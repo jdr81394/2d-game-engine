@@ -14,6 +14,8 @@
 Game::Game() {
     isRunning = false;
     registry = std::make_unique<Registry>();
+    assetStore = std::make_unique<AssetStore>();
+    
     Logger::Log("Game constructor called!");
 }
 
@@ -22,6 +24,7 @@ Game::~Game() {
 }
 
 void Game::Initialize() {
+    // Jake start at 12:05
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         Logger::Err("Error initializing SDL.");
         return;
@@ -72,6 +75,16 @@ void Game::Setup() {
     registry->AddSystem<MovementSystem>();
     registry->AddSystem<RenderSystem>();
 
+    // Add assets to the asset store
+    std::string tankImage = "tank-image";
+    std::string tankImagePath = "./assets/images/tank-panther-right.png";
+
+    std::string truckImage = "truck-image";
+    std::string truckImagePath = "./assets/images/truck-ford-right.png";
+
+    assetStore->AddTexture(renderer, tankImage, tankImagePath);
+    assetStore->AddTexture(renderer, truckImage, truckImagePath);
+
     // Create an entity
     Entity tank = registry->CreateEntity();
     Entity truck = registry->CreateEntity();
@@ -80,15 +93,11 @@ void Game::Setup() {
     // Add some components to that entity
     tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
     tank.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 50.0));
-    tank.AddComponent<SpriteComponent>(10, 10);
-    
-    car.AddComponent<TransformComponent>(glm::vec2(14.0, 10.0), glm::vec2(21.0, 41.0), 0.0);
-    car.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 50.0));
-    car.AddComponent<SpriteComponent>(10, 10);
+    tank.AddComponent<SpriteComponent>(tankImage, 10, 10);
 
     truck.AddComponent<TransformComponent>(glm::vec2(40.0, 50.0), glm::vec2(1.0, 1.0), 0.0);
     truck.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 50.0));
-    truck.AddComponent<SpriteComponent>(10, 10);
+    truck.AddComponent<SpriteComponent>(truckImage,10, 10);
 }
 
 void Game::Update() {

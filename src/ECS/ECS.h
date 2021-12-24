@@ -238,7 +238,7 @@ void Registry::AddComponent(Entity entity, TArgs&& ...args) {
         std::shared_ptr<Pool<TComponent>> newComponentPool(new Pool<TComponent>());
         componentPools[componentId] = newComponentPool;
     }
-
+    // Let's get the newly created componentPool thats related to the entities that would have been created in the last if statement.
     std::shared_ptr<Pool<TComponent>> componentPool = std::static_pointer_cast<Pool<TComponent>>(componentPools[componentId]);
 
     if (entityId >= componentPool->GetSize()) {
