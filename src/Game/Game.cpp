@@ -89,7 +89,7 @@ void Game::Setup() {
 
     // Load the tilemap
     const int tileSize = 32; // This is the number of pixels each square is by length/width
-    double tileScale = 1.0;
+    double tileScale = 2.0;
     int mapNumCols = 25;    // This is the number of columns each map has.
     int mapNumRows = 20;
 
@@ -109,12 +109,14 @@ void Game::Setup() {
             mapFile.ignore();   // We are ignoring the ","
 
             Entity tile = registry->CreateEntity();
+            // tile.AddComponent<TransformComponent>(
+            //     glm::vec2(x * (tileScale * tileSize), y * (tileScale * tileSize)), 
+            //     glm::vec2(tileScale, tileSize), 0.0          // I put tileSize which is why it was erroring.
+            // );
             tile.AddComponent<TransformComponent>(
-                glm::vec2(
-                    x * (tileScale * tileSize) , 
-                    y * (tileScale * tileSize)
-                    ), 
-                glm::vec2(tileScale, tileSize));
+                glm::vec2(x * (tileScale * tileSize), y * (tileScale * tileSize) ), 
+                glm::vec2(tileScale, tileScale), 0.0);              // 2nd value is scale, thats what is wrong in the uncommented.
+
             tile.AddComponent<SpriteComponent>("tilemap-image", tileSize, tileSize, srcRectX, srcRectY);
         }
     }
