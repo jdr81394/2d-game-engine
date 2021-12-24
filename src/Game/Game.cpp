@@ -10,6 +10,7 @@
 #include <SDL2/SDL_image.h>
 #include <glm/glm.hpp>
 #include <iostream>
+#include <fstream>      // std::ifstream
 
 Game::Game() {
     isRunning = false;
@@ -84,10 +85,43 @@ void Game::Setup() {
 
     assetStore->AddTexture(renderer, tankImage, tankImagePath);
     assetStore->AddTexture(renderer, truckImage, truckImagePath);
+    assetStore->AddTexture(renderer, "tilemap-image", "./assets/tilemaps/jungle.png");
+
+    // Load the tilemap
+    const int tileSize = 32; // This is the number of pixels each square is by length/width
+    double tileScale = 1.0;
+    int mapNumCols = 25;    // This is the number of columns each map has.
+    int mapNumRows = 20;
+
+    std::fstream mapFile;   // fstream is a library that allows you to read textfiles and Standard I/O
+    mapFile.open("./assets/tilemaps/jungle.map");    // This opens up the map and gets it ready to be read
+
+    for (int y = 0; y < mapNumRows; y++) {
+        for (int x = 0; x < mapNumCols; x++) {
+            char ch; // Opens up a blank character variable.. i guess to assign the text value to.
+            // The 2 digits represent the y and x axis respectively.
+            // For example, "21" represents the water tile
+            // If you look at the png, you must go down 2 * tileSize, and 1 * tileSize to the right to get it.
+            mapFile.get(ch);    // Gets the character from the stream. I guess this allows it to be moved along.
+            int srcRectY = std::atoi(&ch) * tileSize; // std::atoi is a character to integer conversion.
+            mapFile.get(ch);
+            int srcRectX = std::atoi(&ch) * tileSize;
+            mapFile.ignore();   // We are ignoring the ","
+
+            Entity tile = registry->CreateEntity();
+            tile.AddComponent<TransformComponent>(
+                glm::vec2(
+                    x * (tileScale * tileSize) , 
+                    y * (tileScale * tileSize)
+                    ), 
+                glm::vec2(tileScale, tileSize));
+            tile.AddComponent<SpriteComponent>("tilemap-image", tileSize, tileSize, srcRectX, srcRectY);
+        }
+    }
+    mapFile.close();        // Close the stream
 
     // Create an entity
     Entity tank = registry->CreateEntity();
-    // Entity car = registry->CreateEntity();
 
     // Add some components to that entity
     tank.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(3.0, 3.0), 45.0);
