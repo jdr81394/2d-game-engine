@@ -87,17 +87,17 @@ void Game::Setup() {
 
     // Create an entity
     Entity tank = registry->CreateEntity();
-    Entity truck = registry->CreateEntity();
-    Entity car = registry->CreateEntity();
+    // Entity car = registry->CreateEntity();
 
     // Add some components to that entity
-    tank.AddComponent<TransformComponent>(glm::vec2(10.0, 30.0), glm::vec2(1.0, 1.0), 0.0);
-    tank.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 50.0));
-    tank.AddComponent<SpriteComponent>(tankImage, 10, 10);
+    tank.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(3.0, 3.0), 45.0);
+    tank.AddComponent<RigidBodyComponent>(glm::vec2(40.0, 0.0));
+    tank.AddComponent<SpriteComponent>(tankImage, 32, 32);
 
-    truck.AddComponent<TransformComponent>(glm::vec2(40.0, 50.0), glm::vec2(1.0, 1.0), 0.0);
-    truck.AddComponent<RigidBodyComponent>(glm::vec2(10.0, 50.0));
-    truck.AddComponent<SpriteComponent>(truckImage,10, 10);
+    Entity truck = registry->CreateEntity();
+    truck.AddComponent<TransformComponent>(glm::vec2(50.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
+    truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 50.0));
+    truck.AddComponent<SpriteComponent>(truckImage,32, 32);
 }
 
 void Game::Update() {
@@ -125,7 +125,7 @@ void Game::Render() {
     SDL_RenderClear(renderer);
 
     // TODO: Render game objects...
-    registry->GetSystem<RenderSystem>().Update(renderer);
+    registry->GetSystem<RenderSystem>().Update(renderer, assetStore);
 
     SDL_RenderPresent(renderer);
 }
