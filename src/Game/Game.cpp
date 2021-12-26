@@ -98,15 +98,19 @@ void Game::Setup() {
 
     for (int y = 0; y < mapNumRows; y++) {
         for (int x = 0; x < mapNumCols; x++) {
-            char ch; // Opens up a blank character variable.. i guess to assign the text value to.
+            // Opens up a blank character variable.. i guess to assign the text value to.
+            char ch; 
+            
             // The 2 digits represent the y and x axis respectively.
             // For example, "21" represents the water tile
             // If you look at the png, you must go down 2 * tileSize, and 1 * tileSize to the right to get it.
-            mapFile.get(ch);    // Gets the character from the stream. I guess this allows it to be moved along.
-            int srcRectY = std::atoi(&ch) * tileSize; // std::atoi is a character to integer conversion.
+            mapFile.get(ch);                            // Gets the character from the stream. I guess this allows it to be moved along.
+            int srcRectY = std::atoi(&ch) * tileSize;   // std::atoi is a character to integer conversion.
+
             mapFile.get(ch);
             int srcRectX = std::atoi(&ch) * tileSize;
-            mapFile.ignore();   // We are ignoring the ","
+            
+            mapFile.ignore();                           // We are ignoring the ","
 
             Entity tile = registry->CreateEntity();
             // tile.AddComponent<TransformComponent>(
@@ -117,7 +121,7 @@ void Game::Setup() {
                 glm::vec2(x * (tileScale * tileSize), y * (tileScale * tileSize) ), 
                 glm::vec2(tileScale, tileScale), 0.0);              // 2nd value is scale, thats what is wrong in the uncommented.
 
-            tile.AddComponent<SpriteComponent>("tilemap-image", tileSize, tileSize, srcRectX, srcRectY);
+            tile.AddComponent<SpriteComponent>("tilemap-image", tileSize, tileSize, 0, srcRectX, srcRectY);
         }
     }
     mapFile.close();        // Close the stream
@@ -127,13 +131,13 @@ void Game::Setup() {
 
     // Add some components to that entity
     tank.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(3.0, 3.0), 45.0);
-    tank.AddComponent<RigidBodyComponent>(glm::vec2(40.0, 0.0));
-    tank.AddComponent<SpriteComponent>(tankImage, 32, 32);
+    tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+    tank.AddComponent<SpriteComponent>(tankImage, 32, 32, 2);
 
     Entity truck = registry->CreateEntity();
-    truck.AddComponent<TransformComponent>(glm::vec2(50.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
-    truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 50.0));
-    truck.AddComponent<SpriteComponent>(truckImage,32, 32);
+    truck.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(3.0, 3.0), 0.0);
+    truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+    truck.AddComponent<SpriteComponent>(truckImage, 32, 32, 10);
 }
 
 void Game::Update() {

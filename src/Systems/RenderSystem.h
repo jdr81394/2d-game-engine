@@ -6,6 +6,8 @@
 #include "../Components/SpriteComponent.h"
 #include "../AssetStore/AssetStore.h"
 #include <SDL2/SDL.h>
+#include <iostream>
+
 class RenderSystem: public System {
     public:
         RenderSystem() {
@@ -14,11 +16,38 @@ class RenderSystem: public System {
         }
 
         void Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& assetStore ) {
-            // Loop all entities that the system is interested in
+            // Sort all the entities of our system by the z-index
+            struct RenderableEntity {
+                TransformComponent transformComponent;
+                SpriteComponent spriteComponent;
+            };
+
+            std::vector<RenderableEntity> renderableEntities;
             for (auto entity: GetSystemEntities()) {
+                RenderableEntity renderableEntity;
+                renderableEntity.spriteComponent = entity.GetComponent<SpriteComponent>();
+                renderableEntity.transformComponent = entity.GetComponent<TransformComponent>();
+                
+                // Push onto the back of the vector
+                renderableEntities.emplace_back(renderableEntity);
+            }
+            
+            // Sort the vector by the z-index value;
+            // the std::sort takes a pointer to the first, last value in the vector, and lambda function to compare
+            std::sort(
+                renderableEntities.begin(), 
+                renderableEntities.end(), 
+                [](const RenderableEntity& a, const RenderableEntity& b) {
+                    return a.spriteComponent.zIndex < b.spriteComponent.zIndex;         // This is the comparison statement. if a is less than b it is equal to true
+                }
+            );              
+
+            
+            // Loop all entities that the system is interested in
+            for (auto entity: renderableEntities) {
                 // Update entity position based on its velocity
-                TransformComponent transform = entity.GetComponent<TransformComponent>();
-                SpriteComponent sprite = entity.GetComponent<SpriteComponent>();
+                TransformComponent transform = entity.transformComponent;
+                SpriteComponent sprite = entity.spriteComponent;
 
                 // Set the source rectangle to our original sprite texture
                 SDL_Rect srcRect = sprite.srcRect;
