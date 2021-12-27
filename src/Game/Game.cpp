@@ -4,8 +4,12 @@
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
+#include "../Components/BoxColliderComponent.h"
+#include "../Components/AnimationComponent.h"
 #include "../Systems/MovementSystem.h"
+#include "../Systems/CollisionSystem.h"
 #include "../Systems/RenderSystem.h"
+#include "../Systems/AnimationSystem.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <glm/glm.hpp>
@@ -75,6 +79,8 @@ void Game::Setup() {
     // Add the systems that need to be processed in our game
     registry->AddSystem<MovementSystem>();
     registry->AddSystem<RenderSystem>();
+    registry->AddSystem<AnimationSystem>();
+    registry->AddSystem<CollisionSystem>();
 
     // Add assets to the asset store
     std::string tankImage = "tank-image";
@@ -83,13 +89,18 @@ void Game::Setup() {
     std::string truckImage = "truck-image";
     std::string truckImagePath = "./assets/images/truck-ford-right.png";
 
+    std::string chopperImage = "chopper-image";
+    std::string chopperImagePath = "./assets/images/chopper.png";
+
     assetStore->AddTexture(renderer, tankImage, tankImagePath);
     assetStore->AddTexture(renderer, truckImage, truckImagePath);
     assetStore->AddTexture(renderer, "tilemap-image", "./assets/tilemaps/jungle.png");
+    assetStore->AddTexture(renderer, chopperImage, chopperImagePath);
+    assetStore->AddTexture(renderer, "radar-image","./assets/images/radar.png");
 
     // Load the tilemap
     const int tileSize = 32; // This is the number of pixels each square is by length/width
-    double tileScale = 2.0;
+    double tileScale = 2.5;
     int mapNumCols = 25;    // This is the number of columns each map has.
     int mapNumRows = 20;
 
@@ -127,17 +138,30 @@ void Game::Setup() {
     mapFile.close();        // Close the stream
 
     // Create an entity
-    Entity tank = registry->CreateEntity();
+    Entity chopper = registry->CreateEntity();
+    chopper.AddComponent<TransformComponent>(glm::vec2(10.0, 100.0), glm::vec2(3.0, 3.0), 0.0);
+    chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+    chopper.AddComponent<SpriteComponent>(chopperImage, 32, 32, 2);
+    chopper.AddComponent<AnimationComponent>(2,30, true);
 
-    // Add some components to that entity
-    tank.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(3.0, 3.0), 45.0);
-    tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+    Entity radar = registry->CreateEntity();
+    radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 74, 10.0), glm::vec2(1.0, 1.0), 0.0);
+    radar.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+    radar.AddComponent<SpriteComponent>("radar-image", 64, 64, 2);       // This image is 64 x 64 image
+    radar.AddComponent<AnimationComponent>(8,5, true);
+   
+    Entity tank = registry->CreateEntity();
+    tank.AddComponent<TransformComponent>(glm::vec2(500.0, 10.0), glm::vec2(3.0, 3.0), 45.0);
+    tank.AddComponent<RigidBodyComponent>(glm::vec2(-30.0, 0.0));
     tank.AddComponent<SpriteComponent>(tankImage, 32, 32, 2);
+    tank.AddComponent<BoxColliderComponent>(32,32, glm::vec2(0));
 
     Entity truck = registry->CreateEntity();
     truck.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(3.0, 3.0), 0.0);
-    truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+    truck.AddComponent<RigidBodyComponent>(glm::vec2(20.0, 0.0));
     truck.AddComponent<SpriteComponent>(truckImage, 32, 32, 10);
+    truck.AddComponent<BoxColliderComponent>(32,32, glm::vec2(0));
+
 }
 
 void Game::Update() {
@@ -158,7 +182,10 @@ void Game::Update() {
     
     // Ask all the systems to update
     registry->GetSystem<MovementSystem>().Update(deltaTime);
-}
+    registry->GetSystem<AnimationSystem>().Update();
+    registry->GetSystem<CollisionSystem>().Update();
+}    
+
 
 void Game::Render() {
     SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);
