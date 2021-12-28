@@ -10,6 +10,7 @@
 #include "../Systems/CollisionSystem.h"
 #include "../Systems/RenderSystem.h"
 #include "../Systems/AnimationSystem.h"
+#include "../Systems/RenderColliderSystem.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <glm/glm.hpp>
@@ -18,6 +19,7 @@
 
 Game::Game() {
     isRunning = false;
+    isDebug = false;
     registry = std::make_unique<Registry>();
     assetStore = std::make_unique<AssetStore>();
     
@@ -70,17 +72,21 @@ void Game::ProcessInput() {
                 if (sdlEvent.key.keysym.sym == SDLK_ESCAPE) {
                     isRunning = false;
                 }
+                if (sdlEvent.key.keysym.sym == SDLK_d) {
+                    isDebug = !isDebug;
+                }
                 break;
         }
     }
 }
 
-void Game::Setup() {
-    // Add the systems that need to be processed in our game
+void Game::LoadLevel(int level) {
+   // Add the systems that need to be processed in our game
     registry->AddSystem<MovementSystem>();
     registry->AddSystem<RenderSystem>();
     registry->AddSystem<AnimationSystem>();
     registry->AddSystem<CollisionSystem>();
+    registry->AddSystem<RenderColliderSystem>();
 
     // Add assets to the asset store
     std::string tankImage = "tank-image";
@@ -164,6 +170,10 @@ void Game::Setup() {
 
 }
 
+void Game::Setup() {
+    LoadLevel(1);
+}
+
 void Game::Update() {
     // If we are too fast, waste some time until we reach the MILLISECS_PER_FRAME
     int timeToWait = MILLISECS_PER_FRAME - (SDL_GetTicks() - millisecsPreviousFrame);
@@ -193,6 +203,9 @@ void Game::Render() {
 
     // TODO: Render game objects...
     registry->GetSystem<RenderSystem>().Update(renderer, assetStore);
+    if (isDebug) {
+        registry->GetSystem<RenderColliderSystem>().Update(renderer);
+    }
 
     SDL_RenderPresent(renderer);
 }
