@@ -55,6 +55,8 @@ class CollisionSystem : public System {
                         " is colliding with " + 
                         std::to_string(b.GetId())
                     );
+                    
+                    // TODO: emit an event
                 }
             }
             
