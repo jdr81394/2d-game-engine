@@ -1,6 +1,6 @@
 #ifndef GAME_H
 #define GAME_H
-
+#include "../EventBus/EventBus.h"
 #include "../ECS/ECS.h"
 #include <SDL2/SDL.h>
 #include "../AssetStore/AssetStore.h"
