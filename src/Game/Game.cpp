@@ -12,6 +12,7 @@
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/RenderColliderSystem.h"
 #include "../Systems/DamageSystem.h"
+#include "../Systems/KeyboardMovementSystem.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <glm/glm.hpp>
@@ -90,6 +91,7 @@ void Game::LoadLevel(int level) {
     registry->AddSystem<CollisionSystem>();
     registry->AddSystem<RenderColliderSystem>();
     registry->AddSystem<DamageSystem>();
+    registry->AddSystem<KeyboardMovementSystem>();
 
     // Add assets to the asset store
     std::string tankImage = "tank-image";
@@ -195,6 +197,7 @@ void Game::Update() {
 
     // Perform the subscription of the events for all systems
     registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
+    registry->GetSystem<KeyboardMovementSystem>().SubscribeToEvents(eventBus);
     
     // Update the registry to process the entities that are waiting to be created/deleted
     registry->Update();
@@ -203,6 +206,7 @@ void Game::Update() {
     registry->GetSystem<MovementSystem>().Update(deltaTime);
     registry->GetSystem<AnimationSystem>().Update();
     registry->GetSystem<CollisionSystem>().Update(eventBus);
+    registry->GetSystem<KeyboardMovementSystem>().Update(eventBus);
 
 }    
 
