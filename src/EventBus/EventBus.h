@@ -72,6 +72,10 @@ class EventBus {
             Logger::Log("Event bus destructor has been called");
         }
 
+        void Reset() {
+            subscribers.clear();
+        }
+
         /* 
             Subscribe to event type <T>
             In our implementation, a listener subscribes to an event

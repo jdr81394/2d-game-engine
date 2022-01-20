@@ -4,6 +4,7 @@
 #include "../ECS/ECS.h"
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/TransformComponent.h"
+#include "../EventBus/EventBus.h"
 
 class CollisionSystem : public System {
 
@@ -13,7 +14,7 @@ class CollisionSystem : public System {
             RequireComponent<TransformComponent>();
         }
 
-    void Update() {
+    void Update(std::unique_ptr<EventBus>& eventBus) {
         // TODO: Check all entities that have a box collider to see if they are colliding with each other.
         // Tip: AABB collision check = Axis-Aligned Bounding Boxes
 
@@ -57,6 +58,7 @@ class CollisionSystem : public System {
                     );
                     
                     // TODO: emit an event
+                    eventBus->EmitEvent<CollisionEvent>(a, b);
                 }
             }
             
