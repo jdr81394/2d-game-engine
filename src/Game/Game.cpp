@@ -7,6 +7,8 @@
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/AnimationComponent.h"
 #include "../Components/KeyboardControlledComponent.h"
+#include "../Components/CameraFollowComponent.h"
+#include "../Systems/CameraMovementSystem.h"
 #include "../Systems/MovementSystem.h"
 #include "../Systems/CollisionSystem.h"
 #include "../Systems/RenderSystem.h"
@@ -26,7 +28,6 @@ Game::Game() {
     registry = std::make_unique<Registry>();
     assetStore = std::make_unique<AssetStore>();
     eventBus = std::make_unique<EventBus>();
-    
     Logger::Log("Game constructor called!");
 }
 
@@ -61,8 +62,14 @@ void Game::Initialize() {
         Logger::Err("Error creating SDL renderer.");
         return;
     }
-    SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+    // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
     isRunning = true;
+
+    // Initialize the camera view with the entire screen area
+    camera.x = 0;
+    camera.y = 0;
+    camera.w = windowWidth;
+    camera.h = windowHeight;
 }
 
 void Game::ProcessInput() {
@@ -156,7 +163,8 @@ void Game::LoadLevel(int level) {
     chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     chopper.AddComponent<SpriteComponent>(chopperImage, 32, 32, 2);
     chopper.AddComponent<AnimationComponent>(2,30, true);
-    chopper.AddComponent<KeyboardControlledComponent>(glm::vec2(0, -20), glm::vec2(20, 0), glm::vec2(0, 20), glm::vec2(-20, 0));
+    chopper.AddComponent<KeyboardControlledComponent>(glm::vec2(0, -80), glm::vec2(80, 0), glm::vec2(0, 80), glm::vec2(-80, 0));
+    chopper.AddComponent<CameraFollowComponent>();
 
     Entity radar = registry->CreateEntity();
     radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 74, 10.0), glm::vec2(1.0, 1.0), 0.0);
@@ -209,7 +217,7 @@ void Game::Update() {
     registry->GetSystem<MovementSystem>().Update(deltaTime);
     registry->GetSystem<AnimationSystem>().Update();
     registry->GetSystem<CollisionSystem>().Update(eventBus);
-
+    registry->GetSystem<CameraMovementSystem>().Update(camera);
 }    
 
 
