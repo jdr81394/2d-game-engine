@@ -6,6 +6,7 @@
 #include "../Components/SpriteComponent.h"
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/AnimationComponent.h"
+#include "../Components/KeyboardControlledComponent.h"
 #include "../Systems/MovementSystem.h"
 #include "../Systems/CollisionSystem.h"
 #include "../Systems/RenderSystem.h"
@@ -102,7 +103,7 @@ void Game::LoadLevel(int level) {
     std::string truckImagePath = "./assets/images/truck-ford-right.png";
 
     std::string chopperImage = "chopper-image";
-    std::string chopperImagePath = "./assets/images/chopper.png";
+    std::string chopperImagePath = "./assets/images/chopper-spritesheet.png";
 
     assetStore->AddTexture(renderer, tankImage, tankImagePath);
     assetStore->AddTexture(renderer, truckImage, truckImagePath);
@@ -155,6 +156,7 @@ void Game::LoadLevel(int level) {
     chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     chopper.AddComponent<SpriteComponent>(chopperImage, 32, 32, 2);
     chopper.AddComponent<AnimationComponent>(2,30, true);
+    chopper.AddComponent<KeyboardControlledComponent>(glm::vec2(0, -20), glm::vec2(20, 0), glm::vec2(0, 20), glm::vec2(-20, 0));
 
     Entity radar = registry->CreateEntity();
     radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 74, 10.0), glm::vec2(1.0, 1.0), 0.0);
