@@ -8,6 +8,7 @@
 #include "../Components/AnimationComponent.h"
 #include "../Components/KeyboardControlledComponent.h"
 #include "../Components/CameraFollowComponent.h"
+#include "../Components/ProjectileEmitterComponent.h"
 #include "../Systems/CameraMovementSystem.h"
 #include "../Systems/MovementSystem.h"
 #include "../Systems/CollisionSystem.h"
@@ -16,8 +17,8 @@
 #include "../Systems/RenderColliderSystem.h"
 #include "../Systems/DamageSystem.h"
 #include "../Systems/KeyboardControlSystem.h"
+#include "../Systems/ProjectileEmitSystem.h"
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 #include <glm/glm.hpp>
 #include <iostream>
 #include <fstream>      // std::ifstream
@@ -107,6 +108,7 @@ void Game::LoadLevel(int level) {
     registry->AddSystem<DamageSystem>();
     registry->AddSystem<KeyboardControlSystem>();
     registry->AddSystem<CameraMovementSystem>();
+    registry->AddSystem<ProjectileEmitSystem>();
 
     // Add assets to the asset store
     std::string tankImage = "tank-image";
@@ -123,6 +125,7 @@ void Game::LoadLevel(int level) {
     assetStore->AddTexture(renderer, "tilemap-image", "./assets/tilemaps/jungle.png");
     assetStore->AddTexture(renderer, chopperImage, chopperImagePath);
     assetStore->AddTexture(renderer, "radar-image","./assets/images/radar.png");
+    assetStore->AddTexture(renderer, "bullet-image", "./assets/images/bullet.png");
 
     // Load the tilemap
     const int tileSize = 32; // This is the number of pixels each square is by length/width
@@ -187,13 +190,16 @@ void Game::LoadLevel(int level) {
     tank.AddComponent<TransformComponent>(glm::vec2(500.0, 10.0), glm::vec2(3.0, 3.0), 45.0);
     tank.AddComponent<RigidBodyComponent>(glm::vec2(-30.0, 0.0));
     tank.AddComponent<SpriteComponent>(tankImage, 32, 32, 2);
-    tank.AddComponent<BoxColliderComponent>(32,32, glm::vec2(0));
+    tank.AddComponent<BoxColliderComponent>(32,32);
+    tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 10000, 0, false);
 
     Entity truck = registry->CreateEntity();
     truck.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(3.0, 3.0), 0.0);
     truck.AddComponent<RigidBodyComponent>(glm::vec2(20.0, 0.0));
     truck.AddComponent<SpriteComponent>(truckImage, 32, 32, 10);
-    truck.AddComponent<BoxColliderComponent>(32,32, glm::vec2(0));
+    truck.AddComponent<BoxColliderComponent>(32,32);
+    truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 10000, 0, false);
+
 
 }
 
@@ -229,6 +235,7 @@ void Game::Update() {
     registry->GetSystem<AnimationSystem>().Update();
     registry->GetSystem<CollisionSystem>().Update(eventBus);
     registry->GetSystem<CameraMovementSystem>().Update(camera);
+    registry->GetSystem<ProjectileEmitSystem>().Update(registry);
 }    
 
 
