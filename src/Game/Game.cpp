@@ -158,7 +158,7 @@ void Game::LoadLevel(int level) {
                 glm::vec2(x * (tileScale * tileSize), y * (tileScale * tileSize) ), 
                 glm::vec2(tileScale, tileScale), 0.0);              // 2nd value is scale, thats what is wrong in the uncommented.
 
-            tile.AddComponent<SpriteComponent>("tilemap-image", tileSize, tileSize, 0, srcRectX, srcRectY);
+            tile.AddComponent<SpriteComponent>("tilemap-image", tileSize, tileSize, 0, false, srcRectX, srcRectY);
         }
     }
     mapFile.close();        // Close the stream
@@ -180,7 +180,7 @@ void Game::LoadLevel(int level) {
     Entity radar = registry->CreateEntity();
     radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 74, 10.0), glm::vec2(1.0, 1.0), 0.0);
     radar.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
-    radar.AddComponent<SpriteComponent>("radar-image", 64, 64, 2);       // This image is 64 x 64 image
+    radar.AddComponent<SpriteComponent>("radar-image", 64, 64, 2, true);       // This image is 64 x 64 image
     radar.AddComponent<AnimationComponent>(8,5, true);
    
     Entity tank = registry->CreateEntity();

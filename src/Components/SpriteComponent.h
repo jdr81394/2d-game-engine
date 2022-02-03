@@ -6,10 +6,11 @@
 #include <SDL2/SDL.h>
 
 struct SpriteComponent {
+    std::string assetId;
     int width;
     int height;
     int zIndex;
-    std::string assetId;
+    bool isFixed;
     SDL_Rect srcRect;
 
     SpriteComponent(
@@ -17,6 +18,7 @@ struct SpriteComponent {
         int width = 10, 
         int height = 10, 
         int zIndex = 0,
+        bool isFixed = false,
         int srcRectX = 0, 
         int srcRectY = 0
         ) {
@@ -24,6 +26,7 @@ struct SpriteComponent {
         this->width = width;
         this->height = height;
         this->zIndex = zIndex;
+        this->isFixed = isFixed;
         this->srcRect = { srcRectX, srcRectY, width, height };
     }
 };
