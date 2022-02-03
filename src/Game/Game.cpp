@@ -22,6 +22,11 @@
 #include <iostream>
 #include <fstream>      // std::ifstream
 
+int Game::windowHeight;
+int Game::windowWidth;
+int Game::mapHeight;
+int Game::mapWidth;
+
 Game::Game() {
     isRunning = false;
     isDebug = false;
@@ -101,6 +106,7 @@ void Game::LoadLevel(int level) {
     registry->AddSystem<RenderColliderSystem>();
     registry->AddSystem<DamageSystem>();
     registry->AddSystem<KeyboardControlSystem>();
+    registry->AddSystem<CameraMovementSystem>();
 
     // Add assets to the asset store
     std::string tankImage = "tank-image";
@@ -157,13 +163,18 @@ void Game::LoadLevel(int level) {
     }
     mapFile.close();        // Close the stream
 
+    // Whenever loading tile map, as soon as were done loading tile map
+    // we want the map width to be loaded in the size of pixels
+    mapWidth = mapNumCols * tileSize * tileScale;
+    mapHeight = mapNumRows * tileSize * tileScale;
+
     // Create an entity
     Entity chopper = registry->CreateEntity();
     chopper.AddComponent<TransformComponent>(glm::vec2(10.0, 100.0), glm::vec2(3.0, 3.0), 0.0);
     chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     chopper.AddComponent<SpriteComponent>(chopperImage, 32, 32, 2);
     chopper.AddComponent<AnimationComponent>(2,30, true);
-    chopper.AddComponent<KeyboardControlledComponent>(glm::vec2(0, -80), glm::vec2(80, 0), glm::vec2(0, 80), glm::vec2(-80, 0));
+    chopper.AddComponent<KeyboardControlledComponent>(glm::vec2(0, -200), glm::vec2(200, 0), glm::vec2(0, 200), glm::vec2(-200, 0));
     chopper.AddComponent<CameraFollowComponent>();
 
     Entity radar = registry->CreateEntity();
@@ -226,7 +237,7 @@ void Game::Render() {
     SDL_RenderClear(renderer);
 
     // TODO: Render game objects...
-    registry->GetSystem<RenderSystem>().Update(renderer, assetStore);
+    registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
     if (isDebug) {
         registry->GetSystem<RenderColliderSystem>().Update(renderer);
     }
