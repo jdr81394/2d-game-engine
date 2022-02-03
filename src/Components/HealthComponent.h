@@ -6,7 +6,7 @@ struct HealthComponent {
 
     HealthComponent(int healthPercentage = 100){
         this->healthPercentage = healthPercentage;
-    }
-}
+    };
+};
 
 #endif
