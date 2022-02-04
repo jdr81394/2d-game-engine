@@ -156,6 +156,7 @@ void Game::LoadLevel(int level) {
             mapFile.ignore();                           // We are ignoring the ","
 
             Entity tile = registry->CreateEntity();
+            tile.Group("tiles");
             // tile.AddComponent<TransformComponent>(
             //     glm::vec2(x * (tileScale * tileSize), y * (tileScale * tileSize)), 
             //     glm::vec2(tileScale, tileSize), 0.0          // I put tileSize which is why it was erroring.
@@ -176,6 +177,7 @@ void Game::LoadLevel(int level) {
 
     // Create an entity
     Entity chopper = registry->CreateEntity();
+    chopper.Tag("player");
     chopper.AddComponent<TransformComponent>(glm::vec2(10.0, 100.0), glm::vec2(3.0, 3.0), 0.0);
     chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     chopper.AddComponent<SpriteComponent>(chopperImage, 32, 32, 2);
@@ -198,6 +200,7 @@ void Game::LoadLevel(int level) {
     tank.AddComponent<BoxColliderComponent>(32,32);
     tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0.0), 2000, 3000, 0, false);
     tank.AddComponent<HealthComponent>(100);
+    tank.Group("enemies");
 
     Entity truck = registry->CreateEntity();
     truck.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(3.0, 3.0), 0.0);
@@ -206,6 +209,7 @@ void Game::LoadLevel(int level) {
     truck.AddComponent<BoxColliderComponent>(32,32);
     truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 3000, 0, false);
     truck.AddComponent<HealthComponent>(100);
+    tank.Group("enemies");
 
 
 }
