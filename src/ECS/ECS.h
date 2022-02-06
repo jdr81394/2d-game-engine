@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <typeindex>
 #include <memory>
+#include <string>
 
 const unsigned int MAX_COMPONENTS = 32;
 
@@ -57,6 +58,12 @@ class Entity {
         template <typename TComponent> TComponent& GetComponent() const;
 
         void Kill();
+
+        // Manage entity tags and groups
+        void Tag(const std::string& tag);
+        bool HasTag(const std::string& tag) const;
+        void Group(const std::string& group);
+        bool BelongsToGroup(const std::string& group) const;
 
         // Hold a pointer to the entity's owner registry
         class Registry* registry;
@@ -167,6 +174,17 @@ class Registry {
         std::set<Entity> entitiesToBeAdded;
         std::set<Entity> entitiesToBeKilled;
 
+        // Entity tags (one tag name per entity)
+        std::unordered_map<std::string, Entity> entityPerTag;
+                        // EntityId
+        std::unordered_map<int, std::string> tagPerEntity;
+
+        // Entity groups (a set of entities per group name)
+        std::unordered_map<std::string, std::set<Entity>> entitiesPerGroup;
+                        // EntityId
+        std::unordered_map<int, std::string> groupPerEntity;
+
+
         std::deque<int> freeIds;
 
     public:
@@ -198,6 +216,18 @@ class Registry {
         template <typename TSystem> void RemoveSystem();
         template <typename TSystem> bool HasSystem() const;
         template <typename TSystem> TSystem& GetSystem() const;
+
+        // Tag management
+        void TagEntity(Entity entity, const std::string& tag);
+        bool EntityHasTag(Entity entity, const std::string& tag) const;
+        Entity GetEntityByTag(const std::string& tag) const;
+        void RemoveEntityTag(Entity entity);
+
+        // Group Management
+        void GroupEntity(Entity entity, const std::string& group);
+        bool EntityBelongsToGroup(Entity entity, const std::string& group) const;
+        std::vector<Entity> GetEntitiesByGroup(const std::string& group) const;
+        void RemoveEntityGroup(Entity entity);
 
         // Checks the component signature of an entity and add the entity to the systems
         // that are interested in it
