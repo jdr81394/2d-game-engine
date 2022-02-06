@@ -175,7 +175,9 @@ void Registry::Update() {
 
         // Remove entity from the component pools
         for ( auto pool : componentPools) {
-            pool->RemoveEntityFromPool(entity.GetId());
+            if (pool) {
+                pool->RemoveEntityFromPool(entity.GetId());
+            }
         }
 
         // Make the entity ID available to be reused.
