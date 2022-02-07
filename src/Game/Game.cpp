@@ -7,6 +7,7 @@
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/AnimationComponent.h"
 #include "../Components/KeyboardControlledComponent.h"
+#include "../Components/TextLabelComponent.h"
 #include "../Components/CameraFollowComponent.h"
 #include "../Components/ProjectileEmitterComponent.h"
 #include "../Components/HealthComponent.h"
@@ -16,6 +17,7 @@
 #include "../Systems/RenderSystem.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/RenderColliderSystem.h"
+#include "../Systems/RenderTextSystem.h"
 #include "../Systems/DamageSystem.h"
 #include "../Systems/KeyboardControlSystem.h"
 #include "../Systems/ProjectileEmitSystem.h"
@@ -49,6 +51,13 @@ void Game::Initialize() {
         Logger::Err("Error initializing SDL.");
         return;
     }
+
+    // Must be initialized to use anything TTF related.
+    if(TTF_Init() != 0) {
+        Logger::Err("Error initializing SDL TTF");
+        return;
+    }
+
     SDL_DisplayMode displayMode;
     SDL_GetCurrentDisplayMode(0, &displayMode);
     windowWidth = displayMode.w;
@@ -112,6 +121,7 @@ void Game::LoadLevel(int level) {
     registry->AddSystem<CameraMovementSystem>();
     registry->AddSystem<ProjectileEmitSystem>();
     registry->AddSystem<ProjectileLifecycleSystem>();
+    registry->AddSystem<RenderTextSystem>();
 
     // Add assets to the asset store
     std::string tankImage = "tank-image";
@@ -129,7 +139,7 @@ void Game::LoadLevel(int level) {
     assetStore->AddTexture(renderer, chopperImage, chopperImagePath);
     assetStore->AddTexture(renderer, "radar-image","./assets/images/radar.png");
     assetStore->AddTexture(renderer, "bullet-image", "./assets/images/bullet.png");
-    assetStore->AddFont("chariot-font", "./assets/fonts/charriot.ttf", 14);
+    assetStore->AddFont("charriot-font", "./assets/fonts/charriot.ttf", 14);
 
     // Load the tilemap
     const int tileSize = 32; // This is the number of pixels each square is by length/width
@@ -215,7 +225,8 @@ void Game::LoadLevel(int level) {
     truck.AddComponent<HealthComponent>(100);
 
     Entity label = registry->CreateEntity();
-    // TODO: label.AddComponent<TextLabelComponent>();
+    SDL_Color green = {0,255,0};
+    label.AddComponent<TextLabelComponent>(glm::vec2(windowWidth / 2 - 40, 100), "This is a text label!!", "charriot-font", green, true);
 
 }
 
@@ -263,6 +274,8 @@ void Game::Render() {
 
     // TODO: Render game objects...
     registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
+    registry->GetSystem<RenderTextSystem>().Update(renderer, assetStore, camera);
+
     if (isDebug) {
         registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
     }

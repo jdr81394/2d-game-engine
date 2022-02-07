@@ -10,7 +10,7 @@
 class AssetStore {
     private:
         std::map<std::string, SDL_Texture*> textures;
-        std::map<std::string, TTF_FONT*> fonts;
+        std::map<std::string, TTF_Font*> fonts;
     public:
         void ClearAssets();
         void AddTexture(SDL_Renderer* renderer, const std::string& assetId, const std::string& filePath);
