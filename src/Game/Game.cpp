@@ -22,6 +22,8 @@
 #include "../Systems/KeyboardControlSystem.h"
 #include "../Systems/ProjectileEmitSystem.h"
 #include "../Systems/ProjectileLifecycleSystem.h"
+#include "../Systems/RenderHealthSystem.h"
+#include "../Systems/RenderHealthTextSystem.h"
 #include <SDL2/SDL.h>
 #include <glm/glm.hpp>
 #include <iostream>
@@ -122,6 +124,8 @@ void Game::LoadLevel(int level) {
     registry->AddSystem<ProjectileEmitSystem>();
     registry->AddSystem<ProjectileLifecycleSystem>();
     registry->AddSystem<RenderTextSystem>();
+    registry->AddSystem<RenderHealthSystem>();
+    registry->AddSystem<RenderHealthTextSystem>();
 
     // Add assets to the asset store
     std::string tankImage = "tank-image";
@@ -185,6 +189,7 @@ void Game::LoadLevel(int level) {
     // we want the map width to be loaded in the size of pixels
     mapWidth = mapNumCols * tileSize * tileScale;
     mapHeight = mapNumRows * tileSize * tileScale;
+    SDL_Color green = {0,255,0};
 
     // Create an entity
     Entity chopper = registry->CreateEntity();
@@ -195,10 +200,11 @@ void Game::LoadLevel(int level) {
     chopper.AddComponent<SpriteComponent>(chopperImage, 32, 32, 2);
     chopper.AddComponent<AnimationComponent>(2,30, true);
     chopper.AddComponent<BoxColliderComponent>(32,32);
-    chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(500.0,500.0), 0, 10000, 100, true);
+    chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(500.0,500.0), 0, 10000, 20, true);
     chopper.AddComponent<KeyboardControlledComponent>(glm::vec2(0, -200), glm::vec2(200, 0), glm::vec2(0, 200), glm::vec2(-200, 0));
     chopper.AddComponent<CameraFollowComponent>();
     chopper.AddComponent<HealthComponent>(100);
+    chopper.AddComponent<TextLabelComponent>(glm::vec2(0), "","charriot-font", green, true);       // Health label, and color will be changed in renderHealthTextSystem
 
     Entity radar = registry->CreateEntity();
     radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 74, 10.0), glm::vec2(1.0, 1.0), 0.0);
@@ -208,26 +214,27 @@ void Game::LoadLevel(int level) {
    
     Entity tank = registry->CreateEntity();
     tank.Group("enemies");
-    tank.AddComponent<TransformComponent>(glm::vec2(500.0, 10.0), glm::vec2(1.0, 1.0), 45.0);
+    tank.AddComponent<TransformComponent>(glm::vec2(1000.0, 1000.0), glm::vec2(1.0, 1.0), 45.0);
     tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     tank.AddComponent<SpriteComponent>(tankImage, 32, 32, 2);
     tank.AddComponent<BoxColliderComponent>(32,32);
-    tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0.0), 2000, 3000, 100, false); // change to 10
+    tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0.0), 2000, 3000, 20, false); // change to 10
     tank.AddComponent<HealthComponent>(100);
+    tank.AddComponent<TextLabelComponent>(glm::vec2(0), "", "charriot-font", green, true);          // Health label, and color will be changed in renderHealthTextSystem
     tank.Group("enemies");
 
     Entity truck = registry->CreateEntity();
     truck.Group("enemies");
-    truck.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
+    truck.AddComponent<TransformComponent>(glm::vec2(1250.0, 750.0), glm::vec2(1.0, 1.0), 0.0);
     truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     truck.AddComponent<SpriteComponent>(truckImage, 32, 32, 10);
     truck.AddComponent<BoxColliderComponent>(32,32);
-    truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 3000, 100, false); // change 100 to 10
+    truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 3000, 20, false); // change 100 to 10
     truck.AddComponent<HealthComponent>(100);
+    truck.AddComponent<TextLabelComponent>(glm::vec2(0), "", "charriot-font", green, true);          // Health label, and color will be changed in renderHealthTextSystem
     tank.Group("enemies");
 
     Entity label = registry->CreateEntity();
-    SDL_Color green = {0,255,0};
     label.AddComponent<TextLabelComponent>(glm::vec2(windowWidth / 2 - 40, 100), "This is a text label!!", "charriot-font", green, true);
 
 }
@@ -277,6 +284,8 @@ void Game::Render() {
     // TODO: Render game objects...
     registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
     registry->GetSystem<RenderTextSystem>().Update(renderer, assetStore, camera);
+    registry->GetSystem<RenderHealthSystem>().Update(renderer, camera);
+    registry->GetSystem<RenderHealthTextSystem>().Update(renderer, assetStore, camera);
 
     if (isDebug) {
         registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
