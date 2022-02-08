@@ -28,6 +28,9 @@
 #include <glm/glm.hpp>
 #include <iostream>
 #include <fstream>      // std::ifstream
+#include <imgui/imgui.h>
+#include <imgui/imgui_sdl.h>        // This is the out of date library that gustavo spoke about. It will still work, but imgui no longer needs this..can work a different way. See notes.
+#include <imgui/imgui_impl_sdl.h>
 
 int Game::windowHeight;
 int Game::windowWidth;
@@ -84,6 +87,11 @@ void Game::Initialize() {
     // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
     isRunning = true;
 
+    //Initialize the IMGUI context
+    ImGui::CreateContext();     // Core ImGui context
+    ImGuiSDL::Initialize(renderer, windowWidth, windowHeight);  // This allows us to use SDL as the renderer
+
+
     // Initialize the camera view with the entire screen area
     camera.x = 0;
     camera.y = 0;
@@ -94,6 +102,22 @@ void Game::Initialize() {
 void Game::ProcessInput() {
     SDL_Event sdlEvent;
     while (SDL_PollEvent(&sdlEvent)) {
+        
+        // ImGui SDL input
+        ImGui_ImplSDL2_ProcessEvent(&sdlEvent);
+        ImGuiIO& io = ImGui::GetIO();
+
+        // Don't understand how mouseX, mouseY is interacting with the following line
+        int mouseX, mouseY;
+        const int buttons = SDL_GetMouseState(&mouseX, &mouseY);
+        // I think it listens to mouse state and then it will put thebuttons values in there...?
+
+        io.MousePos = ImVec2(mouseX, mouseY);
+        io.MouseDown[0] = buttons & SDL_BUTTON(SDL_BUTTON_LEFT);        // initializing the left butotn
+        io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT);
+    
+        io.MousePos = ImVec2(mouseX, mouseY);
+        // Handle core SDL events (close window, key pressed, etc.)
         switch (sdlEvent.type) {
             case SDL_QUIT:
                 isRunning = false;
@@ -235,7 +259,7 @@ void Game::LoadLevel(int level) {
     tank.Group("enemies");
 
     Entity label = registry->CreateEntity();
-    label.AddComponent<TextLabelComponent>(glm::vec2(windowWidth / 2 - 40, 100), "This is a text label!!", "charriot-font", green, true);
+    label.AddComponent<TextLabelComponent>(glm::vec2(windowWidth / 2 - 40, 100), "Chopper 1.0", "charriot-font", green, true);
 
 }
 
@@ -289,6 +313,11 @@ void Game::Render() {
 
     if (isDebug) {
         registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
+        ImGui::NewFrame();      // creates the ImGui window
+        ImGui::ShowDemoWindow(); // creates window
+        // Need both renders to make it render. The demo data shows up.
+        ImGui::Render();
+        ImGuiSDL::Render(ImGui::GetDrawData());
     }
 
     SDL_RenderPresent(renderer);
@@ -304,6 +333,8 @@ void Game::Run() {
 }
 
 void Game::Destroy() {
+    ImGuiSDL::Deinitialize();
+    ImGui::DestroyContext();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
