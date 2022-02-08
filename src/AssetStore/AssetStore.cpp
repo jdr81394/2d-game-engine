@@ -14,8 +14,14 @@ AssetStore::~AssetStore() {
 void AssetStore::ClearAssets() {
     for(auto texture : textures ) {
         SDL_DestroyTexture(texture.second);     // because its a map and the value not hte key that must be destroyed
-    }
+    };
     textures.clear();
+
+    for(auto font : fonts) {
+        TTF_CloseFont(font.second);             // The equivalent of SDL_DestroyTexture() for fonts
+    };
+
+    fonts.clear();
 };
 
 SDL_Texture* AssetStore::GetTexture(const std::string& assetId)  {
@@ -35,4 +41,18 @@ void AssetStore::AddTexture(SDL_Renderer* renderer, const std::string& assetId, 
     Logger::Log("New texture added to the Asset Store with id = "  + assetId);
 
 };
+
+
+void AssetStore::AddFont(const std::string& assetId, const std::string& filePath, int fontSize) {
+    fonts.emplace(
+        assetId, 
+        TTF_OpenFont(filePath.c_str(), fontSize)
+    );
+
+};
+
+TTF_Font* AssetStore::GetFont(const std::string& assetId) {
+    return fonts[assetId];
+}
+
 

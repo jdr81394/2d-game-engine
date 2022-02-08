@@ -16,7 +16,7 @@ void Entity::Tag(const std::string& tag) {
     registry->TagEntity(*this, tag);
 };
 
-bool Entity::HasTag(const std::string& tag) {
+bool Entity::HasTag(const std::string& tag) const {
     return registry->EntityHasTag(*this, tag);
 };
 
@@ -24,7 +24,7 @@ void Entity::Group(const std::string& group) {
     registry->GroupEntity(*this, group);
 }
 
-bool BelongsToGroup(const std::string& group) const {
+bool Entity::BelongsToGroup(const std::string& group) const {
     return registry->EntityBelongsToGroup(*this, group);
 }
 
@@ -78,12 +78,12 @@ void Registry::KillEntity(Entity entity) {
 
 void Registry::TagEntity(Entity entity, const std::string& tag) {
     entityPerTag.emplace(tag, entity);
-    tagPerEntity(entity.GetId(), tag);
+    tagPerEntity.emplace(entity.GetId(), tag);
 }
 
 bool Registry::EntityHasTag(Entity entity, const std::string& tag) const {
     if(tagPerEntity.find(entity.GetId()) == tagPerEntity.end() ) {
-        return false
+        return false;
     }
     return entityPerTag.find(tag)->second == entity;
 }
@@ -108,23 +108,28 @@ void Registry::GroupEntity(Entity entity, const std::string& group) {
 } 
 
 bool Registry::EntityBelongsToGroup(Entity entity, const std::string& group) const {
+    
+    if(entitiesPerGroup.find(group) == entitiesPerGroup.end()){
+        return false;
+    };
+
     auto groupEntities = entitiesPerGroup.at(group);
     return groupEntities.find(entity.GetId()) != groupEntities.end();
 }
 
 std::vector<Entity> Registry::GetEntitiesByGroup(const std::string& group) const {
-    auto &setOfEntities = entitiesPerGroup.at(group); // This is a set data structure
-    return std::vector<Entity>(setOfEntities.begin(), setOfEntities.end()); // This is how you create a vector from a set. You give the pointers at the beginning and the end.
+    auto& setOfEntities = entitiesPerGroup.at(group);
+    return std::vector<Entity>(setOfEntities.begin(), setOfEntities.end());
 }
 
 void Registry::RemoveEntityGroup(Entity entity) {
-    // If in group, remove entity from group management
+    // if in group, remove entity from group management
     auto groupedEntity = groupPerEntity.find(entity.GetId());
     if(groupedEntity != groupPerEntity.end()) {
         auto group = entitiesPerGroup.find(groupedEntity->second);
         if(group != entitiesPerGroup.end()) {
-            auto entityInGroup = group->secondfind(entity);
-            if(entityInGroup != group->second()) {
+            auto entityInGroup = group->second.find(entity);
+            if(entityInGroup != group->second.end()) {
                 group->second.erase(entityInGroup);
             }
         }
@@ -167,6 +172,13 @@ void Registry::Update() {
         RemoveEntityFromSystems(entity);
 
         entityComponentSignatures[entity.GetId()].reset();
+
+        // Remove entity from the component pools
+        for ( auto pool : componentPools) {
+            if (pool) {
+                pool->RemoveEntityFromPool(entity.GetId());
+            }
+        }
 
         // Make the entity ID available to be reused.
         freeIds.push_back(entity.GetId());

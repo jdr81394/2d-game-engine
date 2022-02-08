@@ -10,7 +10,7 @@
 #include <typeindex>
 #include <memory>
 #include <string>
-
+#include <iostream>
 const unsigned int MAX_COMPONENTS = 32;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -99,27 +99,38 @@ class System {
 ////////////////////////////////////////////////////////////////////////////////
 class IPool {
     public:
-        virtual ~IPool() {}
+        virtual ~IPool() = default;
+
+
+        // This allows us to call RemoveEntityFromPool from the componentPools since this
+        // data structure is actually composed of IPool
+        virtual void RemoveEntityFromPool(int entityId) = 0;
+
 };
 
 template <typename T>
 class Pool: public IPool {
     private:
         std::vector<T> data;
+        int size;
+
+        std::unordered_map<int,int> entityIdToIndex;
+        std::unordered_map<int,int> indexToEntityId;
 
     public:
-        Pool(int size = 100) {
-            data.resize(size);
+        Pool(int capacity = 100) {
+            size = 0;
+            data.resize(capacity);
         }
 
         virtual ~Pool() = default;
 
-        bool isEmpty() const {
-            return data.empty();
+        bool IsEmpty() const {
+            return size == 0;
         }
 
         int GetSize() const {
-            return data.size();
+            return size;
         }
 
         void Resize(int n) {
@@ -128,17 +139,158 @@ class Pool: public IPool {
 
         void Clear() {
             data.clear();
+            size = 0;
         }
 
         void Add(T object) {
             data.push_back(object);
         }
 
-        void Set(int index, T object) {
-            data[index] = object;
+        // Main method to add an entity to the data structures
+        // When adding a new object, keep track of the entity id and its vector index
+        void Set(int entityId, T object) {
+            // If element already already exists, it will be found and not reach end. 
+            // Therefore, just replace the component object
+            if(entityIdToIndex.find(entityId) != entityIdToIndex.end()) {
+
+                int index = entityIdToIndex[entityId];
+                data[index] = object;
+            } 
+            // If it reaches the end, it doesnt exist, therefore it must be created.
+            else {
+                // When adding a new object, we keep track of the entity ids and their vector index
+                int index = size;
+                entityIdToIndex.emplace(entityId, index);
+                indexToEntityId.emplace(index, entityId);
+                if(index >= data.capacity()) {
+                    // If necessary, we resize by always doubling the current capacity
+                    data.resize(size * 2);
+                }
+                data[index] = object;
+                size++;
+            }
         }
 
-        T& Get(int index) {
+        void Remove(int entityId) {
+            /*
+                    entityIdToIndex				indexToEntityId             data
+                    [entityId][index]			[index][entityId]
+                    [0]	=> 	[0]				    [0]	=>	[0]                 [0]
+Remove this one ->  [5]	=>	[1]				    [1]	=>	[5]                 [5]
+                    [12]	=>	[2]				[2]	=>	[12]                [12]
+                    [15]	=>	[3]				[3]	=>	[15]                [15]
+                    [22]    =>   [4]            [4]  => [22]                [22]
+
+            entityId = 5
+            */
+            // Copy the last element to the deleted position to keep the array packed
+            //       1               = entityIdToIndex[5]
+            int indexOfRemoved = entityIdToIndex[entityId];     // The removed values index
+            //      4       = 5 - 1
+            int indexOfLast = size - 1;                         // The final values index
+            // data[1]  (5) now is 22  = data[4] (22)
+            data[indexOfRemoved] = data[indexOfLast];           // Place the value at the final index, at the removed values index
+
+
+            /*
+
+                    entityIdToIndex				indexToEntityId             data
+                    [entityId][index]			[index][entityId]
+                    [0]	=> 	[0]				    [0]	=>	[0]                 [0]     
+Remove this one ->  [5]	=>	[1]				    [1]	=>	[5]                 [22] <---     < This was the change
+                    [12]	=>	[2]				[2]	=>	[12]                [12]    |
+                    [15]	=>	[3]				[3]	=>	[15]                [15]    |
+                    [22]    =>   [4]            [4]  => [22]                [22] ----
+                
+                current values:
+                entityId = 5
+                indexOfRemoved = 1;
+                indexOfLast = 4;
+            */
+
+            // Update the index-entity maps to point to the correct elements
+                //        22          =   indexToEntityId[4] 
+            int entityIdOfLastElement = indexToEntityId[indexOfLast] ; // Get the element id that was at the last element
+            //  entityIdToIndex[22]                = 1
+            entityIdToIndex[entityIdOfLastElement] = indexOfRemoved;
+            
+            /*
+
+                    entityIdToIndex				indexToEntityId             data
+                    [entityId][index]			[index][entityId]
+                    [0]	=> 	[0]				    [0]	=>	[0]                 [0]     
+                    [5]	=>	[1]				    [1]	=>	[5]                 [22]
+                    [12]	=>	[2]				[2]	=>	[12]                [12]    
+    change made     [15]	=>	[3]				[3]	=>	[15]                [15]    
+         ---------> [22]    =>  [1] <----       [4]  => [22]                [22] 
+                
+                current values:
+                entityId = 5
+                indexOfRemoved = 1;
+                indexOfLast = 4;
+            */
+
+
+            // indexToEntityId[1]            =  22
+            indexToEntityId[indexOfRemoved] = entityIdOfLastElement;
+
+            /*
+
+                    entityIdToIndex				indexToEntityId             data
+                    [entityId][index]			[index][entityId]
+                    [0]	=> 	[0]				    [0]	=>	[0]  the change      [0]     
+                    [5]	=>	[1]				    [1]	=>	[22] <-------       [22]
+                    [12]	=>	[2]				[2]	=>	[12]                [12]    
+                    [15]	=>	[3]				[3]	=>	[15]                [15]    
+                    [22]    =>  [1]             [4]  => [22]                [22]
+                
+                current values:
+                entityId = 5
+                indexOfRemoved = 1;
+                indexOfLast = 4;
+            */
+
+            entityIdToIndex.erase(entityId);
+            indexToEntityId.erase(indexOfLast);
+            
+            /*
+
+                    entityIdToIndex				indexToEntityId             data
+                    [entityId][index]			[index][entityId]
+                    [0]	=> 	[0]				    [0]	=>	[0]                  [0]     
+        erased ---> [5]	=>	[1]				    [1]	=>	[22]                [22]
+                    [12]	=>	[2]				[2]	=>	[12]                [12]    
+                    [15]	=>	[3]				[3]	=>	[15]                [15]    
+                    [22]    =>  [1]             [4]  => [22] <--- erased    [22]
+                
+                current values:
+                entityId = 5
+                indexOfRemoved = 1;
+                indexOfLast = 4;
+
+
+                    entityIdToIndex				indexToEntityId             data
+                    [entityId][index]			[index][entityId]
+                    [0]	=> 	[0]				    [0]	=>	[0]                  [0]     
+                            				    [1]	=>	[22]                [22]
+                    [12]	=>	[2]				[2]	=>	[12]                [12]    
+                    [15]	=>	[3]				[3]	=>	[15]                [15]    
+                    [22]    =>  [1]                                         [22] ???
+
+
+            */
+
+            size--;
+        }
+
+        void RemoveEntityFromPool(int entityId) override {
+            if(entityIdToIndex.find(entityId) != entityIdToIndex.end()) {
+                Remove(entityId);
+            }
+        }
+
+        T& Get(int entityId) {
+            int index = entityIdToIndex[entityId];
             return static_cast<T&>(data[index]);
         }
 
@@ -219,7 +371,7 @@ class Registry {
 
         // Tag management
         void TagEntity(Entity entity, const std::string& tag);
-        void EntityHasTag(Entity entity, const std::string& tag) const;
+        bool EntityHasTag(Entity entity, const std::string& tag) const;
         Entity GetEntityByTag(const std::string& tag) const;
         void RemoveEntityTag(Entity entity);
 
@@ -280,10 +432,6 @@ void Registry::AddComponent(Entity entity, TArgs&& ...args) {
     // Let's get the newly created componentPool thats related to the entities that would have been created in the last if statement.
     std::shared_ptr<Pool<TComponent>> componentPool = std::static_pointer_cast<Pool<TComponent>>(componentPools[componentId]);
 
-    if (entityId >= componentPool->GetSize()) {
-        componentPool->Resize(numEntities);
-    }
-
     TComponent newComponent(std::forward<TArgs>(args)...);
 
     componentPool->Set(entityId, newComponent);
@@ -291,12 +439,20 @@ void Registry::AddComponent(Entity entity, TArgs&& ...args) {
     entityComponentSignatures[entityId].set(componentId);
 
     Logger::Log("Component id = " + std::to_string(componentId) + " was added to entity id " + std::to_string(entityId));
+
+    std::cout << "COMPONENT ID = " << componentId << " ---> POOL SIZE: " << componentPool->GetSize() << std::endl;
 }
 
 template <typename TComponent>
 void Registry::RemoveComponent(Entity entity) {
 	const auto componentId = Component<TComponent>::GetId();
 	const auto entityId = entity.GetId();
+    
+    // Remove the component from the component list for that entity
+    std::shared_ptr<Pool<TComponent>> componentPool = std::static_pointer_cast<Pool<TComponent>>(componentPools[componentId]);
+    componentPool->Remove(entityId);
+
+    // Set this component signature for that entity to false
 	entityComponentSignatures[entityId].set(componentId, false);
     
     Logger::Log("Component id = " + std::to_string(componentId) + " was removed from entity id " + std::to_string(entityId));
