@@ -37,7 +37,7 @@ class RenderSystem: public System {
                     renderableEntity.transformComponent.position.y > camera.y + camera.h
                 );
 
-                if(isEntityOutsideCameraView) {
+                if(isEntityOutsideCameraView && !renderableEntity.spriteComponent.isFixed) {
                     continue;
                 };
                 
