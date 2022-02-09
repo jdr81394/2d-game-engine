@@ -143,6 +143,7 @@ void Game::LoadLevel(int level) {
     assetStore->AddTexture(renderer, chopperImage, chopperImagePath);
     assetStore->AddTexture(renderer, "radar-image","./assets/images/radar.png");
     assetStore->AddTexture(renderer, "bullet-image", "./assets/images/bullet.png");
+    assetStore->AddTexture(renderer, "tree-image", "./assets/images/tree.png");
     assetStore->AddFont("charriot-font", "./assets/fonts/charriot.ttf", 14);
 
     // Load the tilemap
@@ -215,7 +216,7 @@ void Game::LoadLevel(int level) {
     Entity tank = registry->CreateEntity();
     tank.Group("enemies");
     tank.AddComponent<TransformComponent>(glm::vec2(1000.0, 1000.0), glm::vec2(1.0, 1.0), 45.0);
-    tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+    tank.AddComponent<RigidBodyComponent>(glm::vec2(60.0, 0.0));
     tank.AddComponent<SpriteComponent>(tankImage, 32, 32, 2);
     tank.AddComponent<BoxColliderComponent>(32,32);
     tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0.0), 2000, 3000, 20, false); // change to 10
@@ -225,8 +226,8 @@ void Game::LoadLevel(int level) {
 
     Entity truck = registry->CreateEntity();
     truck.Group("enemies");
-    truck.AddComponent<TransformComponent>(glm::vec2(1250.0, 750.0), glm::vec2(1.0, 1.0), 0.0);
-    truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+    truck.AddComponent<TransformComponent>(glm::vec2(1050.0, 750.0), glm::vec2(1.0, 1.0), 0.0);
+    truck.AddComponent<RigidBodyComponent>(glm::vec2(60.0, 0.0));
     truck.AddComponent<SpriteComponent>(truckImage, 32, 32, 10);
     truck.AddComponent<BoxColliderComponent>(32,32);
     truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 3000, 20, false); // change 100 to 10
@@ -234,6 +235,18 @@ void Game::LoadLevel(int level) {
     truck.AddComponent<TextLabelComponent>(glm::vec2(0), "", "charriot-font", green, true);          // Health label, and color will be changed in renderHealthTextSystem
     tank.Group("enemies");
 
+    Entity treeA = registry->CreateEntity();
+    treeA.Group("obstacles");
+    treeA.AddComponent<TransformComponent>(glm::vec2(1550.0, 750.0), glm::vec2(1.0, 1.0), 0.0);
+    treeA.AddComponent<SpriteComponent>("tree-image", 16, 32, 10);
+    treeA.AddComponent<BoxColliderComponent>(16,32);
+
+    Entity treeB = registry->CreateEntity();
+    treeB.Group("obstacles");
+    treeB.AddComponent<TransformComponent>(glm::vec2(1000.0, 750.0), glm::vec2(1.0,1.0), 0.0);
+    treeB.AddComponent<SpriteComponent>("tree-image", 16, 32, 10);
+    treeB.AddComponent<BoxColliderComponent>(16,32);
+    
     Entity label = registry->CreateEntity();
     label.AddComponent<TextLabelComponent>(glm::vec2(windowWidth / 2 - 40, 100), "This is a text label!!", "charriot-font", green, true);
 
@@ -263,6 +276,7 @@ void Game::Update() {
     registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
     registry->GetSystem<KeyboardControlSystem>().SubscribeToEvents(eventBus);
     registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
+    registry->GetSystem<MovementSystem>().SubscribeToEvents(eventBus);
 
     // Update the registry to process the entities that are waiting to be created/deleted
     registry->Update();

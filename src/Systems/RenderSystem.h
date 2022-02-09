@@ -73,7 +73,7 @@ class RenderSystem: public System {
                     &dstRect,
                     transform.rotation, // See documentation for this and the following 3 properties - the point where it rotates around
                     NULL,               // defines center of rotation   
-                    SDL_FLIP_NONE   // A SDL_RendererFlip 
+                    sprite.flip        // A SDL_RendererFlip 
                 );
 
                 // TODO: Draw the PNG texture 
