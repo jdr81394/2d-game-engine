@@ -23,5 +23,16 @@ function factorial(n)
         ret_value = ret_value * i
     end
 
-    print(ret_value)
+    return ret_value;
 end
+
+
+function callCube(n) 
+    return_value = cube(n);
+    print("this is the call cube value: " ..return_value)
+end
+
+-- factorial(3)
+-- factorial(5)
+-- factorial(7)
+callCube(10);

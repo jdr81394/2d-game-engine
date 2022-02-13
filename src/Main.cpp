@@ -2,11 +2,18 @@
 #include <iostream>
 #include <sol/sol.hpp>
 
+int nativeCppCubeFunction(int n) {
+    return n*n*n;
+}
+
 void TestLua(){
     sol::state lua;
 
     // Can include libraries in lua script
     lua.open_libraries(sol::lib::base);
+
+    // This is how we expose and bind a native C++ funciton to be used by the lua script
+    lua["cube"] = nativeCppCubeFunction;
 
     lua.script_file("./assets/scripts/myscript.lua");
 
@@ -26,9 +33,10 @@ void TestLua(){
     std::cout << "The value of the height: " << height << std::endl;
     std::cout << "The value of the width: " << width << std::endl;
 
-    auto myLuaFunc = lua["factorial"];
+    sol::function functionFactorial = lua["factorial"];
+    int functionFactorialResult = functionFactorial(5);
 
-    myLuaFunc(5);
+    std::cout << "This is the lua function from the sol file: "<< functionFactorialResult << std::endl;
 
 };
 
