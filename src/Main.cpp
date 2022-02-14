@@ -41,13 +41,13 @@ void TestLua(){
 };
 
 int main(int argc, char* argv[]) {
-    // Game game;
+    Game game;
 
-    // game.Initialize();
-    // game.Run();
-    // game.Destroy();
+    game.Initialize();
+    game.Run();
+    game.Destroy();
 
-    TestLua();
+    // TestLua();
 
     return 0;
 }

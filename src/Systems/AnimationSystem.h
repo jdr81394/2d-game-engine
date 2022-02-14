@@ -2,6 +2,8 @@
 #define ANIMATIONSYSTEM_H
 
 #include "../ECS/ECS.h"
+#include "../Components/SpriteComponent.h"
+#include "../Components/AnimationComponent.h"
 
 class AnimationSystem : public System {
 
