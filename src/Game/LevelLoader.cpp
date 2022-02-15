@@ -12,6 +12,8 @@
 #include "../Components/ProjectileEmitterComponent.h"
 #include "../Components/HealthComponent.h"
 #include <sol/sol.hpp>
+#include <string>
+#include "../Logger/Logger.h"
 
 LevelLoader::LevelLoader() {
     Logger::Log("Level Loader constructor called!");
@@ -21,9 +23,72 @@ LevelLoader::~LevelLoader() {
     Logger::Log("Level Loader deconstructor called!");
 };
 
-void LevelLoader::LoadLevel(std::unique_ptr<Registry>& registry, const std::unique_ptr<AssetStore>& assetStore, SDL_Renderer* renderer, int level) {
-    sol::state lua;
-    lua.open_libraries(sol::lib::base);
+void LevelLoader::LoadLevel(sol::state& lua, std::unique_ptr<Registry>& registry, const std::unique_ptr<AssetStore>& assetStore, SDL_Renderer* renderer, int levelNumber) {
+    
+    // This isnt "interpreting the script". Its not executing the script. Its just loading the file.
+    sol::load_result script = lua.load_file("./assets/scripts/Level"+std::to_string(levelNumber) + ".lua");
+
+    // This checks the syntax of our script, but it does not execute the script.
+    if(!script.valid()) {
+        sol::error err  = script;
+        std::string errorMessage = err.what();
+        Logger::Err("Error loading hte lua script: " + errorMessage);
+        return;
+    }
+
+
+    // Executes the script using the Sol (the lua) state
+    lua.script_file("./assets/scripts/Level" + std::to_string(levelNumber) + ".lua");
+
+    // Read the big table for the current level
+    sol::table level = lua["Level"];
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Read the level assets
+    //////////////////////////////////////////////////////////////////////////////////////////
+
+    sol::table assets = level["assets"];
+
+    int i = 0;
+    while(true) {
+        // The optional is just saying this only "maybe" exists
+        sol::optional<sol::table> hasAsset = assets[i];
+
+        // If the sol::table does not exist
+        if(hasAsset == sol::nullopt) {
+            break;
+        }
+        
+        sol::table asset = assets[i];
+        std::string assetType = asset["type"];
+        std::string assetId = asset["id"];
+        if(assetType == "texture") {
+            assetStore->AddTexture(renderer, assetId, asset["file"]);
+            Logger::Log("New texture asset loaded to the asset store, id: " + assetId);
+
+        }
+
+        if(assetType == "font") {
+            assetStore->AddFont(assetId, asset["file"], asset["font_size"]);
+            Logger::Log("New asset font added to the asset store, id: " + assetId);
+        }
+
+        i++;
+    }
+
+    Logger::Log("we just opened level 1 lua");
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Read the level tilemap information
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // TODO:....
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Read the level entities and components
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // TODO:....
+
 
     // // Add assets to the asset store
     // std::string tankImage = "tank-image";
