@@ -15,6 +15,7 @@
 #include "../Systems/ProjectileLifecycleSystem.h"
 #include "../Systems/RenderHealthSystem.h"
 #include "../Systems/RenderHealthTextSystem.h"
+#include "../Systems/ScriptSystem.h"
 #include <SDL2/SDL.h>
 #include <glm/glm.hpp>
 #include <iostream>
@@ -117,6 +118,7 @@ void Game::Setup() {
     registry->AddSystem<RenderTextSystem>();
     registry->AddSystem<RenderHealthSystem>();
     registry->AddSystem<RenderHealthTextSystem>();
+    registry->AddSystem<ScriptSystem>();
     
     // Load 1st level
     LevelLoader loader;
@@ -156,6 +158,7 @@ void Game::Update() {
     registry->GetSystem<CameraMovementSystem>().Update(camera);
     registry->GetSystem<ProjectileEmitSystem>().Update(registry);
     registry->GetSystem<ProjectileLifecycleSystem>().Update();
+    registry->GetSystem<ScriptSystem>().Update();
 }    
 
 

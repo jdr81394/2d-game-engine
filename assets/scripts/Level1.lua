@@ -2797,7 +2797,6 @@ Level = {
                     [0] =
                     function(entity, delta_time, ellapsed_time)
                         print("Executing the SU-27 fighter jet Lua script!")
-                        --[[
 
                         -- this function makes the fighter jet move up and down the map shooting projectiles
                         local current_position_x, current_position_y = get_position(entity)
@@ -2817,7 +2816,7 @@ Level = {
                         else
                             set_rotation(entity, 180) -- point down
                             set_projectile_velocity(entity, 0, 200) -- shoot projectiles down
-                        end --]]
+                        end 
                     end
                 }
             }
@@ -2864,11 +2863,11 @@ Level = {
                         print("Executing BF-109 Lua script!")
 
                         -- change the position of the the airplane to follow a sine wave movement
-                        --[[ 
+                         
                         local new_x = ellapsed_time * 0.09
                         local new_y = 200 + (math.sin(ellapsed_time * 0.001) * 50)
                         set_position(entity, new_x, new_y) -- set the new position
-                        --]]
+                        
                     end
                 }
             }
