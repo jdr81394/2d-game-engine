@@ -11,6 +11,8 @@
 #include "../Systems/RenderTextSystem.h"
 #include "../Systems/DamageSystem.h"
 #include "../Systems/KeyboardControlSystem.h"
+#include "../Systems/RenderHealthTextSystem.h"
+#include "../Systems/MouseSystem.h"
 #include "../Systems/ProjectileEmitSystem.h"
 #include "../Systems/ProjectileLifecycleSystem.h"
 #include "../Systems/RenderHealthSystem.h"
@@ -119,14 +121,22 @@ void Game::Setup() {
     registry->AddSystem<RenderHealthSystem>();
     registry->AddSystem<RenderHealthTextSystem>();
     registry->AddSystem<ScriptSystem>();
+    registry->AddSystem<MouseSystem>();
 
     // Create the bindings between C++ and Lua
     registry->GetSystem<ScriptSystem>().CreateLuaBindings(lua);
-    
-    // Load 1st level
-    LevelLoader loader;
+
     lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
-    loader.LoadLevel(lua, registry, assetStore, renderer, 1);
+
+    // Load 1st level
+
+    LoadLevel("1");
+
+}
+
+void Game::LoadLevel(std::string level){
+    LevelLoader loader;
+    loader.LoadLevel(lua, registry, assetStore, renderer, level);
 }
 
 void Game::Update() {
