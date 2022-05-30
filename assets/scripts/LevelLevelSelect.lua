@@ -60,7 +60,7 @@ Level = {
                 mouse_controlled = {
                     is_clickable = true,
                     is_draggable = true,
-                    link = "LevelSelect"
+                    link = "1"
                 }
             }
         },

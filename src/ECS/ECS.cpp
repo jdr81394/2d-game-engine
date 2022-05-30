@@ -45,6 +45,11 @@ std::vector<Entity> System::GetSystemEntities() const {
 
 const Signature& System::GetComponentSignature() const {
     return componentSignature;
+
+}
+
+int Registry::GetNumEntities() {
+    return numEntities;
 }
 
 Entity Registry::CreateEntity() {
@@ -157,6 +162,14 @@ void Registry::AddEntityToSystems(Entity entity) {
 void Registry::RemoveEntityFromSystems(Entity entity) {
     for(auto system : systems) {
         system.second->RemoveEntityFromSystem(entity);
+    }
+}
+
+void Registry::DeloadEverything() {
+     for(auto system: systems) {
+        for(auto entity : system.second->GetSystemEntities()) {
+            KillEntity(entity);
+        }
     }
 }
 

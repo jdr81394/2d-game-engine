@@ -353,6 +353,7 @@ class Registry {
         
         // Entity management
         Entity CreateEntity();
+        int GetNumEntities();
 
         // Remove Entity
         void KillEntity(Entity entity);
@@ -385,6 +386,9 @@ class Registry {
         // that are interested in it
         void AddEntityToSystems(Entity entity);
         void RemoveEntityFromSystems(Entity entity);
+
+        // Level Management
+        void DeloadEverything();
 };
 
 template <typename TComponent>

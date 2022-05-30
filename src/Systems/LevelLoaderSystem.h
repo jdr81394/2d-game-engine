@@ -47,10 +47,8 @@ class LevelLoaderSystem : public System {
             auto const mouseControlledComponent = entity.GetComponent<MouseControlledComponent>();
             if(mouseControlledComponent.isClickable) {
                 std::string const link = mouseControlledComponent.link;
-                Logger::Log("Is within isClickable");
 
                 if(link.size() > 0) {
-                    Logger::Log("Is within link size");
 
                     // lets see if there is collision between mouse click and objct
                     auto const boxColliderComponent = entity.GetComponent<BoxColliderComponent>();
@@ -101,8 +99,15 @@ class LevelLoaderSystem : public System {
     void LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& registry, const std::unique_ptr<AssetStore>& assetStore, SDL_Renderer* renderer, std::string levelNumber) {
 
 
+        // First lets check if there is something loaded
+        // If so deload it.
+        if(registry->GetNumEntities() > 0) {
+            registry->DeloadEverything();
+        }
+
         // This checks the syntax of our script, but it does not execute the script
         sol::load_result script = lua.load_file("./assets/scripts/Level" + levelNumber + ".lua");
+        
         if (!script.valid()) {
             sol::error err = script;
             std::string errorMessage = err.what();
