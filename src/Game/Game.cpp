@@ -1,5 +1,5 @@
 #include "Game.h"
-#include "./LevelLoader.h"
+#include "../Systems/LevelLoaderSystem.h"
 #include "../Logger/Logger.h"
 #include "../ECS/ECS.h"
 #include "../Systems/CameraMovementSystem.h"
@@ -100,6 +100,12 @@ void Game::ProcessInput() {
                 }
                 eventBus->EmitEvent<KeyPressedEvent>(sdlEvent.key.keysym.sym);
                 break;
+            case SDL_MOUSEBUTTONDOWN:
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+                glm::vec2 mouseCoordinates = glm::vec2(static_cast<int>(x),static_cast<int>(y));
+                registry->GetSystem<LevelLoaderSystem>().CheckToLoadLevel(mouseCoordinates,lua, registry, assetStore, renderer);
+                break;
         }
     }
 }
@@ -122,7 +128,7 @@ void Game::Setup() {
     registry->AddSystem<RenderHealthTextSystem>();
     registry->AddSystem<ScriptSystem>();
     registry->AddSystem<MouseSystem>();
-
+    registry->AddSystem<LevelLoaderSystem>();
     // Create the bindings between C++ and Lua
     registry->GetSystem<ScriptSystem>().CreateLuaBindings(lua);
 
@@ -130,13 +136,8 @@ void Game::Setup() {
 
     // Load 1st level
 
-    LoadLevel("1");
+    registry->GetSystem<LevelLoaderSystem>().LoadLevel(lua, registry, assetStore, renderer, "LevelSelect");
 
-}
-
-void Game::LoadLevel(std::string level){
-    LevelLoader loader;
-    loader.LoadLevel(lua, registry, assetStore, renderer, level);
 }
 
 void Game::Update() {

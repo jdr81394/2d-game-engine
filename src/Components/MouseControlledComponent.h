@@ -14,7 +14,11 @@ struct MouseControlledComponent {
         bool isClickable = true, 
         bool isDraggable  = false, 
         std::string link = ""
-        ) {}
+        ) {
+            this->isClickable = isClickable;
+            this->isDraggable = isDraggable;
+            this->link = link;
+        }
 };
 
 #endif

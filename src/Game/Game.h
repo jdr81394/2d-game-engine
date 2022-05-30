@@ -35,7 +35,6 @@ class Game {
         void Render();
         void Destroy();
 
-        void LoadLevel(std::string level);
         static int windowWidth;
         static int windowHeight;
         static int mapWidth;
