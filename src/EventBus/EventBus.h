@@ -66,10 +66,10 @@ class EventBus {
         std::map<std::type_index, std::unique_ptr<HandlerList>> subscribers;
     public:
         EventBus(){
-            Logger::Log("Event bus constructor has been called");
+            // Logger::Log("Event bus constructor has been called");
         }
         ~EventBus(){
-            Logger::Log("Event bus destructor has been called");
+            // Logger::Log("Event bus destructor has been called");
         }
 
         void Reset() {

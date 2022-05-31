@@ -72,7 +72,7 @@ Entity Registry::CreateEntity() {
     
     entitiesToBeAdded.insert(entity);
 
-    Logger::Log("Entity created with id = " + std::to_string(entityId));
+    // Logger::Log("Entity created with id = " + std::to_string(entityId));
 
     return entity;
 }
