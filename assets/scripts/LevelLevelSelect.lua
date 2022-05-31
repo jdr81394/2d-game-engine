@@ -7,7 +7,7 @@ Level = {
     assets = {
         [0] =
             { type = "texture", id = "tilemap-texture-day",  file = "./assets/tilemaps/jungle.png" },
-            { type = "font" ,   id = "pico8-font-5",         file = "./assets/fonts/arial.ttf"     },
+            { type = "font" ,   id = "arial-font",         file = "./assets/fonts/arial.ttf" , font_size = 10    },
             { type = "texture", id = "radar-texture",        file = "./assets/images/radar-spritesheet.png" },
 
     },
@@ -31,7 +31,7 @@ Level = {
         [0] =
         -- Go to level 1
         { 
-            group = "ui",     
+            group = "text",     
             components = {
                 transform = {
                     position = {
@@ -61,6 +61,20 @@ Level = {
                     is_clickable = true,
                     is_draggable = true,
                     link = "1"
+                },
+                text_label = {
+                    position = {
+                        x = 300.0,
+                        y = 300.0
+                    },
+                    text = "Level One",
+                    asset_id = "arial-font",
+                    sdl_color = { 
+                        r = 100,
+                        g = 255, 
+                        b = 100
+                    },
+                    is_fixed = true
                 }
             }
         },

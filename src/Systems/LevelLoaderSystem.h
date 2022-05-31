@@ -17,11 +17,13 @@
 #include "../Components/ProjectileEmitterComponent.h"
 #include "../Components/KeyboardControlledComponent.h"
 #include "../Components/MouseControlledComponent.h"
+#include "../Components/TextLabelComponent.h"
 #include "../Components/ScriptComponent.h"
 #include "../Components/CameraFollowComponent.h"
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <fstream>
+#include <glm/glm.hpp>
 
 
 class LevelLoaderSystem : public System {
@@ -29,8 +31,6 @@ class LevelLoaderSystem : public System {
     public:
         LevelLoaderSystem() {
             RequireComponent<MouseControlledComponent>();
-            RequireComponent<TransformComponent>();
-            RequireComponent<BoxColliderComponent>();
         }
 
     void CheckToLoadLevel(
@@ -41,7 +41,7 @@ class LevelLoaderSystem : public System {
         SDL_Renderer* renderer
     ) {
 
-        Logger::Log("HIIIII, here is mousecoordinates: " +  std::to_string(mouseCoordinates.x) +  "    and heres y:  " + std::to_string(mouseCoordinates.y));
+        Logger::Log(" Here are the mousecoordinates,  heres the x: " +  std::to_string(mouseCoordinates.x) +  "    and heres y:  " + std::to_string(mouseCoordinates.y));
 
         for(auto entity : GetSystemEntities()) {
             auto const mouseControlledComponent = entity.GetComponent<MouseControlledComponent>();
@@ -50,25 +50,62 @@ class LevelLoaderSystem : public System {
 
                 if(link.size() > 0) {
 
-                    // lets see if there is collision between mouse click and objct
-                    auto const boxColliderComponent = entity.GetComponent<BoxColliderComponent>();
-                    auto const transformComponent = entity.GetComponent<TransformComponent>();
+                    double initialX = 0.0, initialY = 0.0, width = 0.0, height = 0.0;
+
+                    // If entity belongs to group text, then we should look at text component
+                    if(entity.BelongsToGroup("text") && entity.HasComponent<TextLabelComponent>()) {
+                        TextLabelComponent textLabelComponent = entity.GetComponent<TextLabelComponent>();
+
+                         SDL_Surface* surface = TTF_RenderText_Blended(
+                            assetStore->GetFont(textLabelComponent.assetId),
+                            textLabelComponent.text.c_str(),
+                            textLabelComponent.color
+                        );
+                        SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+                        SDL_FreeSurface(surface);
+
+                        int labelWidth = 0;
+                        int labelHeight = 0;
+
+                        // Query font to find width and height; This populates the labelWidth and labelHeight values.
+                        SDL_QueryTexture(texture, NULL, NULL, &labelWidth, &labelHeight);
+
+                        initialX = textLabelComponent.position.x;
+                        initialY = textLabelComponent.position.y;
+                        width    = labelWidth;
+                        height   = labelHeight;
+
+                        
+                    }
+                    else if(entity.HasComponent<BoxColliderComponent>() && entity.HasComponent<TransformComponent>()) {
+                        // lets see if there is collision between mouse click and objct
+                        auto const boxColliderComponent = entity.GetComponent<BoxColliderComponent>();
+                        auto const transformComponent = entity.GetComponent<TransformComponent>();
+
+                        initialX = transformComponent.position.x + boxColliderComponent.offset.y;
+                        initialY = transformComponent.position.y + boxColliderComponent.offset.y;
+                        width    = boxColliderComponent.width;
+                        height   = boxColliderComponent.height;
+
+                    }
 
                     bool isClickInEntity = CheckAABBCollision(
-                        transformComponent.position.x + boxColliderComponent.offset.x,
-                        transformComponent.position.y + boxColliderComponent.offset.y,
-                        boxColliderComponent.width,
-                        boxColliderComponent.height,
-                        mouseCoordinates.x,
-                        mouseCoordinates.y,
-                        10.0,
-                        10.0
+                            initialX,
+                            initialY,
+                            width,
+                            height,
+                            mouseCoordinates.x,
+                            mouseCoordinates.y,
+                            5.0,
+                            5.0
                     );
+
 
                     // If cick is within entity, we will go to link
                     if(isClickInEntity) {
                         LoadLevel(lua,registry,assetStore,renderer,link);
                     }
+
                     
                 }
             }
@@ -330,15 +367,46 @@ class LevelLoaderSystem : public System {
                         entity["components"]["mouse_controlled"]["link"]
                     );
                 }
+
+
+                // TextLabelComponent
+                sol::optional<sol::table> textLabel = entity["components"]["text_label"];
+
+                if(textLabel != sol::nullopt) {
+
+                    SDL_Color color = {
+                         entity["components"]["text_label"]["sdl_color"]["r"],
+                         entity["components"]["text_label"]["sdl_color"]["g"],
+                         entity["components"]["text_label"]["sdl_color"]["b"]
+                    };
+
+                    const std::string text = entity["components"]["text_label"]["text"];
+
+                    const std::string assetId = entity["components"]["text_label"]["asset_id"];
+             
+                    newEntity.AddComponent<TextLabelComponent>(
+                        glm::vec2(
+                            entity["components"]["text_label"]["position"]["x"],
+                            entity["components"]["text_label"]["position"]["y"]
+                        ),
+                        text,
+                        assetId,
+                        color,
+                        entity["components"]["text_label"]["is_fixed"]
+                    );
+                }
+
+
+                // Script
+                sol::optional<sol::table> updateScript = entity["components"]["on_update_script"];
+                if(updateScript != sol::nullopt) {
+                    sol::function func = entity["components"]["on_update_script"][0];
+                    newEntity.AddComponent<ScriptComponent>(func);
+                }
             
             }
 
-            // Script
-            sol::optional<sol::table> updateScript = entity["components"]["on_update_script"];
-            if(updateScript != sol::nullopt) {
-                sol::function func = entity["components"]["on_update_script"][0];
-                newEntity.AddComponent<ScriptComponent>(func);
-            }
+
 
             i++;
         }
