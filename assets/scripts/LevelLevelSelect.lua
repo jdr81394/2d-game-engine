@@ -1,13 +1,12 @@
+window_width = config["window_width"]
+window_height = config["window_height"]
 
-
-
--- Define a table with start values of the first level
 Level = {
 
     assets = {
         [0] =
             { type = "texture", id = "tilemap-texture-day",  file = "./assets/tilemaps/jungle.png" },
-            { type = "font" ,   id = "arial-font",         file = "./assets/fonts/arial.ttf" , font_size = 10    },
+            { type = "font" ,   id = "arial-font",         file = "./assets/fonts/arial.ttf" , font_size = 40    },
             { type = "texture", id = "radar-texture",        file = "./assets/images/radar-spritesheet.png" },
 
     },
@@ -33,30 +32,6 @@ Level = {
         { 
             group = "text",     
             components = {
-                transform = {
-                    position = {
-                        x = 50,
-                        y = 150
-                    },
-                    scale = { x = 1.0 , y = 1.0},
-                    rotation = { 0.0 }
-                },
-                boxcollider = {
-                    width = 64,
-                    height = 64,
-                    offset = { x = 0, y = 0 }
-                },
-                sprite = {
-                    texture_asset_id = "radar-texture",
-                    width = 64,
-                    height = 64,
-                    z_index = 10,
-                    fixed = true
-                },
-                animation = {
-                    num_frames = 8,
-                    speed_rate = 7      
-                },
                 mouse_controlled = {
                     is_clickable = true,
                     is_draggable = true,
@@ -64,15 +39,39 @@ Level = {
                 },
                 text_label = {
                     position = {
-                        x = 300.0,
-                        y = 300.0
+                        x = window_width / 2 - (window_width * .1),
+                        y = window_height / 2 - (window_height * .15)
                     },
                     text = "Level One",
                     asset_id = "arial-font",
                     sdl_color = { 
-                        r = 100,
+                        r = 255,
                         g = 255, 
-                        b = 100
+                        b = 255
+                    },
+                    is_fixed = true
+                }
+            }
+        },
+        { 
+            group = "text",     
+            components = {
+                mouse_controlled = {
+                    is_clickable = true,
+                    is_draggable = true,
+                    link = "2"
+                },
+                text_label = {
+                    position = {
+                        x = window_width / 2 - (window_width * .1),
+                        y = window_height / 2 - (window_height * .1)
+                    },
+                    text = "Level Two",
+                    asset_id = "arial-font",
+                    sdl_color = { 
+                        r = 255,
+                        g = 255, 
+                        b = 255
                     },
                     is_fixed = true
                 }

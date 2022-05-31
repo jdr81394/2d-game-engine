@@ -82,6 +82,13 @@ void Game::Initialize() {
     camera.y = 0;
     camera.w = windowWidth;
     camera.h = windowHeight;
+
+    // Give lua the dimensions of the screen
+    lua.create_named_table("config", 
+        "window_width", windowWidth,
+        "window_height", windowHeight
+    );
+
 }
 
 void Game::ProcessInput() {
