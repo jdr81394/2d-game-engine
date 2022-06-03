@@ -136,6 +136,8 @@ class LevelLoaderSystem : public System {
     void LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& registry, const std::unique_ptr<AssetStore>& assetStore, SDL_Renderer* renderer, std::string levelNumber) {
 
 
+        // If level number empty, then just end function
+        if(levelNumber == "") return;
         // First lets check if there is something loaded
         // If so deload it.
         if(registry->GetNumEntities() > 0) {
