@@ -108,7 +108,7 @@ void Game::ProcessInput() {
                 eventBus->EmitEvent<KeyPressedEvent>(sdlEvent.key.keysym.sym);
                 break;
             case SDL_MOUSEBUTTONDOWN:
-                eventBus->EmitEvent<MousePressedEvent>();
+                eventBus->EmitEvent<MousePressedEvent>(lua, registry, assetStore,renderer, eventBus);
                 break;
         }
     }
@@ -136,6 +136,9 @@ void Game::Setup() {
     // Create the bindings between C++ and Lua
     registry->GetSystem<ScriptSystem>().CreateLuaBindings(lua);
 
+    // Subscribe to WorldEditorStartEvent
+    eventBus->SubscribeToEvent<WorldEditorStartEvent>(this, &Game::SetupWorldEditor);
+
     lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
 
     // Load 1st level
@@ -145,7 +148,8 @@ void Game::Setup() {
 }
 
 // Have game listen to event World Editor start, then call this method...
-void Game::SetupWorldEditor() {
+void Game::SetupWorldEditor(WorldEditorStartEvent& event) {
+    std::cout << "LOG here";
 }
 
 void Game::Update() {
@@ -169,7 +173,9 @@ void Game::Update() {
     registry->GetSystem<KeyboardControlSystem>().SubscribeToEvents(eventBus);
     registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
     registry->GetSystem<MovementSystem>().SubscribeToEvents(eventBus);
-
+    registry->GetSystem<LevelLoaderSystem>().SubscribeToEvent(eventBus);
+    eventBus->SubscribeToEvent<WorldEditorStartEvent>(this, &Game::SetupWorldEditor);
+    
     // Update the registry to process the entities that are waiting to be created/deleted
     registry->Update();
     

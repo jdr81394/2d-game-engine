@@ -25,6 +25,7 @@
 #include <fstream>
 #include <glm/glm.hpp>
 #include "../Events/WorldEditorStartEvent.h"
+#include "../Events/MousePressedEvent.h"
 
 
 class LevelLoaderSystem : public System {
@@ -35,11 +36,11 @@ class LevelLoaderSystem : public System {
         }
 
         void SubscribeToEvent(std::unique_ptr<EventBus>& eventBus ) {
-            eventBus->SubscribeToEvent<WorldEditorStartEvent>(this, &LevelLoaderSystem::CheckToLoadLevel);
+            eventBus->SubscribeToEvent<MousePressedEvent>(this, &LevelLoaderSystem::CheckToLoadLevel);
         }
 
         void CheckToLoadLevel(
-            WorldEditorStartEvent& event
+            MousePressedEvent& event
         ) {
 
             sol::state& lua = event.lua;
@@ -51,11 +52,12 @@ class LevelLoaderSystem : public System {
             int x, y;
             SDL_GetMouseState(&x, &y);
             glm::vec2 mouseCoordinates = glm::vec2(static_cast<int>(x),static_cast<int>(y));
-            Logger::Log(" Here are the mousecoordinates,  heres the x: " +  std::to_string(mouseCoordinates.x) +  "    and heres y:  " + std::to_string(mouseCoordinates.y));
+            Logger::Log("Here are the mousecoordinates,  heres the x: " +  std::to_string(mouseCoordinates.x) +  "    and heres y:  " + std::to_string(mouseCoordinates.y));
 
             for(auto entity : GetSystemEntities()) {
                 auto const mouseControlledComponent = entity.GetComponent<MouseControlledComponent>();
                 if(mouseControlledComponent.isClickable) {
+
                     std::string const link = mouseControlledComponent.link;
 
                     if(link.size() > 0 || entity.HasTag("WorldEditorLink")) {
@@ -111,11 +113,12 @@ class LevelLoaderSystem : public System {
                         );
 
 
+
                         // If cick is within entity, we will go to link
                         if(isClickInEntity) {
 
                             if(entity.HasTag("WorldEditorLink")) {
-                                eventBus->EmitEvent<WorldEditorStartEvent>(lua, registry, assetStore, renderer, eventBus);
+                                eventBus->EmitEvent<WorldEditorStartEvent>();
                             }
                             else {
                                 LoadLevel(lua,registry,assetStore,renderer,link);

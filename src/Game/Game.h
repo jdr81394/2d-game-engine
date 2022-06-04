@@ -5,6 +5,7 @@
 #include <SDL2/SDL.h>
 #include "../AssetStore/AssetStore.h"
 #include "../Events/CollisionEvent.h"
+#include "../Events/WorldEditorStartEvent.h"
 #include <sol/sol.hpp>
 
 const int FPS = 60;
@@ -30,7 +31,7 @@ class Game {
         void Initialize();
         void Run();
         void Setup();
-        void SetupWorldEditor();
+        void SetupWorldEditor(WorldEditorStartEvent& event);
         void ProcessInput();
         void Update();
         void Render();

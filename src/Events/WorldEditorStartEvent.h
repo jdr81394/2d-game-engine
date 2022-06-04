@@ -13,19 +13,9 @@
 class WorldEditorStartEvent : public Event {
 
     public:
-        sol::state& lua;
-        std::unique_ptr<Registry>& registry;
-        std::unique_ptr<AssetStore>& assetStore;
-        SDL_Renderer* renderer;
-        std::unique_ptr<EventBus>& eventBus;
+        WorldEditorStartEvent() {}
 
-        WorldEditorStartEvent(      
-            sol::state& lua, 
-            std::unique_ptr<Registry>& registry, 
-            std::unique_ptr<AssetStore>& assetStore, 
-            SDL_Renderer* renderer,
-            std::unique_ptr<EventBus>& eventBus
-        ) : lua(lua), registry(registry), assetStore(assetStore), renderer(renderer), eventBus(eventBus)  {}
+
 };
 
 #endif
