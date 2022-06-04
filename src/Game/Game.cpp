@@ -108,10 +108,7 @@ void Game::ProcessInput() {
                 eventBus->EmitEvent<KeyPressedEvent>(sdlEvent.key.keysym.sym);
                 break;
             case SDL_MOUSEBUTTONDOWN:
-                int x, y;
-                SDL_GetMouseState(&x, &y);
-                glm::vec2 mouseCoordinates = glm::vec2(static_cast<int>(x),static_cast<int>(y));
-                registry->GetSystem<LevelLoaderSystem>().CheckToLoadLevel(mouseCoordinates,lua, registry, assetStore, renderer);
+                eventBus->EmitEvent<MousePressedEvent>();
                 break;
         }
     }
@@ -145,6 +142,10 @@ void Game::Setup() {
 
     registry->GetSystem<LevelLoaderSystem>().LoadLevel(lua, registry, assetStore, renderer, "LevelSelect");
 
+}
+
+// Have game listen to event World Editor start, then call this method...
+void Game::SetupWorldEditor() {
 }
 
 void Game::Update() {

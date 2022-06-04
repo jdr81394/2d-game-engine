@@ -30,6 +30,7 @@ class Game {
         void Initialize();
         void Run();
         void Setup();
+        void SetupWorldEditor();
         void ProcessInput();
         void Update();
         void Render();

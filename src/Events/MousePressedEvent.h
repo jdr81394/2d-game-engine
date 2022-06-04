@@ -7,8 +7,7 @@
 
 class MousePressedEvent : public Event {
     public:
-        SDL_MouseButtonEvent symbol;
-        MousePressedEvent(SDL_MouseButtonEvent symbol): symbol(symbol) {};
+        MousePressedEvent() {};
 
 
 };

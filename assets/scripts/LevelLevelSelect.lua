@@ -103,6 +103,31 @@ Level = {
                 }
             }
         },
+        { 
+            tag = "WorldEditorLink",
+            group = "text",     
+            components = {
+                mouse_controlled = {
+                    is_clickable = true,
+                    is_draggable = false,
+                    link = ""
+                },
+                text_label = {
+                    position = {
+                        x = window_width / 2 - (window_width * .1),
+                        y = window_height / 2 - (window_height * .2)
+                    },
+                    text = "World Editor",
+                    asset_id = "arial-font",
+                    sdl_color = { 
+                        r = 255,
+                        g = 255, 
+                        b = 255
+                    },
+                    is_fixed = true
+                }
+            }
+        },
     }
 
 
