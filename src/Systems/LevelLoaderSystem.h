@@ -24,6 +24,7 @@
 #include <iostream>
 #include <fstream>
 #include <glm/glm.hpp>
+#include "../WorldEditor/WorldEditor.h"
 #include "../Events/WorldEditorStartEvent.h"
 #include "../Events/MousePressedEvent.h"
 
@@ -48,6 +49,7 @@ class LevelLoaderSystem : public System {
             std::unique_ptr<AssetStore>& assetStore = event.assetStore;
             SDL_Renderer* renderer = event.renderer;
             std::unique_ptr<EventBus>& eventBus = event.eventBus;
+            std::unique_ptr<WorldEditor>& worldEditor = event.worldEditor;
 
             int x, y;
             SDL_GetMouseState(&x, &y);
@@ -125,7 +127,9 @@ class LevelLoaderSystem : public System {
                         if(isClickInEntity) {
 
                             if(entity.HasTag("WorldEditorLink")) {
-                                eventBus->EmitEvent<WorldEditorStartEvent>();
+                                if(!worldEditor) {
+                                    eventBus->EmitEvent<WorldEditorStartEvent>();
+                                }
                             }
                             else {
                                 LoadLevel(lua,registry,assetStore,renderer,link);

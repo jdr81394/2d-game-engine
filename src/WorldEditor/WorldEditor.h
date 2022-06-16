@@ -38,8 +38,10 @@ class WorldEditor {
             std::unique_ptr<EventBus>& eventBus
         );
         ~WorldEditor();
+        SDL_Window* GetWindow();
         void Initialize();
         void Run();
+        void Render();
         void Destroy();
 
 };

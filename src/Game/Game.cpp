@@ -109,7 +109,12 @@ void Game::ProcessInput() {
                 eventBus->EmitEvent<KeyPressedEvent>(sdlEvent.key.keysym.sym);
                 break;
             case SDL_MOUSEBUTTONDOWN:
-                eventBus->EmitEvent<MousePressedEvent>(lua, registry, assetStore,renderer, eventBus);
+                if(worldEditor) {
+                    // SDL_SetWindowInputFocus(worldEditor->GetWindow());
+                    SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
+                    SDL_RaiseWindow(worldEditor->GetWindow());
+                }
+                eventBus->EmitEvent<MousePressedEvent>(lua, registry, assetStore,renderer, eventBus, worldEditor);
                 break;
         }
     }

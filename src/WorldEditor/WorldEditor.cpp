@@ -18,6 +18,10 @@ WorldEditor::WorldEditor(
 }
 WorldEditor::~WorldEditor() {}
 
+SDL_Window* WorldEditor::GetWindow(){
+    return window;
+}
+
 void WorldEditor::Initialize() {
     window = SDL_CreateWindow(
         "World Editor",
@@ -65,7 +69,22 @@ void WorldEditor::Initialize() {
 };
 
 
-void WorldEditor::Run() {}
+void WorldEditor::Run() {
+
+    Render();
+}
+
+void WorldEditor::Render() {
+
+    // Get Window size
+    SDL_DisplayMode displayMode;
+    SDL_GetCurrentDisplayMode(0, &displayMode);
+    windowWidth = displayMode.w;
+    windowHeight = displayMode.h;
+
+    // Render all the tiles in the window
+
+}
 
 
 void WorldEditor::Destroy() {}
