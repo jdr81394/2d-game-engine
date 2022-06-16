@@ -58,13 +58,14 @@ void Game::Initialize() {
     windowWidth = displayMode.w;
     windowHeight = displayMode.h;
     window = SDL_CreateWindow(
-        NULL,
+        "Main Screen",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         windowWidth,
         windowHeight,
         SDL_WINDOW_BORDERLESS
     );
+
     if (!window) {
         Logger::Err("Error creating SDL window.");
         return;
@@ -137,7 +138,7 @@ void Game::Setup() {
     registry->GetSystem<ScriptSystem>().CreateLuaBindings(lua);
 
     // Subscribe to WorldEditorStartEvent
-    eventBus->SubscribeToEvent<WorldEditorStartEvent>(this, &Game::SetupWorldEditor);
+    eventBus->SubscribeToEvent<WorldEditorStartEvent>(this, &Game::InitializeWorldEditor);
 
     lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
 
@@ -148,8 +149,13 @@ void Game::Setup() {
 }
 
 // Have game listen to event World Editor start, then call this method...
-void Game::SetupWorldEditor(WorldEditorStartEvent& event) {
-    std::cout << "LOG here";
+void Game::InitializeWorldEditor(WorldEditorStartEvent& event) {
+    Logger::Log("World Editor Initialization has begun!");
+    worldEditor = std::make_unique<WorldEditor>(lua, registry,assetStore, eventBus);
+
+    worldEditor->Initialize();
+    worldEditor->Run();             // Im not sure how C++ handles threading, well see if this is how I must do this
+    worldEditor->Destroy(); 
 }
 
 void Game::Update() {
@@ -174,8 +180,8 @@ void Game::Update() {
     registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
     registry->GetSystem<MovementSystem>().SubscribeToEvents(eventBus);
     registry->GetSystem<LevelLoaderSystem>().SubscribeToEvent(eventBus);
-    eventBus->SubscribeToEvent<WorldEditorStartEvent>(this, &Game::SetupWorldEditor);
-    
+    eventBus->SubscribeToEvent<WorldEditorStartEvent>(this, &Game::InitializeWorldEditor);
+
     // Update the registry to process the entities that are waiting to be created/deleted
     registry->Update();
     

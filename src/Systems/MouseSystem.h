@@ -17,14 +17,14 @@ class MouseSystem : public System {
 
         void OnKeyPress(MousePressedEvent& event) {
 
-            for(auto entity: GetSystemEntities()) {
-                const MouseControlledComponent mouseControlledComponent = entity.GetComponent<MouseControlledComponent>();
+            // for(auto entity: GetSystemEntities()) {
+            //     const MouseControlledComponent mouseControlledComponent = entity.GetComponent<MouseControlledComponent>();
 
-                if(mouseControlledComponent.link.size() > 0) {
-                    const std::string link = mouseControlledComponent.link;
-                    Game::LoadLevel(link);
-                }
-            }
+            //     if(mouseControlledComponent.link.size() > 0) {
+            //         const std::string link = mouseControlledComponent.link;
+            //         Game::LoadLevel(link);
+            //     }
+            // }
         }
 
 };

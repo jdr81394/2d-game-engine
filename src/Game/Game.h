@@ -6,6 +6,7 @@
 #include "../AssetStore/AssetStore.h"
 #include "../Events/CollisionEvent.h"
 #include "../Events/WorldEditorStartEvent.h"
+#include "../WorldEditor/WorldEditor.h"
 #include <sol/sol.hpp>
 
 const int FPS = 60;
@@ -25,13 +26,16 @@ class Game {
         std::unique_ptr<Registry> registry;
         std::unique_ptr<AssetStore> assetStore; 
         std::unique_ptr<EventBus> eventBus;
+
+        std::unique_ptr<WorldEditor> worldEditor;
+        
     public:
         Game();
         ~Game();
         void Initialize();
         void Run();
         void Setup();
-        void SetupWorldEditor(WorldEditorStartEvent& event);
+        void InitializeWorldEditor(WorldEditorStartEvent& event);
         void ProcessInput();
         void Update();
         void Render();

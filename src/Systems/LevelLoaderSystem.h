@@ -51,6 +51,13 @@ class LevelLoaderSystem : public System {
 
             int x, y;
             SDL_GetMouseState(&x, &y);
+
+            SDL_Window * currentlyFocusedWindow = SDL_GetMouseFocus();      // Use Get window title
+
+            auto title = SDL_GetWindowTitle(currentlyFocusedWindow);
+
+            Logger::Log(title);
+
             glm::vec2 mouseCoordinates = glm::vec2(static_cast<int>(x),static_cast<int>(y));
             Logger::Log("Here are the mousecoordinates,  heres the x: " +  std::to_string(mouseCoordinates.x) +  "    and heres y:  " + std::to_string(mouseCoordinates.y));
 

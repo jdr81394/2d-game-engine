@@ -50,12 +50,12 @@ class CollisionSystem : public System {
 
                 if(collisionHappened) {
                     // Trigger event
-                    Logger::Log(
-                        "Entity " + 
-                        std::to_string(a.GetId()) + 
-                        " is colliding with " + 
-                        std::to_string(b.GetId())
-                    );
+                    // Logger::Log(
+                    //     "Entity " + 
+                    //     std::to_string(a.GetId()) + 
+                    //     " is colliding with " + 
+                    //     std::to_string(b.GetId())
+                    // );
                     
                     // TODO: emit an event
                     eventBus->EmitEvent<CollisionEvent>(a, b);
