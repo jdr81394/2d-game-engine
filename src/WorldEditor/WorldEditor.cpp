@@ -4,6 +4,8 @@ const float INITIAL_X = 750.0;
 const float INITIAL_Y = 200.0;
 const int INITIAL_WIDTH = 450;
 const int INITIAL_HEIGHT = 600;
+const int FPS = 60;
+const int MILLISECS_PER_FRAME_EDITOR = 1000 / FPS;
 
 // Jake - I must change the z index so the world editor screen is always in front of the
 // game screen
@@ -71,20 +73,117 @@ void WorldEditor::Initialize() {
 
 void WorldEditor::Run() {
 
+    Update();
     Render();
+
 }
+
+
+void WorldEditor::Update() {}
 
 void WorldEditor::Render() {
 
-    // Get Window size
-    SDL_DisplayMode displayMode;
-    SDL_GetCurrentDisplayMode(0, &displayMode);
-    windowWidth = displayMode.w;
-    windowHeight = displayMode.h;
 
-    // Render all the tiles in the window
+       // Get Window size
+        SDL_DisplayMode displayMode;
+        SDL_GetCurrentDisplayMode(0, &displayMode);
+        windowWidth = displayMode.w;
+        windowHeight = displayMode.h;
+
+        // // Render all the tiles in the window
+        int timeToWait = MILLISECS_PER_FRAME_EDITOR  - ( SDL_GetTicks() - millisecsPreviousFrame);
+        //     Logger::Log("TIM TO WAIT: !" + std::to_string(timeToWait));
+
+        if (timeToWait > 0 && timeToWait <= MILLISECS_PER_FRAME_EDITOR) {
+
+            SDL_Delay(timeToWait);
+        }
+
+        // Logger::Log("World Editor Render!");
+
+        // The difference in ticks since the last frame, converted to seconds
+        double deltaTime = (SDL_GetTicks() - millisecsPreviousFrame) / 1000.0;
+
+        millisecsPreviousFrame = SDL_GetTicks();
+
+        int * width = new int;
+        int * height = new int; 
+        SDL_GetWindowSize(window, width, height);  
+
+
+        // // Render all the tiles in the window
+
+
+        camera.x = 0;
+        camera.y = 0;
+        // camera.w = 450;
+        // camera.h = 450;
+
+        camera.w = *width;
+        camera.h = *height;
+
+        // // int numRows = camera.h * 1.5 < 20 ? 20 : camera.h * 1.5;
+        // // int numCols = camera.w * 1.5 < 15 ? 15 : camera.w * 1.5;
+        // // int mapScale = 1;
+        // // int tileSizeHeight = static_cast<int>(camera.h / numRows * mapScale);
+        // // int tileSizeWidth = static_cast<int>(camera.w / numCols * mapScale);
+
+        int numRows = 20;
+        int numCols = 15;
+        int mapScale = 1;
+        int tileSize = 24;
+
+        Logger::Log("width: " + std::to_string(*width) + "  hegiht: " + std::to_string(*height));
+
+
+        std::map<std::string, SDL_Texture*> allTextures = assetStore->GetAllTextures();
+        auto it = allTextures.begin();
+
+        for (int y = 0; y < numRows; y++) {
+
+            for (int x = 0; x < numCols; x++) {
+
+                
+                Entity tile = registry->CreateEntity();
+
+                tile.AddComponent<TransformComponent>(
+                    glm::vec2(x * (mapScale * tileSize) , y * (mapScale * tileSize)),
+                    glm::vec2(mapScale, mapScale),
+                    0.0
+                );
+
+                if(it != allTextures.end() ) {
+                    tile.AddComponent<SpriteComponent>(
+                        it->first,
+                        tileSize,
+                        tileSize,
+                        0,
+                        false
+                    );
+                    it++;
+
+                }
+                else {
+                    break;
+                }
+            
+
+
+
+            }
+        
+        }
+
+        delete width;
+        delete height;
+
+
+
+
+    
 
 }
 
 
-void WorldEditor::Destroy() {}
+void WorldEditor::Destroy() {
+}

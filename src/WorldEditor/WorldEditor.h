@@ -9,11 +9,16 @@
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/MouseControlledComponent.h"
+#include "../Components/SpriteComponent.h"
 #include <stdio.h>
 #include <string>
 #include <filesystem>
+#include <thread>
+#include <vector>
+
 
 #include <glm/glm.hpp>
+
 
 class WorldEditor {
 
@@ -23,9 +28,10 @@ class WorldEditor {
         bool isRunning;
         int windowWidth;
         int windowHeight;
-
+        int millisecsPreviousFrame = 0;;
         sol::state &  lua;
-        
+        SDL_Rect camera;
+
         const std::unique_ptr<Registry>&  registry;
         const std::unique_ptr<AssetStore>& assetStore; 
         std::unique_ptr<EventBus>& eventBus;
@@ -39,8 +45,10 @@ class WorldEditor {
         );
         ~WorldEditor();
         SDL_Window* GetWindow();
+
         void Initialize();
         void Run();
+        void Update();
         void Render();
         void Destroy();
 

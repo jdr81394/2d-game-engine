@@ -160,7 +160,7 @@ void Game::InitializeWorldEditor(WorldEditorStartEvent& event) {
 
     worldEditor->Initialize();
     worldEditor->Run();             // Im not sure how C++ handles threading, well see if this is how I must do this
-    worldEditor->Destroy(); 
+    
 }
 
 void Game::Update() {
@@ -198,6 +198,10 @@ void Game::Update() {
     registry->GetSystem<ProjectileEmitSystem>().Update(registry);
     registry->GetSystem<ProjectileLifecycleSystem>().Update();
     registry->GetSystem<ScriptSystem>().Update(deltaTime, SDL_GetTicks());
+
+    if(worldEditor) {
+        worldEditor->Update();
+    }
 }    
 
 
@@ -215,6 +219,10 @@ void Game::Render() {
         registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
     }
 
+    if(worldEditor) {
+        worldEditor->Render();
+    }
+
     SDL_RenderPresent(renderer);
 }
 
@@ -228,6 +236,9 @@ void Game::Run() {
 }
 
 void Game::Destroy() {
+    if(worldEditor) {
+        worldEditor->Destroy(); 
+    }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
