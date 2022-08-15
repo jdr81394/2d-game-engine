@@ -67,7 +67,7 @@ void WorldEditor::Initialize() {
         assetStore->AddTexture(renderer, assetId, path );
     }
 
-    
+
 };
 
 SDL_Renderer * WorldEditor::GetRenderer() {
@@ -134,64 +134,90 @@ void WorldEditor::Render() {
         int numRows = 20;
         int numCols = 15;
         int mapScale = 1;
-        int tileSize = 24;
+        int tileSize = 10;
 
         // Logger::Log("width: " + std::to_string(*width) + "  hegiht: " + std::to_string(*height));
 
+        /*
+
+        Total Width of window is 1000 pixels
+        
+        10 tiles in each row
+        width of the tile will be 1000 / 10 = 100 pixels
+
+
+        */
 
         std::map<std::string, SDL_Texture*> allTextures = assetStore->GetAllTextures();
         auto it = allTextures.begin();
 
-        for (int y = 0; y < numRows; y++) {
+        if(it != allTextures.end()) {
 
-            for (int x = 0; x < numCols; x++) {
 
-                
-                Entity tile = registry->CreateEntity();
 
-                tile.AddComponent<TransformComponent>(
-                    glm::vec2(x * (mapScale * tileSize) , y * (mapScale * tileSize)),
-                    glm::vec2(mapScale, mapScale),
-                    0.0
-                );
 
-                if(it != allTextures.end() ) {
+            for(int y = 0; y < numRows; y++) {
+
+                for(int x = 0; x < numCols; x++) {
+
+                    if(it == allTextures.end()) break;
+
+                    Entity tile = registry->CreateEntity();
+
+                    tile.AddComponent<TransformComponent>(
+                        glm::vec2(x * (mapScale * tileSize), y * (mapScale * tileSize) ),
+                        glm::vec2(mapScale, mapScale),
+                        0.0
+                    );
+
                     tile.AddComponent<SpriteComponent>(
                         it->first,
                         tileSize,
                         tileSize,
-                        1000,
-                        false
+                        1000
                     );
+                    Logger::Log("Name: " + it->first + " X: " + std::to_string(x) + " Y: " + std::to_string(y));
+
                     it++;
-                    // Logger::Log(
-                    //     " position x " + std::to_string(tile.GetComponent<TransformComponent>().position.x) 
-                    //     +
-                    //     " position y " + std::to_string(tile.GetComponent<TransformComponent>().position.y) 
-                    //     +
-                    //     " scale x "  + std::to_string(tile.GetComponent<TransformComponent>().scale.x) 
-                    //     +
-                    //     " scale y "  + std::to_string(tile.GetComponent<TransformComponent>().scale.y) 
-                    //     + 
-                    //     " textures: " + it->first);
-
+                    tile.Group("World Editor");
+                    
                 }
-                else {
-                    break;
-                }
-
-                tile.Group("World Editor");
-
-                // SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);
-                // SDL_RenderClear(renderer);
-                // SDL_RenderPresent(renderer);
-
-
-
 
             }
-        
         }
+
+        // for (int y = 0; y < numRows; y++) {
+
+        //     for (int x = 0; x < numCols; x++) {
+
+                
+        //         Entity tile = registry->CreateEntity();
+
+        //         tile.AddComponent<TransformComponent>(
+        //             glm::vec2(x * (mapScale * tileSize) , y * (mapScale * tileSize)),
+        //             glm::vec2(mapScale, mapScale),
+        //             0.0
+        //         );
+
+        //         if(it != allTextures.end() ) {
+        //             tile.AddComponent<SpriteComponent>(
+        //                 it->first,
+        //                 tileSize,
+        //                 tileSize,
+        //                 1000,
+        //                 false
+        //             );
+        //             it++;
+        //         }
+        //         else {
+        //             break;
+        //         }
+
+        //         tile.Group("World Editor");
+
+        //     }
+        
+        // }
 
         delete width;
         delete height;

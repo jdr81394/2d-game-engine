@@ -101,6 +101,9 @@ void Game::ProcessInput() {
                 break;
             case SDL_KEYDOWN:
                 if (sdlEvent.key.keysym.sym == SDLK_ESCAPE) {
+                    if(worldEditor) {
+                        worldEditor->Destroy();
+                    }
                     isRunning = false;
                 }
                 if (sdlEvent.key.keysym.sym == SDLK_d) {
