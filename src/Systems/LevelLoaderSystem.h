@@ -207,11 +207,11 @@ class LevelLoaderSystem : public System {
                 std::string assetId = asset["id"];
                 if (assetType == "texture") {
                     assetStore->AddTexture(renderer, assetId, asset["file"]);
-                    Logger::Log("A new texture asset was added to the asset store, id: " + assetId);
+                    // Logger::Log("A new texture asset was added to the asset store, id: " + assetId);
                 }
                 if (assetType == "font") {
                     assetStore->AddFont(assetId, asset["file"], asset["font_size"]);
-                    Logger::Log("A new font asset was added to the asset store, id: " + assetId);
+                    // Logger::Log("A new font asset was added to the asset store, id: " + assetId);
                 }
                 i++;
             }

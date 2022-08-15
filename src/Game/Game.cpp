@@ -210,7 +210,12 @@ void Game::Render() {
     SDL_RenderClear(renderer);
 
     // TODO: Render game objects...
-    registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
+    if(worldEditor) {
+        registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera, worldEditor->GetRenderer());
+
+    } else {
+        registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
+    }
     registry->GetSystem<RenderTextSystem>().Update(renderer, assetStore, camera);
     registry->GetSystem<RenderHealthSystem>().Update(renderer, camera);
     registry->GetSystem<RenderHealthTextSystem>().Update(renderer, assetStore, camera);
@@ -221,9 +226,12 @@ void Game::Render() {
 
     if(worldEditor) {
         worldEditor->Render();
+        SDL_RenderPresent(worldEditor->GetRenderer());
+    } else {
+        SDL_RenderPresent(renderer);
+
     }
 
-    SDL_RenderPresent(renderer);
 }
 
 void Game::Run() {

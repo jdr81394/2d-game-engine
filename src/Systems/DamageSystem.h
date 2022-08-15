@@ -22,11 +22,11 @@ class DamageSystem : public System {
         };
 
         void onCollision(CollisionEvent& event) {
-            Logger::Log(
-                "The Damage system received an event collision between entities: "  + 
-                std::to_string(event.a.GetId()) + " and " + 
-                std::to_string(event.b.GetId())
-            );
+            // Logger::Log(
+            //     "The Damage system received an event collision between entities: "  + 
+            //     std::to_string(event.a.GetId()) + " and " + 
+            //     std::to_string(event.b.GetId())
+            // );
 
             Entity a = event.a;
             Entity b = event.b;

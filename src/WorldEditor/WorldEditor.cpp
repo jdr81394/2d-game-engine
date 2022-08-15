@@ -70,6 +70,9 @@ void WorldEditor::Initialize() {
     
 };
 
+SDL_Renderer * WorldEditor::GetRenderer() {
+    return renderer;
+}
 
 void WorldEditor::Run() {
 
@@ -133,7 +136,7 @@ void WorldEditor::Render() {
         int mapScale = 1;
         int tileSize = 24;
 
-        Logger::Log("width: " + std::to_string(*width) + "  hegiht: " + std::to_string(*height));
+        // Logger::Log("width: " + std::to_string(*width) + "  hegiht: " + std::to_string(*height));
 
 
         std::map<std::string, SDL_Texture*> allTextures = assetStore->GetAllTextures();
@@ -157,16 +160,32 @@ void WorldEditor::Render() {
                         it->first,
                         tileSize,
                         tileSize,
-                        0,
+                        1000,
                         false
                     );
                     it++;
+                    // Logger::Log(
+                    //     " position x " + std::to_string(tile.GetComponent<TransformComponent>().position.x) 
+                    //     +
+                    //     " position y " + std::to_string(tile.GetComponent<TransformComponent>().position.y) 
+                    //     +
+                    //     " scale x "  + std::to_string(tile.GetComponent<TransformComponent>().scale.x) 
+                    //     +
+                    //     " scale y "  + std::to_string(tile.GetComponent<TransformComponent>().scale.y) 
+                    //     + 
+                    //     " textures: " + it->first);
 
                 }
                 else {
                     break;
                 }
-            
+
+                tile.Group("World Editor");
+
+                // SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);
+                // SDL_RenderClear(renderer);
+                // SDL_RenderPresent(renderer);
+
 
 
 

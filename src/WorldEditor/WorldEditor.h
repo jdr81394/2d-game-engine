@@ -47,6 +47,7 @@ class WorldEditor {
         SDL_Window* GetWindow();
 
         void Initialize();
+        SDL_Renderer* GetRenderer();
         void Run();
         void Update();
         void Render();
