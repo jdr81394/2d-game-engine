@@ -156,11 +156,21 @@ void Game::Setup() {
 // Have game listen to event World Editor start, then call this method...
 void Game::InitializeWorldEditor(WorldEditorStartEvent& event) {
     Logger::Log("World Editor Initialization has begun!");
-    worldEditor = std::make_unique<WorldEditor>(lua, registry,assetStore, eventBus);
 
+
+
+    worldEditorThread = new std::thread(&Game::MainWorldEditor, this);
+    // worldEditorThread->detach();
+
+}
+
+void Game::MainWorldEditor() {
+
+    worldEditor = std::make_unique<WorldEditor>(lua, registry,assetStore, eventBus);
     worldEditor->Initialize();
     worldEditor->Run();             // Im not sure how C++ handles threading, well see if this is how I must do this
     worldEditor->Destroy(); 
+
 }
 
 void Game::Update() {

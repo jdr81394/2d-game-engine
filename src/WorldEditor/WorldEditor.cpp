@@ -71,7 +71,10 @@ void WorldEditor::Initialize() {
 
 void WorldEditor::Run() {
 
-    Render();
+    while(true) {
+        Render();
+
+    }
 }
 
 void WorldEditor::Render() {
@@ -82,6 +85,7 @@ void WorldEditor::Render() {
     windowWidth = displayMode.w;
     windowHeight = displayMode.h;
 
+    Logger::Log("Here");
     // Render all the tiles in the window
 
 }

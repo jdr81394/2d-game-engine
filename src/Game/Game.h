@@ -8,6 +8,7 @@
 #include "../Events/WorldEditorStartEvent.h"
 #include "../WorldEditor/WorldEditor.h"
 #include <sol/sol.hpp>
+#include <thread>
 
 const int FPS = 60;
 const int MILLISECS_PER_FRAME = 1000 / FPS;
@@ -36,6 +37,9 @@ class Game {
         void Run();
         void Setup();
         void InitializeWorldEditor(WorldEditorStartEvent& event);
+        void MainWorldEditor();
+        std::thread * worldEditorThread;
+
         void ProcessInput();
         void Update();
         void Render();
