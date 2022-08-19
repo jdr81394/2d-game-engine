@@ -18,6 +18,7 @@ class AssetStore {
 
         void AddFont(const std::string& assetId, const std::string& filePath, int fontSize);
         TTF_Font* GetFont(const std::string& assetId);
+        std::map<std::string, SDL_Texture*> GetAllTextures();
 
         AssetStore();
         ~AssetStore();

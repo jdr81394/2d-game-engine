@@ -166,7 +166,7 @@ void Game::InitializeWorldEditor(WorldEditorStartEvent& event) {
 
 void Game::MainWorldEditor() {
 
-    worldEditor = std::make_unique<WorldEditor>(lua, registry,assetStore, eventBus);
+    worldEditor = std::make_unique<WorldEditor>(lua, registry, eventBus);
     worldEditor->Initialize();
     worldEditor->Run();             // Im not sure how C++ handles threading, well see if this is how I must do this
     worldEditor->Destroy(); 

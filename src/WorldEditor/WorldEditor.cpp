@@ -4,16 +4,18 @@ const float INITIAL_X = 750.0;
 const float INITIAL_Y = 200.0;
 const int INITIAL_WIDTH = 450;
 const int INITIAL_HEIGHT = 600;
+const int FPS = 60;
+const int MILLISECS_PER_FRAME_EDITOR = 1000 / FPS;
 
 // Jake - I must change the z index so the world editor screen is always in front of the
 // game screen
 WorldEditor::WorldEditor(
     sol::state & lua, 
     const std::unique_ptr<Registry>& registry,
-    const std::unique_ptr<AssetStore>& assetStore,
     std::unique_ptr<EventBus>& eventBus
-): lua(lua), registry(registry), assetStore(assetStore), eventBus(eventBus) {
+): lua(lua), registry(registry), eventBus(eventBus) {
 
+    assetStore = new AssetStore();
     isRunning = false;
 }
 WorldEditor::~WorldEditor() {}
@@ -65,30 +67,179 @@ void WorldEditor::Initialize() {
         assetStore->AddTexture(renderer, assetId, path );
     }
 
-    
+
+
 };
 
 
+AssetStore * WorldEditor::GetAssetStore() {
+    return assetStore;
+}
+SDL_Renderer * WorldEditor::GetRenderer() {
+    return renderer;
+}
+
 void WorldEditor::Run() {
 
-    while(true) {
+    while(isRunning) {
+        Update();
         Render();
-
     }
+
+
 }
+
+
+void WorldEditor::Update() {}
 
 void WorldEditor::Render() {
 
-    // Get Window size
-    SDL_DisplayMode displayMode;
-    SDL_GetCurrentDisplayMode(0, &displayMode);
-    windowWidth = displayMode.w;
-    windowHeight = displayMode.h;
 
-    Logger::Log("Here");
-    // Render all the tiles in the window
+       // Get Window size
+        SDL_DisplayMode displayMode;
+        SDL_GetCurrentDisplayMode(0, &displayMode);
+        windowWidth = displayMode.w;
+        windowHeight = displayMode.h;
+
+        // // Render all the tiles in the window
+        int timeToWait = MILLISECS_PER_FRAME_EDITOR  - ( SDL_GetTicks() - millisecsPreviousFrame);
+        //     Logger::Log("TIM TO WAIT: !" + std::to_string(timeToWait));
+
+        if (timeToWait > 0 && timeToWait <= MILLISECS_PER_FRAME_EDITOR) {
+
+            SDL_Delay(timeToWait);
+        }
+
+        Logger::Log("Render: "  + std::to_string(windowWidth));
+        // Logger::Log("World Editor Render!");
+
+        // The difference in ticks since the last frame, converted to seconds
+        double deltaTime = (SDL_GetTicks() - millisecsPreviousFrame) / 1000.0;
+
+        millisecsPreviousFrame = SDL_GetTicks();
+
+        int * width = new int;
+        int * height = new int; 
+        SDL_GetWindowSize(window, width, height);  
+
+
+        // // Render all the tiles in the window
+
+
+        camera.x = 0;
+        camera.y = 0;
+        // camera.w = 450;
+        // camera.h = 450;
+
+        camera.w = *width;
+        camera.h = *height;
+
+        // // int numRows = camera.h * 1.5 < 20 ? 20 : camera.h * 1.5;
+        // // int numCols = camera.w * 1.5 < 15 ? 15 : camera.w * 1.5;
+        // // int mapScale = 1;
+        // // int tileSizeHeight = static_cast<int>(camera.h / numRows * mapScale);
+        // // int tileSizeWidth = static_cast<int>(camera.w / numCols * mapScale);
+
+        // Logger::Log("Height: " + std::to_string(*height) + " Width: " + std::to_string(*width));
+        int tileSize = 25;
+        int numRows = *height / tileSize;
+        int numCols = *width / tileSize;
+        int mapScale = 1;
+
+        // Logger::Log("width: " + std::to_string(*width) + "  hegiht: " + std::to_string(*height));
+
+        /*
+
+        Total Width of window is 1000 pixels
+        
+        10 tiles in each row
+        width of the tile will be 1000 / 10 = 100 pixels
+
+
+        */
+
+        std::map<std::string, SDL_Texture*> allTextures = assetStore->GetAllTextures();
+        auto it = allTextures.begin();
+
+        if(it != allTextures.end()) {
+
+
+
+
+            for(int y = 0; y < numRows; y++) {
+
+                for(int x = 0; x < numCols; x++) {
+
+                    if(it == allTextures.end()) break;
+
+                    Entity tile = registry->CreateEntity();
+
+                    tile.AddComponent<TransformComponent>(
+                        glm::vec2(x * (mapScale * tileSize), y * (mapScale * tileSize) ),
+                        glm::vec2(mapScale, mapScale),
+                        0.0
+                    );
+
+                    tile.AddComponent<SpriteComponent>(
+                        it->first,
+                        tileSize,
+                        tileSize,
+                        1000
+                    );
+                    Logger::Log("Name: " + it->first + " X: " + std::to_string(x) + " Y: " + std::to_string(y));
+
+                    it++;
+                    tile.Group("World Editor");
+                    
+                }
+
+            }
+        }
+
+        // for (int y = 0; y < numRows; y++) {
+
+        //     for (int x = 0; x < numCols; x++) {
+
+                
+        //         Entity tile = registry->CreateEntity();
+
+        //         tile.AddComponent<TransformComponent>(
+        //             glm::vec2(x * (mapScale * tileSize) , y * (mapScale * tileSize)),
+        //             glm::vec2(mapScale, mapScale),
+        //             0.0
+        //         );
+
+        //         if(it != allTextures.end() ) {
+        //             tile.AddComponent<SpriteComponent>(
+        //                 it->first,
+        //                 tileSize,
+        //                 tileSize,
+        //                 1000,
+        //                 false
+        //             );
+        //             it++;
+        //         }
+        //         else {
+        //             break;
+        //         }
+
+        //         tile.Group("World Editor");
+
+        //     }
+        
+        // }
+
+        delete width;
+        delete height;
+
+
+
+
+    
 
 }
 
 
-void WorldEditor::Destroy() {}
+void WorldEditor::Destroy() {
+    isRunning = false;
+}

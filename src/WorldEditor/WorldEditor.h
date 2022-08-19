@@ -8,6 +8,7 @@
 #include <memory>
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/TransformComponent.h"
+#include "../Components/SpriteComponent.h"
 #include "../Components/MouseControlledComponent.h"
 #include <stdio.h>
 #include <string>
@@ -23,24 +24,29 @@ class WorldEditor {
         bool isRunning;
         int windowWidth;
         int windowHeight;
+        int millisecsPreviousFrame = 0;
+        SDL_Rect camera;
 
         sol::state &  lua;
         
         const std::unique_ptr<Registry>&  registry;
-        const std::unique_ptr<AssetStore>& assetStore; 
+        AssetStore * assetStore; 
         std::unique_ptr<EventBus>& eventBus;
 
     public:
         WorldEditor(
             sol::state &  lua, 
             const std::unique_ptr<Registry>& registry, 
-            const std::unique_ptr<AssetStore>& assetStore, 
             std::unique_ptr<EventBus>& eventBus
         );
         ~WorldEditor();
+        
         SDL_Window* GetWindow();
+        AssetStore * GetAssetStore();
+        SDL_Renderer * GetRenderer();
         void Initialize();
         void Run();
+        void Update();
         void Render();
         void Destroy();
 
