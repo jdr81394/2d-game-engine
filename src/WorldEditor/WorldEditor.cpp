@@ -94,20 +94,20 @@ void WorldEditor::Render() {
         windowHeight = displayMode.h;
 
         // // Render all the tiles in the window
-        int timeToWait = MILLISECS_PER_FRAME_EDITOR  - ( SDL_GetTicks() - millisecsPreviousFrame);
-        //     Logger::Log("TIM TO WAIT: !" + std::to_string(timeToWait));
+        // int timeToWait = MILLISECS_PER_FRAME_EDITOR  - ( SDL_GetTicks() - millisecsPreviousFrame);
+        // //     Logger::Log("TIM TO WAIT: !" + std::to_string(timeToWait));
 
-        if (timeToWait > 0 && timeToWait <= MILLISECS_PER_FRAME_EDITOR) {
+        // if (timeToWait > 0 && timeToWait <= MILLISECS_PER_FRAME_EDITOR) {
 
-            SDL_Delay(timeToWait);
-        }
+        //     SDL_Delay(timeToWait);
+        // }
 
-        // Logger::Log("World Editor Render!");
+        // // Logger::Log("World Editor Render!");
 
-        // The difference in ticks since the last frame, converted to seconds
-        double deltaTime = (SDL_GetTicks() - millisecsPreviousFrame) / 1000.0;
+        // // The difference in ticks since the last frame, converted to seconds
+        // double deltaTime = (SDL_GetTicks() - millisecsPreviousFrame) / 1000.0;
 
-        millisecsPreviousFrame = SDL_GetTicks();
+        // millisecsPreviousFrame = SDL_GetTicks();
 
         int * width = new int;
         int * height = new int; 
