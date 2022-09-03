@@ -19,9 +19,7 @@ class RenderSystem: public System {
         void Update(
             SDL_Renderer* renderer, 
             std::unique_ptr<AssetStore>& assetStore, 
-            SDL_Rect& camera,
-            AssetStore * worldEditorAssetStore = nullptr,
-            SDL_Renderer * worldEditorRenderer = nullptr
+            SDL_Rect& camera
             ) {
             // Sort all the entities of our system by the z-index
             struct RenderableEntity {
@@ -35,7 +33,7 @@ class RenderSystem: public System {
                 RenderableEntity renderableEntity;
                 renderableEntity.spriteComponent = entity.GetComponent<SpriteComponent>();
                 renderableEntity.transformComponent = entity.GetComponent<TransformComponent>();
-
+        
                 renderableEntity.group = entity.BelongsToGroup("World Editor") ? "World Editor" : "Main Screen";
                 // Bypass rendering entities if they are outside the camera view
 
@@ -47,9 +45,10 @@ class RenderSystem: public System {
                 );
 
                 if(isEntityOutsideCameraView && !renderableEntity.spriteComponent.isFixed) {
+                    
                     continue;
                 };
-                
+
                 // Push onto the back of the vector
                 renderableEntities.emplace_back(renderableEntity);
             }
@@ -87,32 +86,18 @@ class RenderSystem: public System {
                     static_cast<int>(sprite.height * transform.scale.y)
                 };
 
+
                 // The SDL render Copy Ex takes a rotation value as well
-
-                if(worldEditorRenderer != nullptr && worldEditorAssetStore != nullptr && entity.group == "World Editor") {
-                    Logger::Log("1");
-                    SDL_RenderCopyEx(
-                        worldEditorRenderer,
-                        worldEditorAssetStore->GetTexture(sprite.assetId),
-                        &srcRect,
-                        &dstRect,
-                        transform.rotation, // See documentation for this and the following 3 properties - the point where it rotates around
-                        NULL,               // defines center of rotation   
-                        sprite.flip        // A SDL_RendererFlip 
-                    );
-                } else {
-                    Logger::Log("2");
-
-                    SDL_RenderCopyEx(
-                        renderer, 
-                        assetStore->GetTexture(sprite.assetId),
-                        &srcRect,
-                        &dstRect,
-                        transform.rotation, // See documentation for this and the following 3 properties - the point where it rotates around
-                        NULL,               // defines center of rotation   
-                        sprite.flip        // A SDL_RendererFlip 
-                    );
-                }
+                SDL_RenderCopyEx(
+                    renderer, 
+                    assetStore->GetTexture(sprite.assetId),
+                    &srcRect,
+                    &dstRect,
+                    transform.rotation, // See documentation for this and the following 3 properties - the point where it rotates around
+                    NULL,               // defines center of rotation   
+                    sprite.flip        // A SDL_RendererFlip 
+                );
+            
 
 
 

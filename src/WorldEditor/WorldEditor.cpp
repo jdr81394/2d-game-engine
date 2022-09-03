@@ -11,20 +11,9 @@ const int MILLISECS_PER_FRAME_EDITOR = 1000 / FPS;
 // game screen
 WorldEditor::WorldEditor(
     sol::state & lua, 
-    const std::unique_ptr<Registry>& registry,
     std::unique_ptr<EventBus>& eventBus
-): lua(lua), registry(registry), eventBus(eventBus) {
+): lua(lua), eventBus(eventBus) {
 
-    assetStore = new AssetStore();
-    isRunning = false;
-}
-WorldEditor::~WorldEditor() {}
-
-SDL_Window* WorldEditor::GetWindow(){
-    return window;
-}
-
-void WorldEditor::Initialize() {
     window = SDL_CreateWindow(
         "World Editor",
         static_cast<int>(INITIAL_X),
@@ -38,22 +27,31 @@ void WorldEditor::Initialize() {
         printf("Error creating window: %s\n", SDL_GetError());
         return;
     }
-
     renderer = SDL_CreateRenderer(window, -1, 0);
+    camera.x = 0;
+    camera.y = 0;
+    camera.w = INITIAL_WIDTH;
+    camera.h = INITIAL_HEIGHT;
+    
+    isRunning = false;
+    
+}
+WorldEditor::~WorldEditor() {}
 
+SDL_Window* WorldEditor::GetWindow(){
+    return window;
+}
+
+void WorldEditor::Initialize() {
+    assetStore = std::make_unique<AssetStore>();
+    registry = std::make_unique<Registry>();
     isRunning = true;
 
-    windowWidth = 450;
-    windowHeight  = 600;
+    SetUp();
 
-    // Create WorldEditorWindow entity
-    // Entity windowEntity = registry->CreateEntity();
-    // windowEntity.Tag("WorldEditorWindow");
-    // windowEntity.AddComponent<BoxColliderComponent>(INITIAL_WIDTH,INITIAL_HEIGHT);
-    // windowEntity.AddComponent<TransformComponent>(glm::vec2(INITIAL_X,INITIAL_Y));
-    // windowEntity.AddComponent<MouseControlledComponent>(true, true);
+};
 
-
+void WorldEditor::SetUp() {
     // we will display the tiles, entities, components, and the relationships that could exist
     // there really is components, sprites 
 
@@ -68,39 +66,57 @@ void WorldEditor::Initialize() {
 
     for(auto directoryEntry : std::filesystem::directory_iterator{assetPath}) {
         const std::string path = directoryEntry.path().u8string();
+        if(path.find("spritesheet") != std::string::npos) {
+            continue;
+        }
         std::string assetId = path.substr(0, path.size() - 4);
         assetStore->AddTexture(renderer, assetId, path );
     }
 
 
-
-};
-
-
-AssetStore * WorldEditor::GetAssetStore() {
-    return assetStore;
+    registry->AddSystem<RenderSystem>();
+    ArrangeAssetsOnWindow();
 }
+
+
+
 SDL_Renderer * WorldEditor::GetRenderer() {
     return renderer;
 }
 
 void WorldEditor::Run() {
 
-    // while(isRunning) {
+    while(isRunning) {
         Update();
         Render();
-    // }
+    }
 
-    while(1) SDL_RenderPresent(renderer);
 
 
 
 }
 
 
-void WorldEditor::Update() {}
+
+void WorldEditor::Update() {
+    registry->Update();
+}
 
 void WorldEditor::Render() {
+
+    SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);
+    SDL_RenderClear(renderer);
+
+    registry->GetSystem<RenderSystem>().Update(
+        renderer,
+        assetStore,
+        camera
+    );
+
+    SDL_RenderPresent(renderer);
+}
+
+void WorldEditor::ArrangeAssetsOnWindow() {
 
         int * width = new int;
         int * height = new int; 
@@ -124,6 +140,7 @@ void WorldEditor::Render() {
         */
 
         std::map<std::string, SDL_Texture*> allTextures = assetStore->GetAllTextures();
+
         auto it = allTextures.begin();
 
         if(it != allTextures.end()) {
@@ -151,7 +168,6 @@ void WorldEditor::Render() {
                         tileSize,
                         1000
                     );
-                    // Logger::Log("Name: " + it->first + " X: " + std::to_string(x) + " Y: " + std::to_string(y));
 
                     tile.Group("World Editor");
                     it++;
@@ -162,46 +178,9 @@ void WorldEditor::Render() {
             }
         }
 
-        // for (int y = 0; y < numRows; y++) {
-
-        //     for (int x = 0; x < numCols; x++) {
-
-                
-        //         Entity tile = registry->CreateEntity();
-
-        //         tile.AddComponent<TransformComponent>(
-        //             glm::vec2(x * (mapScale * tileSize) , y * (mapScale * tileSize)),
-        //             glm::vec2(mapScale, mapScale),
-        //             0.0
-        //         );
-
-        //         if(it != allTextures.end() ) {
-        //             tile.AddComponent<SpriteComponent>(
-        //                 it->first,
-        //                 tileSize,
-        //                 tileSize,
-        //                 1000,
-        //                 false
-        //             );
-        //             it++;
-        //         }
-        //         else {
-        //             break;
-        //         }
-
-        //         tile.Group("World Editor");
-
-        //     }
         
-        // }
-
         delete width;
         delete height;
-
-
-
-
-    
 
 }
 

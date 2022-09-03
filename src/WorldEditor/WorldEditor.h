@@ -10,6 +10,7 @@
 #include "../Components/TransformComponent.h"
 #include "../Components/SpriteComponent.h"
 #include "../Components/MouseControlledComponent.h"
+#include "../Systems/RenderSystem.h"
 #include <stdio.h>
 #include <string>
 #include <filesystem>
@@ -29,21 +30,21 @@ class WorldEditor {
 
         sol::state &  lua;
         
-        const std::unique_ptr<Registry>&  registry;
-        AssetStore * assetStore; 
+        std::unique_ptr<Registry> registry;
+        std::unique_ptr<AssetStore> assetStore; 
         std::unique_ptr<EventBus>& eventBus;
 
     public:
         WorldEditor(
             sol::state &  lua, 
-            const std::unique_ptr<Registry>& registry, 
             std::unique_ptr<EventBus>& eventBus
         );
         ~WorldEditor();
         
         SDL_Window* GetWindow();
-        AssetStore * GetAssetStore();
         SDL_Renderer * GetRenderer();
+        void SetUp();
+        void ArrangeAssetsOnWindow();
         void Initialize();
         void Run();
         void Update();

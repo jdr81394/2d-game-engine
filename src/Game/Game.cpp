@@ -158,15 +158,14 @@ void Game::InitializeWorldEditor(WorldEditorStartEvent& event) {
     Logger::Log("World Editor Initialization has begun!");
 
 
-    worldEditor = std::make_unique<WorldEditor>(lua, registry, eventBus);
-    worldEditor->Initialize();
+    worldEditor = std::make_unique<WorldEditor>(lua, eventBus);
     worldEditorThread = new std::thread(&Game::MainWorldEditor, this);
     // worldEditorThread->detach();
 
 }
 
 void Game::MainWorldEditor() {
-
+    worldEditor->Initialize();
     worldEditor->Run();             // Im not sure how C++ handles threading, well see if this is how I must do this
     worldEditor->Destroy(); 
 
@@ -219,9 +218,7 @@ void Game::Render() {
     registry->GetSystem<RenderSystem>().Update(
         renderer, 
         assetStore, 
-        camera, 
-        worldEditor ? worldEditor->GetAssetStore() : nullptr,
-        worldEditor ? worldEditor->GetRenderer() : nullptr
+        camera
     );
 
     registry->GetSystem<RenderTextSystem>().Update(renderer, assetStore, camera);
