@@ -61,9 +61,9 @@ void Game::Initialize() {
         "Main Screen",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        windowWidth,
-        windowHeight,
-        SDL_WINDOW_BORDERLESS
+        windowWidth - 300,
+        windowHeight - 300,
+        SDL_WINDOW_RESIZABLE
     );
 
     if (!window) {
@@ -107,6 +107,21 @@ void Game::ProcessInput() {
                     isDebug = !isDebug;
                 }
                 eventBus->EmitEvent<KeyPressedEvent>(sdlEvent.key.keysym.sym);
+                break;
+            case SDL_WINDOWEVENT:
+                if(sdlEvent.window.event == SDL_WINDOWEVENT_RESIZED) {
+                    // 1 is for main
+                    // 2 is for world editor
+                    Logger::Log("Window resize " + std::to_string(sdlEvent.window.windowID));
+
+                    // Jake - I will revist this later
+                    // eventBus->EmitEvent<ResizeWindowEvent>(sdlEvent.window.windowID);
+
+                    // if(sdlEvent.window.windowID == 2) {
+                    //     // Fire event
+                    // }
+
+                }
                 break;
             case SDL_MOUSEBUTTONDOWN:
                 if(worldEditor) {

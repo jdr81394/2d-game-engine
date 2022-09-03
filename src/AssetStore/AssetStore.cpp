@@ -32,6 +32,10 @@ SDL_Texture* AssetStore::GetTexture(const std::string& assetId)  {
     return textures;
  }
 
+ int AssetStore::GetSizeOfTextures() {
+     return textures.size();
+ }
+
 void AssetStore::AddTexture(SDL_Renderer* renderer, const std::string& assetId, const std::string& filePath) {
     SDL_Surface* surface = IMG_Load(filePath.c_str());
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);

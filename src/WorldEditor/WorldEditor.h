@@ -11,6 +11,7 @@
 #include "../Components/SpriteComponent.h"
 #include "../Components/MouseControlledComponent.h"
 #include "../Systems/RenderSystem.h"
+#include "../Events/ResizeWindowEvent.h"
 #include <stdio.h>
 #include <string>
 #include <filesystem>
@@ -44,7 +45,7 @@ class WorldEditor {
         SDL_Window* GetWindow();
         SDL_Renderer * GetRenderer();
         void SetUp();
-        void ArrangeAssetsOnWindow();
+        void ArrangeAssetsOnWindow(ResizeWindowEvent & e );
         void Initialize();
         void Run();
         void Update();

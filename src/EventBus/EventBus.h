@@ -76,6 +76,10 @@ class EventBus {
             subscribers.clear();
         }
 
+        bool IsClear() {
+            return subscribers.size() == 0 ? true : false;
+        }
+
         /* 
             Subscribe to event type <T>
             In our implementation, a listener subscribes to an event

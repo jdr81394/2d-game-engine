@@ -5,6 +5,7 @@
 #include <SDL2/SDL.h>
 #include "../AssetStore/AssetStore.h"
 #include "../Events/CollisionEvent.h"
+#include "../Events/ResizeWindowEvent.h"
 #include "../Events/WorldEditorStartEvent.h"
 #include "../WorldEditor/WorldEditor.h"
 #include <sol/sol.hpp>

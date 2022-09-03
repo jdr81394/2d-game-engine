@@ -58,7 +58,7 @@ class LevelLoaderSystem : public System {
 
             auto title = SDL_GetWindowTitle(currentlyFocusedWindow);
 
-            Logger::Log(title);
+            // std::cout << "window: " << title;
 
             glm::vec2 mouseCoordinates = glm::vec2(static_cast<int>(x),static_cast<int>(y));
             Logger::Log("Here are the mousecoordinates,  heres the x: " +  std::to_string(mouseCoordinates.x) +  "    and heres y:  " + std::to_string(mouseCoordinates.y));

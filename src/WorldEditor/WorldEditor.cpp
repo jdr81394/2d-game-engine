@@ -75,7 +75,8 @@ void WorldEditor::SetUp() {
 
 
     registry->AddSystem<RenderSystem>();
-    ArrangeAssetsOnWindow();
+    eventBus->SubscribeToEvent<ResizeWindowEvent>(this, &WorldEditor::ArrangeAssetsOnWindow);
+    eventBus->EmitEvent<ResizeWindowEvent>(2);
 }
 
 
@@ -99,6 +100,9 @@ void WorldEditor::Run() {
 
 
 void WorldEditor::Update() {
+
+    // eventBus->SubscribeToEvent<ResizeWindowEvent>(this, &WorldEditor::ArrangeAssetsOnWindow);
+
     registry->Update();
 }
 
@@ -116,7 +120,14 @@ void WorldEditor::Render() {
     SDL_RenderPresent(renderer);
 }
 
-void WorldEditor::ArrangeAssetsOnWindow() {
+void WorldEditor::ArrangeAssetsOnWindow(ResizeWindowEvent & e) {
+
+
+        // if(assetStore->GetSizeOfTextures() > 0) {
+        //     Logger::Log("arrange assets 1");
+        //     assetStore->ClearAssets();
+        // }
+        // Logger::Log("arrange assets 2");
 
         int * width = new int;
         int * height = new int; 
@@ -139,6 +150,7 @@ void WorldEditor::ArrangeAssetsOnWindow() {
 
         */
 
+
         std::map<std::string, SDL_Texture*> allTextures = assetStore->GetAllTextures();
 
         auto it = allTextures.begin();
@@ -156,6 +168,7 @@ void WorldEditor::ArrangeAssetsOnWindow() {
 
                     Entity tile = registry->CreateEntity();
 
+                    Logger::Log("entity id: " + std::to_string(tile.GetId()));
                     tile.AddComponent<TransformComponent>(
                         glm::vec2(x * (mapScale * tileSize), y * (mapScale * tileSize) ),
                         glm::vec2(mapScale, mapScale),
