@@ -7,6 +7,7 @@
 #include "../AssetStore/AssetStore.h"
 #include <SDL2/SDL.h>
 #include <iostream>
+#include <string>
 
 class RenderSystem: public System {
     public:
@@ -15,11 +16,18 @@ class RenderSystem: public System {
             RequireComponent<SpriteComponent>();
         }
 
-        void Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& assetStore, SDL_Rect& camera ) {
+        void Update(
+            SDL_Renderer* renderer, 
+            std::unique_ptr<AssetStore>& assetStore, 
+            SDL_Rect& camera,
+            AssetStore * worldEditorAssetStore = nullptr,
+            SDL_Renderer * worldEditorRenderer = nullptr
+            ) {
             // Sort all the entities of our system by the z-index
             struct RenderableEntity {
                 TransformComponent transformComponent;
                 SpriteComponent spriteComponent;
+                std::string group;
             };
 
             std::vector<RenderableEntity> renderableEntities;
@@ -28,6 +36,7 @@ class RenderSystem: public System {
                 renderableEntity.spriteComponent = entity.GetComponent<SpriteComponent>();
                 renderableEntity.transformComponent = entity.GetComponent<TransformComponent>();
 
+                renderableEntity.group = entity.BelongsToGroup("World Editor") ? "World Editor" : "Main Screen";
                 // Bypass rendering entities if they are outside the camera view
 
                  bool isEntityOutsideCameraView = (
@@ -79,15 +88,33 @@ class RenderSystem: public System {
                 };
 
                 // The SDL render Copy Ex takes a rotation value as well
-                SDL_RenderCopyEx(
-                    renderer, 
-                    assetStore->GetTexture(sprite.assetId),
-                    &srcRect,
-                    &dstRect,
-                    transform.rotation, // See documentation for this and the following 3 properties - the point where it rotates around
-                    NULL,               // defines center of rotation   
-                    sprite.flip        // A SDL_RendererFlip 
-                );
+
+                if(worldEditorRenderer != nullptr && worldEditorAssetStore != nullptr && entity.group == "World Editor") {
+                    Logger::Log("1");
+                    SDL_RenderCopyEx(
+                        worldEditorRenderer,
+                        worldEditorAssetStore->GetTexture(sprite.assetId),
+                        &srcRect,
+                        &dstRect,
+                        transform.rotation, // See documentation for this and the following 3 properties - the point where it rotates around
+                        NULL,               // defines center of rotation   
+                        sprite.flip        // A SDL_RendererFlip 
+                    );
+                } else {
+                    Logger::Log("2");
+
+                    SDL_RenderCopyEx(
+                        renderer, 
+                        assetStore->GetTexture(sprite.assetId),
+                        &srcRect,
+                        &dstRect,
+                        transform.rotation, // See documentation for this and the following 3 properties - the point where it rotates around
+                        NULL,               // defines center of rotation   
+                        sprite.flip        // A SDL_RendererFlip 
+                    );
+                }
+
+
 
                 // TODO: Draw the PNG texture 
             }

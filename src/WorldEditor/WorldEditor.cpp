@@ -34,6 +34,11 @@ void WorldEditor::Initialize() {
         SDL_WINDOW_RESIZABLE
     );
 
+    if (!window) {
+        printf("Error creating window: %s\n", SDL_GetError());
+        return;
+    }
+
     renderer = SDL_CreateRenderer(window, -1, 0);
 
     isRunning = true;
@@ -81,10 +86,13 @@ SDL_Renderer * WorldEditor::GetRenderer() {
 
 void WorldEditor::Run() {
 
-    while(isRunning) {
+    // while(isRunning) {
         Update();
         Render();
-    }
+    // }
+
+    while(1) SDL_RenderPresent(renderer);
+
 
 
 }
@@ -94,59 +102,16 @@ void WorldEditor::Update() {}
 
 void WorldEditor::Render() {
 
-
-       // Get Window size
-        SDL_DisplayMode displayMode;
-        SDL_GetCurrentDisplayMode(0, &displayMode);
-        windowWidth = displayMode.w;
-        windowHeight = displayMode.h;
-
-        // // Render all the tiles in the window
-        int timeToWait = MILLISECS_PER_FRAME_EDITOR  - ( SDL_GetTicks() - millisecsPreviousFrame);
-        //     Logger::Log("TIM TO WAIT: !" + std::to_string(timeToWait));
-
-        if (timeToWait > 0 && timeToWait <= MILLISECS_PER_FRAME_EDITOR) {
-
-            SDL_Delay(timeToWait);
-        }
-
-        Logger::Log("Render: "  + std::to_string(windowWidth));
-        // Logger::Log("World Editor Render!");
-
-        // The difference in ticks since the last frame, converted to seconds
-        double deltaTime = (SDL_GetTicks() - millisecsPreviousFrame) / 1000.0;
-
-        millisecsPreviousFrame = SDL_GetTicks();
-
         int * width = new int;
         int * height = new int; 
         SDL_GetWindowSize(window, width, height);  
 
 
         // // Render all the tiles in the window
-
-
-        camera.x = 0;
-        camera.y = 0;
-        // camera.w = 450;
-        // camera.h = 450;
-
-        camera.w = *width;
-        camera.h = *height;
-
-        // // int numRows = camera.h * 1.5 < 20 ? 20 : camera.h * 1.5;
-        // // int numCols = camera.w * 1.5 < 15 ? 15 : camera.w * 1.5;
-        // // int mapScale = 1;
-        // // int tileSizeHeight = static_cast<int>(camera.h / numRows * mapScale);
-        // // int tileSizeWidth = static_cast<int>(camera.w / numCols * mapScale);
-
-        // Logger::Log("Height: " + std::to_string(*height) + " Width: " + std::to_string(*width));
         int tileSize = 25;
         int numRows = *height / tileSize;
         int numCols = *width / tileSize;
         int mapScale = 1;
-
-        // Logger::Log("width: " + std::to_string(*width) + "  hegiht: " + std::to_string(*height));
 
         /*
 
@@ -186,10 +151,11 @@ void WorldEditor::Render() {
                         tileSize,
                         1000
                     );
-                    Logger::Log("Name: " + it->first + " X: " + std::to_string(x) + " Y: " + std::to_string(y));
+                    // Logger::Log("Name: " + it->first + " X: " + std::to_string(x) + " Y: " + std::to_string(y));
 
-                    it++;
                     tile.Group("World Editor");
+                    it++;
+
                     
                 }
 
