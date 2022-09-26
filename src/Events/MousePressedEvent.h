@@ -11,6 +11,11 @@
 #include <SDL2/SDL.h>
 #include <memory>
 
+// enum TypeOfPress = { up = "Up" , down = "down", null = "null"}
+
+// NOTE type of press up = 1, down = 0
+
+// JAKE - MAKE ANOTHER CLASS FOR MOUSEPRESSEDEVENT WITH THE WORLDEDITOR RUNNING, this will avoid problem of not being able to initialize 
 class MousePressedEvent : public Event {
         
     public:
@@ -19,7 +24,9 @@ class MousePressedEvent : public Event {
         std::unique_ptr<AssetStore>& assetStore;
         SDL_Renderer* renderer;
         std::unique_ptr<EventBus>& eventBus;
-        std::unique_ptr<WorldEditor>& worldEditor;
+        bool isWorldEditor;
+        int typeOfPress;
+        int windowID;
 
         MousePressedEvent(      
             sol::state& lua, 
@@ -27,8 +34,15 @@ class MousePressedEvent : public Event {
             std::unique_ptr<AssetStore>& assetStore, 
             SDL_Renderer* renderer,
             std::unique_ptr<EventBus>& eventBus,
-            std::unique_ptr<WorldEditor>& worldEditor
-        ) : lua(lua), registry(registry), assetStore(assetStore), renderer(renderer), eventBus(eventBus), worldEditor(worldEditor)  {}
+            bool isWorldEditor,
+            int typeOfPress,
+            int windowID = 0
+        ) : lua(lua), registry(registry), assetStore(assetStore), renderer(renderer), eventBus(eventBus), isWorldEditor(isWorldEditor),typeOfPress(typeOfPress),windowID(windowID)  {
+            // this->isWorldEditor = isWorldEditor;
+            // this->typeOfPress = typeOfPress;
+            // this->windowID = windowID;
+
+        }
 
 
 

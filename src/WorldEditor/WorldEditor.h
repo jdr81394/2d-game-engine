@@ -41,7 +41,7 @@ class WorldEditor {
             std::unique_ptr<EventBus>& eventBus
         );
         ~WorldEditor();
-        
+        std::unique_ptr<Registry> & GetRegistry();
         SDL_Window* GetWindow();
         SDL_Renderer * GetRenderer();
         void SetUp();

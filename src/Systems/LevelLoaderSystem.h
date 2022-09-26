@@ -49,7 +49,7 @@ class LevelLoaderSystem : public System {
             std::unique_ptr<AssetStore>& assetStore = event.assetStore;
             SDL_Renderer* renderer = event.renderer;
             std::unique_ptr<EventBus>& eventBus = event.eventBus;
-            std::unique_ptr<WorldEditor>& worldEditor = event.worldEditor;
+            bool isWorldEditor = event.isWorldEditor;
 
             int x, y;
             SDL_GetMouseState(&x, &y);
@@ -127,7 +127,7 @@ class LevelLoaderSystem : public System {
                         if(isClickInEntity) {
 
                             if(entity.HasTag("WorldEditorLink")) {
-                                if(!worldEditor) {
+                                if(!isWorldEditor) {
                                     eventBus->EmitEvent<WorldEditorStartEvent>();
                                 }
                             }

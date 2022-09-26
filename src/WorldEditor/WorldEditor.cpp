@@ -38,9 +38,15 @@ WorldEditor::WorldEditor(
 }
 WorldEditor::~WorldEditor() {}
 
+std::unique_ptr<Registry>& WorldEditor::GetRegistry() {
+    return registry;
+}
+
+
 SDL_Window* WorldEditor::GetWindow(){
     return window;
 }
+
 
 void WorldEditor::Initialize() {
     assetStore = std::make_unique<AssetStore>();
@@ -86,7 +92,6 @@ SDL_Renderer * WorldEditor::GetRenderer() {
 }
 
 void WorldEditor::Run() {
-
     while(isRunning) {
         Update();
         Render();
@@ -135,7 +140,7 @@ void WorldEditor::ArrangeAssetsOnWindow(ResizeWindowEvent & e) {
 
 
         // // Render all the tiles in the window
-        int tileSize = 25;
+        int tileSize = 32;
         int numRows = *height / tileSize;
         int numCols = *width / tileSize;
         int mapScale = 1;
@@ -169,6 +174,7 @@ void WorldEditor::ArrangeAssetsOnWindow(ResizeWindowEvent & e) {
                     Entity tile = registry->CreateEntity();
 
                     Logger::Log("entity id: " + std::to_string(tile.GetId()));
+
                     tile.AddComponent<TransformComponent>(
                         glm::vec2(x * (mapScale * tileSize), y * (mapScale * tileSize) ),
                         glm::vec2(mapScale, mapScale),
@@ -181,6 +187,14 @@ void WorldEditor::ArrangeAssetsOnWindow(ResizeWindowEvent & e) {
                         tileSize,
                         1000
                     );
+
+                    if(tile.GetId() > 56) {
+                        Logger::Log("entity transformComponent x: " + std::to_string(x * (mapScale * tileSize)));
+                        
+                        Logger::Log("entity transformComponent y: " + std::to_string(y * (mapScale * tileSize)));
+                        Logger::Log("entity id: " + std::to_string(tile.GetId()));
+                    }
+
 
                     tile.Group("World Editor");
                     it++;

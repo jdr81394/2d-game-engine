@@ -52,6 +52,14 @@ int Registry::GetNumEntities() {
     return numEntities;
 }
 
+void Registry::UpdateCurrentMouseOverWindowId(int id) {
+    currentMouseOverWindowId = id;
+}
+
+int Registry::GetCurrentMouseOverWindowId(){
+    return currentMouseOverWindowId;
+}
+
 Entity Registry::CreateEntity() {
     int entityId;
 

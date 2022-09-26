@@ -13,6 +13,7 @@ struct SpriteComponent {
     SDL_RendererFlip flip;
     bool isFixed;
     SDL_Rect srcRect;
+    bool isAttachedToMouse;
 
     SpriteComponent(
         std::string assetId = "", 
@@ -21,7 +22,8 @@ struct SpriteComponent {
         int zIndex = 0,
         bool isFixed = false,
         int srcRectX = 0, 
-        int srcRectY = 0
+        int srcRectY = 0,
+        bool isAttachedToMouse = false
         ) {
         this->assetId = assetId;
         this->width = width;
@@ -30,6 +32,7 @@ struct SpriteComponent {
         this->flip = SDL_FLIP_NONE;
         this->isFixed = isFixed;
         this->srcRect = { srcRectX, srcRectY, width, height };
+        this->isAttachedToMouse = isAttachedToMouse;
     }
 };
 

@@ -7,6 +7,7 @@
 #include "../Events/CollisionEvent.h"
 #include "../Events/ResizeWindowEvent.h"
 #include "../Events/WorldEditorStartEvent.h"
+#include "../Events/MousePressedWhileMapEditorEvent.h"
 #include "../WorldEditor/WorldEditor.h"
 #include <sol/sol.hpp>
 #include <thread>

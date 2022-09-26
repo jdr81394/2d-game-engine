@@ -336,6 +336,8 @@ class Registry {
                         // EntityId
         std::unordered_map<int, std::string> groupPerEntity;
 
+        int currentMouseOverWindowId;
+
 
         std::deque<int> freeIds;
 
@@ -389,6 +391,8 @@ class Registry {
 
         // Level Management
         void DeloadEverything();
+        void UpdateCurrentMouseOverWindowId(int id);
+        int GetCurrentMouseOverWindowId();
 };
 
 template <typename TComponent>

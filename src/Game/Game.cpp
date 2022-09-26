@@ -124,13 +124,21 @@ void Game::ProcessInput() {
                 }
                 break;
             case SDL_MOUSEBUTTONDOWN:
+                int windowID = sdlEvent.window.windowID;
+
                 if(worldEditor) {
                     // SDL_SetWindowInputFocus(worldEditor->GetWindow());
                     SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
                     SDL_RaiseWindow(worldEditor->GetWindow());
+                    eventBus->EmitEvent<MousePressedWhileMapEditorEvent>(lua, registry, assetStore,renderer, eventBus, worldEditor ? true : false, 0, worldEditor->GetRegistry(), windowID);
                 }
-                eventBus->EmitEvent<MousePressedEvent>(lua, registry, assetStore,renderer, eventBus, worldEditor);
+                else {
+                    eventBus->EmitEvent<MousePressedEvent>(lua, registry, assetStore,renderer, eventBus, worldEditor ? true : false, 0, windowID);
+
+                }
                 break;
+            
+
         }
     }
 }
@@ -209,6 +217,7 @@ void Game::Update() {
     registry->GetSystem<MovementSystem>().SubscribeToEvents(eventBus);
     registry->GetSystem<LevelLoaderSystem>().SubscribeToEvent(eventBus);
     eventBus->SubscribeToEvent<WorldEditorStartEvent>(this, &Game::InitializeWorldEditor);
+    registry->GetSystem<MouseSystem>().SubscribeToEvents(eventBus);
 
     // Update the registry to process the entities that are waiting to be created/deleted
     registry->Update();

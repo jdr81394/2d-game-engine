@@ -73,6 +73,20 @@ class RenderSystem: public System {
                 // Set the source rectangle to our original sprite texture
                 SDL_Rect srcRect = sprite.srcRect;
 
+                int dstRectX = 0;
+                int dstRectY = 0;
+
+
+                if(sprite.isAttachedToMouse) {
+                    SDL_GetMouseState(&dstRectX, &dstRectY);
+                }
+                else {
+                    dstRectX = static_cast<int>(transform.position.x - (sprite.isFixed ? 0 : camera.x) );
+                    dstRectY = static_cast<int>(transform.position.y - (sprite.isFixed ? 0 : camera.y) );
+                }
+
+
+
                 // Set the destination rectangle with the x,y position to be rendered
                 // Must take into account camera position now, because
                 // depending on camera view, 
@@ -80,8 +94,8 @@ class RenderSystem: public System {
                 // to subtract where my camera is
                 // so if the camera moves to the right, everything must move to the left
                 SDL_Rect dstRect = {
-                    static_cast<int>(transform.position.x - (sprite.isFixed ? 0 : camera.x) ),
-                    static_cast<int>(transform.position.y - (sprite.isFixed ? 0 : camera.y) ),
+                    dstRectX,
+                    dstRectY,
                     static_cast<int>(sprite.width * transform.scale.x),
                     static_cast<int>(sprite.height * transform.scale.y)
                 };
