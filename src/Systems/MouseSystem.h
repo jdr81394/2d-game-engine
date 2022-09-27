@@ -36,8 +36,55 @@ class MouseSystem : public System {
 
         void MotionToOtherWindow(MouseMotionToOtherWindowEvent& event) {
 
-            // Get anything thats being dragged. Anything that's being dragged will be in the render system
-    
+            // Get anything thats being dragged. Anything that's being dragged will be in the render system, must switch registries.
+            // Get the registry of the initial window
+            int previousWindowId = event.previousWindowId;
+
+            // If id == 1, then its the main screen, if id == 2 it equals the registry screen
+            std::unique_ptr<Registry> & previousRegistry = previousWindowId == 1 ? event.registry : event.worldEditorRegistry;
+            std::unique_ptr<Registry> & newRegistry = previousWindowId == 1 ? event.worldEditorRegistry : event.registry;
+
+            // Get all the entities that are being dragged, normally should only be one. Do this by looping through the system of render of the registry
+            
+             
+            
+            for (Entity entity : previousRegistry->GetSystem<RenderSystem>().GetSystemEntities()) {
+                SpriteComponent spriteComponent = entity.GetComponent<SpriteComponent>();
+                Logger::Log("outside of here");
+
+                if(spriteComponent.isAttachedToMouse) {
+                    
+                    Logger::Log("in here");
+                    TransformComponent transformComponent = entity.GetComponent<TransformComponent>();
+
+                    // Should only be two components while dragging tiles. Let's create a new entity in the new windows registry
+                    Entity tile = newRegistry->CreateEntity();
+                    
+                    tile.AddComponent<TransformComponent>(
+                        transformComponent.position,
+                        transformComponent.scale,
+                        transformComponent.rotation
+                    );
+
+                    tile.AddComponent<SpriteComponent>(
+                        spriteComponent.assetId,
+                        spriteComponent.width,
+                        spriteComponent.height,
+                        spriteComponent.zIndex,
+                        spriteComponent.srcRect.x,
+                        spriteComponent.srcRect.y,
+                        spriteComponent.isAttachedToMouse
+                    );
+
+                    // Now kill this old entity on the old registry
+                    entity.Kill();
+
+                }
+            }
+
+
+            
+
         }
 
         void OnMapEditorKeyPress(MousePressedWhileMapEditorEvent& event) {
