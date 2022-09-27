@@ -96,10 +96,11 @@ void Game::ProcessInput() {
     SDL_Event sdlEvent;
     while (SDL_PollEvent(&sdlEvent)) {
         switch (sdlEvent.type) {
-            case SDL_QUIT:
+            case SDL_QUIT: {
                 isRunning = false;
                 break;
-            case SDL_KEYDOWN:
+            }
+            case SDL_KEYDOWN: {
                 if (sdlEvent.key.keysym.sym == SDLK_ESCAPE) {
                     isRunning = false;
                 }
@@ -108,7 +109,8 @@ void Game::ProcessInput() {
                 }
                 eventBus->EmitEvent<KeyPressedEvent>(sdlEvent.key.keysym.sym);
                 break;
-            case SDL_WINDOWEVENT:
+            }
+            case SDL_WINDOWEVENT:{
                 if(sdlEvent.window.event == SDL_WINDOWEVENT_RESIZED) {
                     // 1 is for main
                     // 2 is for world editor
@@ -123,7 +125,9 @@ void Game::ProcessInput() {
 
                 }
                 break;
-            case SDL_MOUSEBUTTONDOWN:
+            }
+
+            case SDL_MOUSEBUTTONDOWN: {
                 int windowID = sdlEvent.window.windowID;
 
                 if(worldEditor) {
@@ -137,7 +141,29 @@ void Game::ProcessInput() {
 
                 }
                 break;
-            
+            }
+                
+            case SDL_MOUSEMOTION: {
+                int windowID = sdlEvent.window.windowID;
+                
+                int currentWindowId = registry->GetCurrentMouseOverWindowId();
+
+                // If currentWindowId does not match the windowID that this mouse motion occurred in, do something
+                if(currentWindowId != windowID) {
+                    // If worldEditor exists, then handle it
+                    if(worldEditor) {
+                        // Emit an event - If there is currently a entity being dragged switch registries
+                        // windowID will become the newCurrentWindowID
+                        eventBus->EmitEvent<MouseMotionToOtherWindowEvent>(currentWindowId, windowID, registry, worldEditor->GetRegistry());
+                    }
+
+                }
+
+                Logger::Log("Event: " + std::to_string(windowID));
+
+                break;
+            }
+
 
         }
     }

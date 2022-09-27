@@ -5,6 +5,7 @@
 #include "../Components/SpriteComponent.h"
 #include "../Events/MousePressedEvent.h"
 #include "../Events/MousePressedWhileMapEditorEvent.h"
+#include "../Events/MouseMotionToOtherWindowEvent.h"
 #include "../ECS/ECS.h"
 #include "../Systems/RenderSystem.h"
 #include <string>
@@ -24,11 +25,19 @@ class MouseSystem : public System {
         void SubscribeToEvents(std::unique_ptr<EventBus>& eventBus) {
             eventBus->SubscribeToEvent<MousePressedEvent>(this, &MouseSystem::OnKeyPress);
             eventBus->SubscribeToEvent<MousePressedWhileMapEditorEvent>(this, &MouseSystem::OnMapEditorKeyPress);
+            eventBus->SubscribeToEvent<MouseMotionToOtherWindowEvent>(this, &MouseSystem::MotionToOtherWindow);
+
         };
 
 
         void OnKeyPress(MousePressedEvent& event) {
 
+        }
+
+        void MotionToOtherWindow(MouseMotionToOtherWindowEvent& event) {
+
+            // Get anything thats being dragged. Anything that's being dragged will be in the render system
+    
         }
 
         void OnMapEditorKeyPress(MousePressedWhileMapEditorEvent& event) {
