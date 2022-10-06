@@ -18,6 +18,9 @@
 #include "../Systems/RenderHealthSystem.h"
 #include "../Systems/RenderHealthTextSystem.h"
 #include "../Systems/ScriptSystem.h"
+#include <imgui/imgui.h>
+#include <imgui/imgui_sdl.h>
+#include <imgui/imgui_impl_sdl.h>       // Handles the data integration with the events of the imgui_sdl
 #include <SDL2/SDL.h>
 #include <glm/glm.hpp>
 #include <iostream>
@@ -77,6 +80,11 @@ void Game::Initialize() {
     // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
     isRunning = true;
 
+    // Initialize imGui Context
+    ImGui::CreateContext();
+
+    ImGuiSDL::Initialize(renderer, windowWidth, windowHeight);
+
     // Initialize the camera view with the entire screen area
     camera.x = 0;
     camera.y = 0;
@@ -94,6 +102,21 @@ void Game::Initialize() {
 void Game::ProcessInput() {
     SDL_Event sdlEvent;
     while (SDL_PollEvent(&sdlEvent)) {
+        // ImGui SDL input
+        ImGui_ImplSDL2_ProcessEvent(&sdlEvent);
+        ImGuiIO io = ImGui::GetIO();            // processes io including mouse clicks within the context of gui
+
+        int mouseX, mouseY;
+
+        const int buttons = SDL_GetMouseState(&mouseX, &mouseY);
+
+        // ImGui has its own versino of vec2 called Imec2
+        Logger::Log("Buttons : " + std::to_string(buttons));
+        
+        io.MousePos = ImVec2(mouseX, mouseY);
+        io.MouseDown[0] = buttons & SDL_BUTTON(SDL_BOTTOM_LEFT);
+        io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BOTTOM_RIGHT);
+
         switch (sdlEvent.type) {
             case SDL_QUIT:
                 isRunning = false;
@@ -194,7 +217,12 @@ void Game::Render() {
     registry->GetSystem<RenderHealthTextSystem>().Update(renderer, assetStore, camera);
 
     if (isDebug) {
+   
         registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
+        ImGui::NewFrame();
+        ImGui::ShowDemoWindow();
+        ImGui::Render();                    // ImGui::Render is needed for some reason. Crashes without this if I try to do ImGuiSDL
+        ImGuiSDL::Render(ImGui::GetDrawData());
     }
 
     SDL_RenderPresent(renderer);
@@ -210,6 +238,8 @@ void Game::Run() {
 }
 
 void Game::Destroy() {
+    ImGuiSDL::Deinitialize();
+    ImGui::DestroyContext();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
