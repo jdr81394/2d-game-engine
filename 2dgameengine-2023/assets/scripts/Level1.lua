@@ -20,7 +20,7 @@ Level = {
         [0] =
         { type = "texture", id = "tilemap-texture-day",         file = "./assets/tilemaps/jungle.png" },
         { type = "texture", id = "tilemap-texture-night",       file = "./assets/tilemaps/jungle-night.png" },
-        { type = "texture", id = "chopper-texture",             file = "./assets/images/chopper-spritesheet.png" },
+        { type = "texture", id = "chopper-texture",             file = "./assets/images/chopper-green-spritesheet.png" },
         { type = "texture", id = "su27-texture",                file = "./assets/images/su27-spritesheet.png" },
         { type = "texture", id = "f22-texture",                 file = "./assets/images/f22-spritesheet.png" },
         { type = "texture", id = "fw190-texture",               file = "./assets/images/fw190-spritesheet.png" },
