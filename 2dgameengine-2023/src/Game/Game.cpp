@@ -15,11 +15,12 @@
 #include "../Systems/ProjectileLifecycleSystem.h"
 #include "../Systems/RenderHealthSystem.h"
 #include "../Systems/RenderHealthTextSystem.h"
+#include "../Systems/RenderGUISystem.h"
 #include "../Systems/ScriptSystem.h"
 #include <SDL.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_sdl.h>
-//#include <imgui/imgui_impl_sdl2.h>
+#include <imgui/imgui_impl_sdl.h>
 #include <glm/glm.hpp>
 #include <iostream>
 
@@ -94,22 +95,21 @@ void Game::ProcessInput() {
     while (SDL_PollEvent(&sdlEvent)) {
 
         // ImGui SDL input
-        IMGUI_CHECKVERSION();
-        // ImGui_ImplSDL2_ProcessEvent(&sdlEvent);
-        // ImGuiIO & io = ImGui::GetIO();
+        ImGui_ImplSDL2_ProcessEvent(&sdlEvent);
+        ImGuiIO & io = ImGui::GetIO();
 
         int mouseX, mouseY;
 
         // SDL function that gets the mouse state and puts it in these variables
-        // const int buttons = SDL_GetMouseState(&mouseX, &mouseY);
+        const int buttons = SDL_GetMouseState(&mouseX, &mouseY);
 
         // ImGUI has it's own system for keeping track of the mouse position
         // The MousePos property keeps track of it and it takes an ImVec2() type
-        // io.MousePos = ImVec2(mouseX, mouseY);
+        io.MousePos = ImVec2(mouseX, mouseY);
 
         // Bitwise operation to tell us what mouse is down. 
-        // io.MouseDown[0] = buttons & SDL_BUTTON(SDL_BUTTON_LEFT);
-        //io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT);
+        io.MouseDown[0] = buttons & SDL_BUTTON(SDL_BUTTON_LEFT);
+        io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT);
 
 
         
@@ -147,7 +147,9 @@ void Game::Setup() {
     registry->AddSystem<RenderTextSystem>();
     registry->AddSystem<RenderHealthSystem>();
     registry->AddSystem<RenderHealthTextSystem>();
+    registry->AddSystem<RenderGUISystem>();
     registry->AddSystem<ScriptSystem>();
+
 
     // Create the bindings between C++ and Lua
     registry->GetSystem<ScriptSystem>().CreateLuaBindings(lua);
@@ -206,12 +208,7 @@ void Game::Render() {
 
     if (isDebug) {
         registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
-        ImGui::NewFrame();
-        ImGui::ShowDemoWindow();
-        // Must render the context
-        ImGui::Render();
-        // Then must render the actual context onto the screen...?
-        ImGuiSDL::Render(ImGui::GetDrawData());
+        registry->GetSystem<RenderGUISystem>().Update(registry, camera);
     }
 
     SDL_RenderPresent(renderer);
