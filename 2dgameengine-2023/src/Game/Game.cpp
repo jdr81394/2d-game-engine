@@ -15,8 +15,12 @@
 #include "../Systems/ProjectileLifecycleSystem.h"
 #include "../Systems/RenderHealthSystem.h"
 #include "../Systems/RenderHealthTextSystem.h"
+#include "../Systems/RenderGUISystem.h"
 #include "../Systems/ScriptSystem.h"
 #include <SDL.h>
+#include <imgui/imgui.h>
+#include <imgui/imgui_sdl.h>
+#include <imgui/imgui_impl_sdl.h>
 #include <glm/glm.hpp>
 #include <iostream>
 
@@ -75,6 +79,10 @@ void Game::Initialize() {
     // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
     isRunning = true;
 
+    // Initialize the ImGui Context 
+    ImGui::CreateContext();
+    ImGuiSDL::Initialize(renderer, windowWidth, windowHeight);
+
     // Initialize the camera view with the entire screen area
     camera.x = 0;
     camera.y = 0;
@@ -85,6 +93,27 @@ void Game::Initialize() {
 void Game::ProcessInput() {
     SDL_Event sdlEvent;
     while (SDL_PollEvent(&sdlEvent)) {
+
+        // ImGui SDL input
+        ImGui_ImplSDL2_ProcessEvent(&sdlEvent);
+        ImGuiIO & io = ImGui::GetIO();
+
+        int mouseX, mouseY;
+
+        // SDL function that gets the mouse state and puts it in these variables
+        const int buttons = SDL_GetMouseState(&mouseX, &mouseY);
+
+        // ImGUI has it's own system for keeping track of the mouse position
+        // The MousePos property keeps track of it and it takes an ImVec2() type
+        io.MousePos = ImVec2(mouseX, mouseY);
+
+        // Bitwise operation to tell us what mouse is down. 
+        io.MouseDown[0] = buttons & SDL_BUTTON(SDL_BUTTON_LEFT);
+        io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT);
+
+
+        
+        // Handle core SDL events (close window, key pressed, etc.)
         switch (sdlEvent.type) {
             case SDL_QUIT:
                 isRunning = false;
@@ -118,7 +147,9 @@ void Game::Setup() {
     registry->AddSystem<RenderTextSystem>();
     registry->AddSystem<RenderHealthSystem>();
     registry->AddSystem<RenderHealthTextSystem>();
+    registry->AddSystem<RenderGUISystem>();
     registry->AddSystem<ScriptSystem>();
+
 
     // Create the bindings between C++ and Lua
     registry->GetSystem<ScriptSystem>().CreateLuaBindings(lua);
@@ -177,6 +208,7 @@ void Game::Render() {
 
     if (isDebug) {
         registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
+        registry->GetSystem<RenderGUISystem>().Update(registry, camera);
     }
 
     SDL_RenderPresent(renderer);
@@ -192,6 +224,8 @@ void Game::Run() {
 }
 
 void Game::Destroy() {
+    ImGuiSDL::Deinitialize();
+    ImGui::DestroyContext();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
