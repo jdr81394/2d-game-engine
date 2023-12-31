@@ -17,7 +17,7 @@
 #include "../Systems/RenderHealthTextSystem.h"
 #include "../Systems/RenderGUISystem.h"
 #include "../Systems/ScriptSystem.h"
-#include "../Systems/WorldEditorSystem.h"
+#include "../WorldEditor/WorldEditor.h"
 #include "../Events/LeftMouseClickedEvent.h"
 #include "../Events/RightMouseClickedEvent.h"
 
@@ -195,8 +195,9 @@ void Game::Setup() {
     }
     else {
         // Do world editor stuff
-        registry->AddSystem<WorldEditorSystem>(registry.get()); // THIS GETS RAW POINTER, if the unique pointer is destroyed for whatever reason this will be dangling
+        //registry->AddSystem<WorldEditorSystem>(registry.get()); // THIS GETS RAW POINTER, if the unique pointer is destroyed for whatever reason this will be dangling
         // Determine the tilemap first
+        worldEditor = new WorldEditor(registry);
         PrepAssetStoreForWorldEditor();
    
 
@@ -294,7 +295,7 @@ void Game::Update() {
     registry->GetSystem<KeyboardControlSystem>().SubscribeToEvents(eventBus);
     registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
     registry->GetSystem<MovementSystem>().SubscribeToEvents(eventBus);
-    if (isWorldEditor) registry->GetSystem<WorldEditorSystem>().SubscribeToEvents(eventBus);
+    if (isWorldEditor && worldEditor != nullptr) worldEditor->SubscribeToEvents(eventBus);
 
     // Update the registry to process the entities that are waiting to be created/deleted
     registry->Update();
@@ -315,8 +316,8 @@ void Game::Render() {
     SDL_RenderClear(renderer);
 
 
-    if (isWorldEditor) {
-        registry->GetSystem<WorldEditorSystem>().Update(renderer, assetStore, camera, window);
+    if (isWorldEditor && worldEditor != nullptr) {
+       worldEditor->Update(renderer, assetStore, camera, window);
     }
     // TODO: Render game objects...
     registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);

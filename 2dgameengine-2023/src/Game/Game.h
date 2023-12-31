@@ -4,6 +4,7 @@
 #include "../ECS/ECS.h"
 #include <SDL.h>
 #include "../AssetStore/AssetStore.h"
+#include "../WorldEditor/WorldEditor.h"
 #include "../Events/CollisionEvent.h"
 #include <sol/sol.hpp>
 
@@ -19,6 +20,7 @@ class Game {
         SDL_Window* window;
         SDL_Renderer* renderer;
         SDL_Rect camera;
+        WorldEditor * worldEditor;
 
         sol::state lua;
         

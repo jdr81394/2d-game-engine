@@ -432,7 +432,9 @@
     <ClInclude Include="src\Systems\RenderSystem.h" />
     <ClInclude Include="src\Systems\RenderTextSystem.h" />
     <ClInclude Include="src\Systems\ScriptSystem.h" />
-    <ClInclude Include="src\Systems\WorldEditorSystem.h" />
+    <ClInclude Include="src\WorldEditor\OrderedTilesDataStructure.h" />
+    <ClInclude Include="src\WorldEditor\TileMap.h" />
+    <ClInclude Include="src\WorldEditor\WorldEditor.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\scripts\Level1.lua" />
@@ -586,6 +588,8 @@
     <ClCompile Include="src\Game\LevelLoader.cpp" />
     <ClCompile Include="src\Logger\Logger.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\WorldEditor\OrderedTilesDataStructure.cpp" />
+    <ClCompile Include="src\WorldEditor\WorldEditor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="libs\lua\liblua53.a" />
