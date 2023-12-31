@@ -14,6 +14,7 @@ class Game {
     private:
         bool isRunning;
         bool isDebug;
+        bool isWorldEditor;
         int millisecsPreviousFrame = 0;
         SDL_Window* window;
         SDL_Renderer* renderer;
@@ -27,6 +28,7 @@ class Game {
     public:
         Game();
         ~Game();
+        void PrepAssetStoreForWorldEditor();
         void Initialize();
         void Run();
         void Setup();

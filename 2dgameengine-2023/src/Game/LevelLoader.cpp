@@ -79,7 +79,7 @@ void LevelLoader::LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& re
     for (int y = 0; y < mapNumRows; y++) {
         for (int x = 0; x < mapNumCols; x++) {
             char ch;
-            mapFile.get(ch);
+            mapFile.get(ch);        // the double digit just represents its xy ( or yx ) axis. so 21 is really 3 down ( because 0,1,2) and 2 right ( because 0, 1)
             int srcRectY = std::atoi(&ch) * tileSize;
             mapFile.get(ch);
             int srcRectX = std::atoi(&ch) * tileSize;

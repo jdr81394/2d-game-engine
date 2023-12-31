@@ -99,8 +99,8 @@ Level = {
     tilemap = {
         map_file = "./assets/tilemaps/jungle.map",
         texture_asset_id = map_tilemap_asset_id,
-        num_rows = 20,
-        num_cols = 25,
+        num_rows = 20,      -- Corresponds to the .map file
+        num_cols = 25,      -- Corredponds to the .map file
         tile_size = 32,
         scale = 2.0
     },

@@ -28,9 +28,11 @@ SDL_Texture* AssetStore::GetTexture(const std::string& assetId)  {
     return textures[assetId];
 };
 
+
+
 void AssetStore::AddTexture(SDL_Renderer* renderer, const std::string& assetId, const std::string& filePath) {
     SDL_Surface* surface = IMG_Load(filePath.c_str());
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, surface->w, surface->h);
 
     // Created Texture from surface. Now we can free that surface
     SDL_FreeSurface(surface);
@@ -41,6 +43,30 @@ void AssetStore::AddTexture(SDL_Renderer* renderer, const std::string& assetId, 
     Logger::Log("New texture added to the Asset Store with id = "  + assetId);
 
 };
+
+SDL_Texture* AssetStore::CopyTexture(SDL_Renderer* renderer, SDL_Texture* sourceTexture, SDL_Window* window) {
+    // Get the width and height of the source texture
+    int width, height;
+    SDL_QueryTexture(sourceTexture, NULL, NULL, &width, &height);
+
+    // Create a new texture with the same format and access as the source texture
+    SDL_Texture* destinationTexture = SDL_CreateTexture(renderer, SDL_GetWindowPixelFormat(window), SDL_TEXTUREACCESS_TARGET, width, height);
+
+    // Set the destination texture as the render target
+    SDL_SetRenderTarget(renderer, destinationTexture);
+
+    // Clear the render target
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+    SDL_RenderClear(renderer);
+
+    // Copy the content of the source texture to the destination texture
+    SDL_RenderCopy(renderer, sourceTexture, NULL, NULL);
+
+    // Reset the render target to the default
+    SDL_SetRenderTarget(renderer, NULL);
+
+    return destinationTexture;
+}
 
 
 void AssetStore::AddFont(const std::string& assetId, const std::string& filePath, int fontSize) {

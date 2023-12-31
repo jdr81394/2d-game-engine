@@ -42,6 +42,7 @@ class Entity {
         int id;
 
     public:
+        Entity() = default;
         Entity(int id): id(id) {};
         Entity(const Entity& entity) = default;
         int GetId() const;
@@ -438,9 +439,9 @@ void Registry::AddComponent(Entity entity, TArgs&& ...args) {
 
     entityComponentSignatures[entityId].set(componentId);
 
-    Logger::Log("Component id = " + std::to_string(componentId) + " was added to entity id " + std::to_string(entityId));
+    //Logger::Log("Component id = " + std::to_string(componentId) + " was added to entity id " + std::to_string(entityId));
 
-    std::cout << "COMPONENT ID = " << componentId << " ---> POOL SIZE: " << componentPool->GetSize() << std::endl;
+    //std::cout << "COMPONENT ID = " << componentId << " ---> POOL SIZE: " << componentPool->GetSize() << std::endl;
 }
 
 template <typename TComponent>
@@ -455,7 +456,7 @@ void Registry::RemoveComponent(Entity entity) {
     // Set this component signature for that entity to false
 	entityComponentSignatures[entityId].set(componentId, false);
     
-    Logger::Log("Component id = " + std::to_string(componentId) + " was removed from entity id " + std::to_string(entityId));
+   // Logger::Log("Component id = " + std::to_string(componentId) + " was removed from entity id " + std::to_string(entityId));
 }
 
 template <typename TComponent>

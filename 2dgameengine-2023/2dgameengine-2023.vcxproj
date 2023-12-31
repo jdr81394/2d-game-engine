@@ -411,6 +411,9 @@
     <ClInclude Include="src\EventBus\EventBus.h" />
     <ClInclude Include="src\Events\CollisionEvent.h" />
     <ClInclude Include="src\Events\KeyPressedEvent.h" />
+    <ClInclude Include="src\Events\LeftMouseClickedEvent.h" />
+    <ClInclude Include="src\Events\LeftMouseHeldDownEvent.h" />
+    <ClInclude Include="src\Events\RightMouseClickedEvent.h" />
     <ClInclude Include="src\Game\Game.h" />
     <ClInclude Include="src\Game\LevelLoader.h" />
     <ClInclude Include="src\Logger\Logger.h" />
@@ -429,6 +432,7 @@
     <ClInclude Include="src\Systems\RenderSystem.h" />
     <ClInclude Include="src\Systems\RenderTextSystem.h" />
     <ClInclude Include="src\Systems\ScriptSystem.h" />
+    <ClInclude Include="src\Systems\WorldEditorSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\scripts\Level1.lua" />
