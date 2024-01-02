@@ -30,17 +30,44 @@ SDL_Texture* AssetStore::GetTexture(const std::string& assetId)  {
 
 
 
-void AssetStore::AddTexture(SDL_Renderer* renderer, const std::string& assetId, const std::string& filePath) {
+void AssetStore::AddTexture(SDL_Renderer* renderer, const std::string& assetId, const std::string& filePath, bool isWorldEditor) {
+    Logger::Log("file path: " + filePath);
     SDL_Surface* surface = IMG_Load(filePath.c_str());
-    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, surface->w, surface->h);
 
-    // Created Texture from surface. Now we can free that surface
-    SDL_FreeSurface(surface);
+    if (surface == NULL) {
 
-    // Add the texture to the map
-    textures.emplace(assetId, texture);
+        Logger::Err("There was an error on loading this surface: " + filePath);
+    }
+    else {
 
-    Logger::Log("New texture added to the Asset Store with id = "  + assetId);
+        SDL_Texture* texture;
+        if (isWorldEditor) {
+            texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, surface->w, surface->h);
+
+        }
+        else {
+            texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+        }
+
+        if (texture == NULL) {
+        
+            Logger::Err("Texture was null for this file path: " + filePath);
+            delete texture;
+        }
+        else {
+            // Add the texture to the map
+            textures.emplace(assetId, texture);
+
+            Logger::Log("New texture added to the Asset Store with id = " + assetId);
+        }
+        }
+
+        // Created Texture from surface. Now we can free that surface
+        SDL_FreeSurface(surface);
+
+
+
 
 };
 

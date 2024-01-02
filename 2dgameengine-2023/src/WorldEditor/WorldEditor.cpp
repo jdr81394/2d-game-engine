@@ -126,6 +126,7 @@ void WorldEditor::Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& as
 
 			ImTextureID textureId = it->second;
 
+
 			ImVec2 size = ImVec2(tileMap.tileSize, tileMap.tileSize); // ImVec2& - size - width and height
 			ImVec2 uv0; // default ImVec2& - top left position - top left corner of the image 
 			ImVec2 uv1; // default ImVec2& -bottom right position - bottom right corner of the image
@@ -158,7 +159,7 @@ void WorldEditor::Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& as
 					mouseSelectedTile = NULL;
 				}
 				mouseSelectedTile = registry->CreateEntity();
-			};
+			}
 
 			if (mouseSelectedTile != NULL) {
 
@@ -335,11 +336,49 @@ void WorldEditor::GenerateFinalWorldMap(SDL_Renderer* renderer, std::unique_ptr<
 								x = count;
 								y = 0;
 							}
-							else {
-								x = count % 9;		// remainder
-								y = floor(count / 9);
-
+							else if (count >= 10 && count < 20){
+								// how many times does 10 go into the count?
+								
+								x = count - 10;
+								y = 1;
 							}
+							else if (count >= 20 && count < 30) {
+								// how many times does 10 go into the count?
+
+								x = count - 20;
+								y = 2;
+							}
+							else if (count >= 30 && count < 40) {
+								// how many times does 10 go into the count?
+
+								x = count - 30;
+								y = 3;
+							}
+							else if (count >= 40 && count < 50) {
+								// how many times does 10 go into the count?
+
+								x = count - 40;
+								y = 4;
+							}
+							else if (count >= 50 && count < 60) {
+								// how many times does 10 go into the count?
+
+								x = count - 50;
+								y = 5;
+							}
+							else if (count >= 60 && count < 70) {
+								// how many times does 10 go into the count?
+
+								x = count - 60;
+								y = 6;
+							}
+
+							
+							else {
+								Logger::Err("Count for number of tiles was too great! Here is the count: " + std::to_string(count));
+							}
+
+							// Will break after this was just a fast way to code this properly.
 
 							/* 4d step: */
 
@@ -411,6 +450,74 @@ void WorldEditor::GenerateFinalWorldMap(SDL_Renderer* renderer, std::unique_ptr<
 	}
 
 	SDL_SetRenderTarget(renderer, NULL);
+
+
+
+
+	/*
+		5. Generate the script file
+		5a. For each assetId link it to the file - DONE with the assetIdToFilePath
+		5b. Get each filePath that is important
+		5c. Put it into the lua file
+
+	*/
+
+	std::string final = "";
+
+	final += "Level = {\n";	// open level bracket
+	final += "\tassets = {\n";// open asset
+	final += "\t\t[0] = \n";		// asset first index
+	final += "\t\t{ type = \"texture\" , id = \"./assets/tilemaps/test\",  file = \"./assets/tilemaps/test.png\" }\n";
+	// assets 
+	//for (auto it = allAssetIds.begin(); it != allAssetIds.end(); ++it) {
+	//	
+	//	std::string line = "\t\t{ type = \"texture\" , id = \"./assets/tilemaps/test\",";
+	//	/*std::string filePath = assetIdToFilePath[*it];*/
+	//	std::string filePath = "./assets/tilemaps/test";
+	//	if (filePath.empty()) {
+	//		continue;
+	//	}
+
+	//	line += " file = \"./assets/tilemaps/test.png\" }";
+
+	//	if (std::next(it) != allAssetIds.end()) {
+	//		line += ",";
+	//	}
+
+	//	line += "\n";
+	//	final += line;
+
+	//	
+	//}
+
+	final += "\t}\n,";	// close assets
+	final += "\ttilemap = {\n";	// open tile map
+	final += "\t\tmap_file=\"./assets/tilemaps/test.map\",\n";
+	final += "\t\ttexture_asset_id=\"./assets/tilemaps/test\",\n";
+	final += "\t\tnum_rows=" + std::to_string(tileMap.numRows) + ",\n";
+	final += "\t\tnum_cols=" + std::to_string(tileMap.numCols) + ",\n";
+	final += "\t\ttile_size=32,\n";
+	final += "\t\tscale=2.0\n";
+	final += "\t},\n"; // close tile map
+
+	final += "\tentities = {\n";	// open entities
+	final += "\t\t[0] = {}\n";	// JAKE - add entities in here later.
+	final += "\t}\n"; // close entities
+	final += "}"; // close level 
+
+	Logger::Log("FINAL : " + final + " END");
+
+	// Lua Path
+	std::string s3 = R"(C:\Users\17329\source\repos\2dgameengine-2023\2dgameengine-2023\assets\scripts\test.lua)";
+	std::ofstream luaOutputFile;
+	luaOutputFile.open(s3, std::ios::trunc);
+	if (luaOutputFile.is_open()) {
+		luaOutputFile << final;
+	}
+	else {
+		Logger::Err("Lua file could not be generated");
+	}
+	luaOutputFile.close();
 
 
 

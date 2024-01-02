@@ -439,9 +439,9 @@ void Registry::AddComponent(Entity entity, TArgs&& ...args) {
 
     entityComponentSignatures[entityId].set(componentId);
 
-    //Logger::Log("Component id = " + std::to_string(componentId) + " was added to entity id " + std::to_string(entityId));
+    Logger::Log("Component id = " + std::to_string(componentId) + " was added to entity id " + std::to_string(entityId));
 
-    //std::cout << "COMPONENT ID = " << componentId << " ---> POOL SIZE: " << componentPool->GetSize() << std::endl;
+    std::cout << "COMPONENT ID = " << componentId << " ---> POOL SIZE: " << componentPool->GetSize() << std::endl;
 }
 
 template <typename TComponent>

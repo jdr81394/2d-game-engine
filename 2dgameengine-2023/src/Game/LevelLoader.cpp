@@ -23,9 +23,11 @@ LevelLoader::~LevelLoader() {
     Logger::Log("LevelLoader destructor called!");    
 }
 
-void LevelLoader::LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& registry, const std::unique_ptr<AssetStore>& assetStore, SDL_Renderer* renderer, int levelNumber) {
+void LevelLoader::LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& registry, const std::unique_ptr<AssetStore>& assetStore, SDL_Renderer* renderer, int levelNumber, bool isWorldEditor) {
     // This checks the syntax of our script, but it does not execute the script
-    sol::load_result script = lua.load_file("./assets/scripts/Level" + std::to_string(levelNumber) + ".lua");
+    //sol::load_result script = lua.load_file("./assets/scripts/Level" + std::to_string(levelNumber) + ".lua");
+    sol::load_result script = lua.load_file("./assets/scripts/test.lua");
+
     if (!script.valid()) {
         sol::error err = script;
         std::string errorMessage = err.what();
@@ -34,7 +36,8 @@ void LevelLoader::LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& re
     }
 
     // Executes the script using the Sol state
-    lua.script_file("./assets/scripts/Level" + std::to_string(levelNumber) + ".lua");
+//    lua.script_file("./assets/scripts/Level" + std::to_string(levelNumber) + ".lua");
+    lua.script_file("./assets/scripts/test.lua");
 
     // Read the big table for the current level
     sol::table level = lua["Level"];
@@ -53,9 +56,10 @@ void LevelLoader::LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& re
         sol::table asset = assets[i];
         std::string assetType = asset["type"];
         std::string assetId = asset["id"];
+        std::string assetFile = asset["file"];
         if (assetType == "texture") {
-            assetStore->AddTexture(renderer, assetId, asset["file"]);
-            Logger::Log("A new texture asset was added to the asset store, id: " + assetId);
+            assetStore->AddTexture(renderer, assetId, asset["file"], isWorldEditor);
+            Logger::Log("A new texture asset was added to the asset store, id: " + assetId + " and heres the file: " + assetFile);
         }
         if (assetType == "font") {
             assetStore->AddFont(assetId, asset["file"], asset["font_size"]);
@@ -74,19 +78,44 @@ void LevelLoader::LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& re
     int mapNumCols = map["num_cols"];
     int tileSize = map["tile_size"];
     double mapScale = map["scale"];
+
+    // World Editor test, see if its a null then skip over
+    const char* testCh = "X";
+
     std::fstream mapFile;
     mapFile.open(mapFilePath);
     for (int y = 0; y < mapNumRows; y++) {
         for (int x = 0; x < mapNumCols; x++) {
             char ch;
-            mapFile.get(ch);        // the double digit just represents its xy ( or yx ) axis. so 21 is really 3 down ( because 0,1,2) and 2 right ( because 0, 1)
-            int srcRectY = std::atoi(&ch) * tileSize;
-            mapFile.get(ch);
-            int srcRectX = std::atoi(&ch) * tileSize;
+            int srcRectY{};         // it is initialized to 0 in case the map reads X
+            int srcRectX{};
+            mapFile.get(ch);        // the double digit just represents its xy ( or yx ) axis. so 21 is really 3 down ( because 0,1,2) and 2 right ( because 0, 1
+
+            // If this is "X" then its a null value and we should just skip over it or give it some default value.
+            // Jake TEST LATER
+            if (ch != *testCh) {
+               
+                srcRectY = std::atoi(&ch) * tileSize;
+                mapFile.get(ch); // Get the next value
+                srcRectX = std::atoi(&ch) * tileSize;
+            }
+            else {
+                Logger::Err("ENCOUNTEREDD XX");
+            }
+
+            //mapFile.get(ch);        // the double digit just represents its xy ( or yx ) axis. so 21 is really 3 down ( because 0,1,2) and 2 right ( because 0, 1)
+            //int srcRectY = std::atoi(&ch) * tileSize;
+            //mapFile.get(ch);
+            //int srcRectX = std::atoi(&ch) * tileSize;
+           
             mapFile.ignore();
+
+            Logger::Log("Map texture adsset id: " + mapTextureAssetId + " srcRectY: " + std::to_string(srcRectY) + " srcRectX: " + std::to_string(srcRectX) +" tile size: " + std::to_string(tileSize));
 
             Entity tile = registry->CreateEntity();
             tile.AddComponent<TransformComponent>(glm::vec2(x * (mapScale * tileSize), y * (mapScale * tileSize)), glm::vec2(mapScale, mapScale), 0.0);
+            //tile.AddComponent<SpriteComponent>("./assets/tilemaps/desert.png-4-0-texture", tileSize, tileSize, 0, false, srcRectX, srcRectY); // somehow this is loading the assets.. is the texture that is made massive and has multiple tiles?
+
             tile.AddComponent<SpriteComponent>(mapTextureAssetId, tileSize, tileSize, 0, false, srcRectX, srcRectY);
         }
     }

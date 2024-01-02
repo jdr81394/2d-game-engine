@@ -39,7 +39,7 @@ int Game::mapWidth;
 Game::Game() {
     isRunning = false;
     isDebug = false;
-    isWorldEditor = true;
+    isWorldEditor = false;
     registry = std::make_unique<Registry>();
     assetStore = std::make_unique<AssetStore>();
     eventBus = std::make_unique<EventBus>();
@@ -191,7 +191,7 @@ void Game::Setup() {
         // Load 1st level
         LevelLoader loader;
         lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::os);
-        loader.LoadLevel(lua, registry, assetStore, renderer, 1);
+        loader.LoadLevel(lua, registry, assetStore, renderer, 1, isWorldEditor);
     }
     else {
         // Do world editor stuff
@@ -219,9 +219,33 @@ void Game::PrepAssetStoreForWorldEditor() {
     for (const auto& entry : std::filesystem::directory_iterator(directoryPath)) {
         if (entry.path().extension() == ".png" || entry.path().extension() == ".jpg") {
             // Store the filename in a string variable
-            //fileNames.push_back(entry.path().filename().string());
-            assetStore->AddTexture(renderer, entry.path().stem().string() + "-texture", entry.path().generic_string());
-            //Logger::Log(entry.path().filename().string());
+            // JAKE TODO I MUST REFACTOR IN LUA ALL THE ONES THAT HAVE THE NUMBER NEXT TO THE NAME
+            // EXAMPLE: "tree-1-texture",               file = "./assets/images/tree-1.png"
+
+            const std::string assetId = entry.path().stem().string() + "-texture";
+            // SDL_Surface* surface = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0);
+            std::string filePath = entry.path().string();
+
+            SDL_Surface* fullImage = IMG_Load(filePath.c_str()); // this assumes every image is only 32 by 32 bits
+
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, fullImage);
+            assetStore->AddTextureDirectly(assetId, texture);
+
+      /*      std::cout << "FILE NAME: " << fileName;
+            assetStore->AddTexture(renderer,assetId, fileName, isWorldEditor);*/
+
+            // add file names to a map as value with texture id as key JAKE, then pass it to the world editor to be used for
+            // generate final file function
+
+
+            for (char& c : filePath) {
+                if (c == '\\') {
+                    c = '/';
+                }
+            }
+            Logger::Log("FILEPATH: " + filePath);
+
+            worldEditor->setIdToFile(assetId, filePath);
         }
     }
 
@@ -236,6 +260,7 @@ void Game::PrepAssetStoreForWorldEditor() {
         if (entry.path().extension() == ".png" || entry.path().extension() == ".jpg") {
             // Store the filename in a string variable
             mapFileNames.push_back(entry.path().generic_string());
+           
             //Logger::Log("File name generic string: " + entry.path().generic_string());
         }
     }
@@ -255,6 +280,7 @@ void Game::PrepAssetStoreForWorldEditor() {
             for (int x = 0; x < mapNumCols; x++) {
                 SDL_Rect portionRect = { x * tileSize, y * tileSize, tileSize, tileSize };
                 SDL_Surface* portionSurface = SDL_CreateRGBSurface(0, portionRect.w, portionRect.h, 32, 0, 0, 0, 0);
+
                 SDL_Surface* fullImage = IMG_Load(mapFilePath.c_str());
 
                 SDL_BlitSurface(fullImage, &portionRect, portionSurface, nullptr);
@@ -262,11 +288,15 @@ void Game::PrepAssetStoreForWorldEditor() {
                 // Create a texture from the portion surface
                 SDL_Texture* portionTexture = SDL_CreateTextureFromSurface(renderer, portionSurface);
 
-                const std::string assetId = mapFilePath + std::to_string(x) + "-" + std::to_string(y) + "-texture";
+                const std::string assetId = mapFilePath + "-" + std::to_string(x) + "-" + std::to_string(y) + "-texture";
+
 
                 assetStore->AddTextureDirectly(assetId, portionTexture);
 
                 SDL_FreeSurface(portionSurface);
+
+                worldEditor->setIdToFile(assetId, mapFilePath);
+
 
             }
         }
@@ -295,7 +325,10 @@ void Game::Update() {
     registry->GetSystem<KeyboardControlSystem>().SubscribeToEvents(eventBus);
     registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
     registry->GetSystem<MovementSystem>().SubscribeToEvents(eventBus);
-    if (isWorldEditor && worldEditor != nullptr) worldEditor->SubscribeToEvents(eventBus);
+
+    if (isWorldEditor && worldEditor != nullptr) {
+        worldEditor->SubscribeToEvents(eventBus);
+    }
 
     // Update the registry to process the entities that are waiting to be created/deleted
     registry->Update();

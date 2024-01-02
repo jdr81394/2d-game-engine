@@ -37,6 +37,7 @@ private:
 	const std::unique_ptr<Registry>& registry;
 	TileMap tileMap = {};
 	OrderedTilesDataStructure* worldMap;
+	std::map<std::string, std::string> assetIdToFilePath;
 	bool generateWorld;
 
 
@@ -52,6 +53,9 @@ public:
 		this->worldMap = nullptr;
 	}
 
+	void inline setIdToFile(std::string assetId, std::string filePath) {
+		assetIdToFilePath[assetId] = filePath;
+	}
 
 	void inline SubscribeToEvents(std::unique_ptr<EventBus>& eventBus) {
 		//eventBus->SubscribeToEvent<LeftMouseClickedEvent>(this, &WorldEditorSystem::OnLeftClick);

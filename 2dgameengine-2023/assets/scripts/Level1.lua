@@ -53,40 +53,40 @@ Level = {
         { type = "texture", id = "army-gun-right-texture",      file = "./assets/images/army-gun-right.png" },
         { type = "texture", id = "army-gun-down-texture",       file = "./assets/images/army-gun-down.png" },
         { type = "texture", id = "army-gun-left-texture",       file = "./assets/images/army-gun-left.png" },
-        { type = "texture", id = "army-gun-killed-texture",     file = "./assets/images/army-gun-killed.png" },
+       -- { type = "texture", id = "army-gun-killed-texture",     file = "./assets/images/army-gun-killed.png" },
         { type = "texture", id = "sam-truck-right-texture",     file = "./assets/images/sam-truck-right.png" },
         { type = "texture", id = "sam-tank-left-texture",       file = "./assets/images/sam-tank-left-spritesheet.png" },
         { type = "texture", id = "sam-tank-right-texture",      file = "./assets/images/sam-tank-right-spritesheet.png" },
         { type = "texture", id = "takeoff-base-texture",        file = "./assets/images/takeoff-base.png" },
         { type = "texture", id = "landing-base-texture",        file = "./assets/images/landing-base.png" },
         { type = "texture", id = "runway-texture",              file = "./assets/images/runway.png" },
-        { type = "texture", id = "obstacles1-texture",          file = "./assets/images/obstacles-1.png" },
-        { type = "texture", id = "obstacles2-texture",          file = "./assets/images/obstacles-2.png" },
-        { type = "texture", id = "obstacles3-texture",          file = "./assets/images/obstacles-3.png" },
-        { type = "texture", id = "obstacles4-texture",          file = "./assets/images/obstacles-4.png" },
-        { type = "texture", id = "obstacles5-texture",          file = "./assets/images/obstacles-5.png" },
-        { type = "texture", id = "obstacles6-texture",          file = "./assets/images/obstacles-6.png" },
-        { type = "texture", id = "obstacles7-texture",          file = "./assets/images/obstacles-7.png" },
-        { type = "texture", id = "tree1-texture",               file = "./assets/images/tree-1.png" },
-        { type = "texture", id = "tree2-texture",               file = "./assets/images/tree-2.png" },
-        { type = "texture", id = "tree3-texture",               file = "./assets/images/tree-3.png" },
-        { type = "texture", id = "tree4-texture",               file = "./assets/images/tree-4.png" },
-        { type = "texture", id = "tree5-texture",               file = "./assets/images/tree-5.png" },
-        { type = "texture", id = "tree6-texture",               file = "./assets/images/tree-6.png" },
-        { type = "texture", id = "tree7-texture",               file = "./assets/images/tree-7.png" },
-        { type = "texture", id = "tree8-texture",               file = "./assets/images/tree-8.png" },
-        { type = "texture", id = "tree9-texture",               file = "./assets/images/tree-9.png" },
-        { type = "texture", id = "tree10-texture",              file = "./assets/images/tree-10.png" },
-        { type = "texture", id = "tree11-texture",              file = "./assets/images/tree-11.png" },
-        { type = "texture", id = "tree12-texture",              file = "./assets/images/tree-12.png" },
-        { type = "texture", id = "tree13-texture",              file = "./assets/images/tree-13.png" },
-        { type = "texture", id = "tree14-texture",              file = "./assets/images/tree-14.png" },
-        { type = "texture", id = "tree15-texture",              file = "./assets/images/tree-15.png" },
-        { type = "texture", id = "tree16-texture",              file = "./assets/images/tree-16.png" },
-        { type = "texture", id = "tree17-texture",              file = "./assets/images/tree-17.png" },
-        { type = "texture", id = "tree18-texture",              file = "./assets/images/tree-18.png" },
-        { type = "texture", id = "tree19-texture",              file = "./assets/images/tree-19.png" },
-        { type = "texture", id = "tree20-texture",              file = "./assets/images/tree-20.png" },
+        { type = "texture", id = "obstacles-1-texture",          file = "./assets/images/obstacles-1.png" },
+        { type = "texture", id = "obstacles-2-texture",          file = "./assets/images/obstacles-2.png" },
+        { type = "texture", id = "obstacles-3-texture",          file = "./assets/images/obstacles-3.png" },
+        { type = "texture", id = "obstacles-4-texture",          file = "./assets/images/obstacles-4.png" },
+        { type = "texture", id = "obstacles-5-texture",          file = "./assets/images/obstacles-5.png" },
+        { type = "texture", id = "obstacles-6-texture",          file = "./assets/images/obstacles-6.png" },
+        { type = "texture", id = "obstacles-7-texture",          file = "./assets/images/obstacles-7.png" },
+        { type = "texture", id = "tree-1-texture",               file = "./assets/images/tree-1.png" },
+        { type = "texture", id = "tree-2-texture",               file = "./assets/images/tree-2.png" },
+        { type = "texture", id = "tree-3-texture",               file = "./assets/images/tree-3.png" },
+        { type = "texture", id = "tree-4-texture",               file = "./assets/images/tree-4.png" },
+        { type = "texture", id = "tree-5-texture",               file = "./assets/images/tree-5.png" },
+        { type = "texture", id = "tree-6-texture",               file = "./assets/images/tree-6.png" },
+        { type = "texture", id = "tree-7-texture",               file = "./assets/images/tree-7.png" },
+        { type = "texture", id = "tree-8-texture",               file = "./assets/images/tree-8.png" },
+        { type = "texture", id = "tree-9-texture",               file = "./assets/images/tree-9.png" },
+        { type = "texture", id = "tree-10-texture",              file = "./assets/images/tree-10.png" },
+        { type = "texture", id = "tree-11-texture",              file = "./assets/images/tree-11.png" },
+        { type = "texture", id = "tree-12-texture",              file = "./assets/images/tree-12.png" },
+        { type = "texture", id = "tree-13-texture",              file = "./assets/images/tree-13.png" },
+        { type = "texture", id = "tree-14-texture",              file = "./assets/images/tree-14.png" },
+        { type = "texture", id = "tree-15-texture",              file = "./assets/images/tree-15.png" },
+        { type = "texture", id = "tree-16-texture",              file = "./assets/images/tree-16.png" },
+        { type = "texture", id = "tree-17-texture",              file = "./assets/images/tree-17.png" },
+        { type = "texture", id = "tree-18-texture",              file = "./assets/images/tree-18.png" },
+        { type = "texture", id = "tree-19-texture",              file = "./assets/images/tree-19.png" },
+        { type = "texture", id = "tree-20-texture",              file = "./assets/images/tree-20.png" },
         { type = "texture", id = "bullet-texture",              file = "./assets/images/bullet.png" },
         { type = "texture", id = "radar-texture",               file = "./assets/images/radar-spritesheet.png" },
         { type = "font"   , id = "pico8-font-5",                file = "./assets/fonts/pico8.ttf", font_size = 5 },
@@ -1669,7 +1669,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "tree5-texture",
+                    texture_asset_id = "tree-5-texture",
                     width = 32,
                     height = 32,
                     z_index = 1
@@ -1685,7 +1685,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "tree5-texture",
+                    texture_asset_id = "tree-5-texture",
                     width = 32,
                     height = 32,
                     z_index = 1
@@ -1701,7 +1701,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "tree6-texture",
+                    texture_asset_id = "tree-6-texture",
                     width = 32,
                     height = 32,
                     z_index = 1
@@ -1717,7 +1717,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "tree14-texture",
+                    texture_asset_id = "tree-14-texture",
                     width = 32,
                     height = 32,
                     z_index = 1
@@ -1733,7 +1733,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "tree17-texture",
+                    texture_asset_id = "tree-17-texture",
                     width = 17,
                     height = 20,
                     z_index = 1
@@ -1749,7 +1749,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "tree17-texture",
+                    texture_asset_id = "tree-17-texture",
                     width = 17,
                     height = 20,
                     z_index = 1
@@ -1765,7 +1765,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "tree18-texture",
+                    texture_asset_id = "tree-18-texture",
                     width = 17,
                     height = 20,
                     z_index = 2
@@ -1781,7 +1781,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "tree10-texture",
+                    texture_asset_id = "tree-10-texture",
                     width = 31,
                     height = 32,
                     z_index = 1
@@ -1797,7 +1797,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "tree10-texture",
+                    texture_asset_id = "tree-10-texture",
                     width = 31,
                     height = 32,
                     z_index = 2
@@ -1813,7 +1813,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "tree14-texture",
+                    texture_asset_id = "tree-14-texture",
                     width = 32,
                     height = 32,
                     z_index = 2
@@ -1829,7 +1829,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 2
@@ -1845,7 +1845,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 2
@@ -1861,7 +1861,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 3
@@ -1877,7 +1877,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 2
@@ -1893,7 +1893,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 1
@@ -1909,7 +1909,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 2
@@ -1925,7 +1925,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 2
@@ -1941,7 +1941,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 2
@@ -1957,7 +1957,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 2
@@ -1973,7 +1973,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 2
@@ -1989,7 +1989,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 2
@@ -2005,7 +2005,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 2
@@ -2021,7 +2021,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 2
@@ -2037,7 +2037,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles2-texture",
+                    texture_asset_id = "obstacles-2-texture",
                     width = 32,
                     height = 32,
                     z_index = 1
@@ -2053,7 +2053,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles2-texture",
+                    texture_asset_id = "obstacles-2-texture",
                     width = 32,
                     height = 32,
                     z_index = 1
@@ -2069,7 +2069,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 2
@@ -2085,7 +2085,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 2
@@ -2101,7 +2101,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 2
@@ -2117,7 +2117,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 2
@@ -2133,7 +2133,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 2
@@ -2149,7 +2149,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 1
@@ -2165,7 +2165,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles7-texture",
+                    texture_asset_id = "obstacles-7-texture",
                     width = 16,
                     height = 16,
                     z_index = 1
@@ -2181,7 +2181,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles1-texture",
+                    texture_asset_id = "obstacles-1-texture",
                     width = 32,
                     height = 32,
                     z_index = 1
@@ -2197,7 +2197,7 @@ Level = {
                     rotation = 0.0, -- degrees
                 },
                 sprite = {
-                    texture_asset_id = "obstacles1-texture",
+                    texture_asset_id = "obstacles-1-texture",
                     width = 32,
                     height = 32,
                     z_index = 1

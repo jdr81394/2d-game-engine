@@ -14,7 +14,7 @@ class AssetStore {
         std::map<std::string, TTF_Font*> fonts;
     public:
         void ClearAssets();
-        void AddTexture(SDL_Renderer* renderer, const std::string& assetId, const std::string& filePath);
+        void AddTexture(SDL_Renderer* renderer, const std::string& assetId, const std::string& filePath, bool isWorldEditor);
         std::map<std::string, SDL_Texture*> GetAllTextures() {
             return textures;
         };
