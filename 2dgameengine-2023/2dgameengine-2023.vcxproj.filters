@@ -909,6 +909,9 @@
     <ClInclude Include="src\WorldEditor\TileMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\WorldEditor\Vec2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="libs\glm\detail\func_common.inl">
@@ -1358,6 +1361,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\WorldEditor\OrderedTilesDataStructure.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Events\OtherKeys.h">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

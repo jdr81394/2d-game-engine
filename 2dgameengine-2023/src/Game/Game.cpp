@@ -111,8 +111,11 @@ void Game::ProcessInput() {
 
 
         if (io.MouseDown[0]) {
-            //Logger::Log("MOUSE DOWN : " + std::to_string(mouseX) + " Y : " + std::to_string(mouseY));
-            eventBus->EmitEvent<LeftMouseHeldDownEvent>(mouseX, mouseY);
+            OtherKeys otherKeys{};
+            if (SDL_GetKeyboardState(NULL)[SDL_SCANCODE_LSHIFT]) {
+                otherKeys.isShift = true;
+            }
+            eventBus->EmitEvent<LeftMouseHeldDownEvent>(mouseX, mouseY, otherKeys);
         }
 
 
@@ -148,12 +151,9 @@ void Game::ProcessInput() {
             case SDL_MOUSEBUTTONDOWN:
                 if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
                     eventBus->EmitEvent<LeftMouseClickedEvent>(mouseX, mouseY);
-            
-
                 }
                 else if (sdlEvent.button.button == SDL_BUTTON_RIGHT) {
                     eventBus->EmitEvent<RightMouseClickedEvent>(mouseX, mouseY);
-
                 }
                 break;
 

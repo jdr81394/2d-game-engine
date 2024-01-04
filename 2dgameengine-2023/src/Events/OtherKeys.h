@@ -1,0 +1,3 @@
+struct OtherKeys {
+	bool isShift;
+};

@@ -2,13 +2,46 @@
 
 
 void WorldEditor::OnLeftMouseHeldDown(LeftMouseHeldDownEvent& event) {
+
+	int x = event.GetX();
+	int y = event.GetY();
+
+
+	/* This is for moving the whole map */
+	bool isShift = event.GetOtherKeys().isShift;
+	if (isShift == true) {
+
+		// Check difference in displacement
+		int xDiff = x - mouseGrabCoordinates.x;
+		int yDiff = y - mouseGrabCoordinates.y;
+
+			//worldDisplacement.x = xDiff;a
+			//worldDisplacement.y = yDiff;
+			
+		mouseGrabCoordinates.x = x;
+		mouseGrabCoordinates.y = y;
+		
+
+		worldDisplacement.x += xDiff;
+		worldDisplacement.y += yDiff;
+
+
+		// Change the values of the tiles in the worldMap
+		worldMap->UpdateTilePositionsByOffset(worldDisplacement);
+	}
+	else {
+		mouseGrabCoordinates.x = x;
+		mouseGrabCoordinates.y = y;
+	}
+
+	/* This is for putting the tile down*/
 	if (mouseSelectedTile != NULL) {
 
-		int x = event.GetX();
-		int y = event.GetY();
+		
+		if (x > (tileMap.numCols * tileMap.tileSize) + worldDisplacement.x || x <= 0 ||  x <= worldDisplacement.x) return;
+		if (y > (tileMap.numRows * tileMap.tileSize) + worldDisplacement.y || y <= 0 || y <= worldDisplacement.y ) return;
 
-		if (x > tileMap.numCols * tileMap.tileSize || x <= 0) return;
-		if (y > tileMap.numRows * tileMap.tileSize || y <= 0) return;
+
 
 		Entity entity = registry->CreateEntity();
 
@@ -16,65 +49,95 @@ void WorldEditor::OnLeftMouseHeldDown(LeftMouseHeldDownEvent& event) {
 		const SpriteComponent sC = mouseSelectedTile.GetComponent<SpriteComponent>();
 		const TransformComponent tC = mouseSelectedTile.GetComponent<TransformComponent>();
 
-		Logger::Log("SPRITE COMPONENT HELD DOWN: " + sC.assetId);
-
-		int snapX = ceil(x / sC.width) * sC.width;
-		int snapY = ceil(y / sC.height) * sC.height;
-
-		if (snapX > tileMap.numCols * tileMap.tileSize - 10) return;
-		if (snapY > tileMap.numRows * tileMap.tileSize - 10) return;
 
 
-		glm::vec2 position = glm::vec2(snapX, snapY);
+		/*
+			Lets imagine no displacement
+		*/
+
+		int snapX = (floor(x / sC.width) * sC.width);
+		int snapY = (floor(y / sC.height) * sC.height);
+
+		/*
+			Now imagine displacement 
+			x, relative to the displacement
+			x = 400
+			dX = 300
+			
+			a = x - (x -dx)
+
+		*/
+
+
+
+		if (snapX > tileMap.numCols * tileMap.tileSize - 32 + worldDisplacement.x) return;
+		if (snapY > tileMap.numRows * tileMap.tileSize - 32 + worldDisplacement.y ) return;
+
+
+		glm::vec2 position = glm::vec2(snapX , snapY);
+
 		entity.AddComponent<TransformComponent>(position);
 		entity.AddComponent<SpriteComponent>(sC.assetId, 32, 32, 1);
 
 
 
-		worldMap->AddTile(entity);
-
-	}
-}
-
-void WorldEditor::OnLeftClick(LeftMouseClickedEvent& event) {
-
-	if (mouseSelectedTile != NULL) {
-		int x = event.GetX();
-		int y = event.GetY();
-
-
-		if (x > tileMap.numCols * tileMap.tileSize || x <= 0) return;
-		if (y > tileMap.numRows * tileMap.tileSize || y <= 0) return;
-
-
-
-		Entity entity = registry->CreateEntity();
-
-		/* For position, let's make it snap into place */
-		const SpriteComponent sC = mouseSelectedTile.GetComponent<SpriteComponent>();
-
-
-		int snapX = ceil(x / sC.width) * sC.width;
-		int snapY = ceil(y / sC.height) * sC.height;
-
-		if (snapX > tileMap.numCols * tileMap.tileSize - 10) return;
-		if (snapY > tileMap.numRows * tileMap.tileSize - 10) return;
-
-		glm::vec2 position = glm::vec2(snapX, snapY);
-		entity.AddComponent<TransformComponent>(position);
-
-
-		entity.AddComponent<SpriteComponent>(sC.assetId, 32, 32, 1);
-		Logger::Log("SPRITE COMPONENT CLICK DOWN: " + sC.assetId);
-
-		Logger::Log("Entity from mouse click : " + std::to_string(entity.GetId()));
-
-		worldMap->AddTile(entity);
+		worldMap->AddTile(entity, worldDisplacement);
 
 	}
 
 
+
+	/* Purpose: TODO Jake
+		1.This is for selecting a tile that is already laid down 
+	*/
+	
+	if (mouseSelectedTile == NULL) {
+
+
+	}
 }
+
+//void WorldEditor::OnLeftClick(LeftMouseClickedEvent& event) {
+//
+//	if (mouseSelectedTile != NULL) {
+//		int x = event.GetX();
+//		int y = event.GetY();
+//
+//
+//		if (x > tileMap.numCols * tileMap.tileSize || x <= 0) return;
+//		if (y > tileMap.numRows * tileMap.tileSize || y <= 0) return;
+//
+//
+//
+//		Entity entity = registry->CreateEntity();
+//
+//		/* For position, let's make it snap into place */
+//		const SpriteComponent sC = mouseSelectedTile.GetComponent<SpriteComponent>();
+//
+//
+//		Logger::Log("x: " + std::to_string(worldDisplacement.x) + "Y: " + std::to_string(worldDisplacement.y));
+//		int snapX = (ceil(x / sC.width) * sC.width) + worldDisplacement.x;
+//		int snapY = (ceil(y / sC.height) * sC.height) + worldDisplacement.y;
+//
+//		if (snapX > tileMap.numCols * tileMap.tileSize - 10) return;
+//		if (snapY > tileMap.numRows * tileMap.tileSize - 10) return;
+//
+//		glm::vec2 position = glm::vec2(snapX, snapY);
+//		entity.AddComponent<TransformComponent>(position);
+//
+//
+//		entity.AddComponent<SpriteComponent>(sC.assetId, 32, 32, 1);
+//		Logger::Log("SPRITE COMPONENT CLICK DOWN: " + sC.assetId);
+//
+//		Logger::Log("Entity from mouse click : " + std::to_string(entity.GetId()));
+//
+//		worldMap->AddTile(entity, worldDisplacement);
+//
+//	}
+//	
+//
+//}
+
 
 void WorldEditor::Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& assetStore, SDL_Rect& camera, SDL_Window* window) {
 	ImGui::NewFrame();
@@ -92,10 +155,16 @@ void WorldEditor::Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& as
 	}
 
 	if (generateWorld) {
+
 		if (worldMap == nullptr) worldMap = new OrderedTilesDataStructure(tileMap);
 
+	
 		// Generate Grid for dropping tiles onto
 		GenerateGrid(renderer, tileMap, camera);
+
+	
+		ImGui::Begin("Tile Selection", NULL, windowFlags);
+	
 
 
 		// Load Textures into Selection Pane
@@ -116,7 +185,19 @@ void WorldEditor::Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& as
 			GenerateFinalWorldMap(renderer, assetStore, window);
 		}
 
-		ImGui::NewLine(); // Put space between Button and the rest of the tiles
+		ImGui::NewLine(); 
+
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoNav | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_AlwaysVerticalScrollbar;
+		ImGuiTabBarFlags tabFlags = ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_FittingPolicyScroll;
+		ImGuiTabItemFlags itemTabFlags = ImGuiTabItemFlags_SetSelected;
+		bool* open = new bool(true);
+
+
+		ImGui::BeginTabBar("Tabs", tabFlags);
+		ImGui::BeginTabItem("Tiles", open, itemTabFlags);
+
+
+		ImGui::NewLine();
 
 
 		for (auto it = allTextures.begin(); it != allTextures.end(); ++it) {
@@ -188,6 +269,10 @@ void WorldEditor::Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& as
 		}
 
 
+
+
+		ImGui::EndTabItem();
+		ImGui::EndTabBar();
 
 
 		// Generate the world 
@@ -548,10 +633,8 @@ void WorldEditor::RenderSelectWorldDimensionsWindow(TileMap& tileMap, bool& gene
 }
 
 void WorldEditor::GenerateGrid(SDL_Renderer* renderer, TileMap& tileMap, SDL_Rect& camera) {
-	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_AlwaysAutoResize;
 
 	// Render Each World Grid
-	if (ImGui::Begin("Tile Selection", NULL, windowFlags)) {
 
 		for (int i = 0; i < tileMap.numRows; i++)
 		{
@@ -565,11 +648,20 @@ void WorldEditor::GenerateGrid(SDL_Renderer* renderer, TileMap& tileMap, SDL_Rec
 				// Can have a zoom variable to handle zoom later. multile it against (tileMap.tileSize * zoom)
 				// SDL_Rect newRect = { (std::floor(j * tileMap.tileSize * zoom)) - camera.x, (std::floor(i * mTileSize * zoom)) - camera.y, std::ceil(mTileSize * zoom), std::ceil(mTileSize * zoom) };
 
-				SDL_Rect newRect = { (std::floor(j * tileMap.tileSize)) - camera.x, (std::floor(i * tileMap.tileSize)) - camera.y, std::ceil(tileMap.tileSize), std::ceil(tileMap.tileSize) };
+				SDL_Rect newRect = { (std::floor(j * tileMap.tileSize)) + worldDisplacement.x - camera.x, (std::floor(i * tileMap.tileSize)) + worldDisplacement.y - camera.y, std::ceil(tileMap.tileSize), std::ceil(tileMap.tileSize) };
 
 				SDL_RenderFillRect(renderer, &newRect);
 			}
 		}
-	}
+	
 }
 
+void WorldEditor::OnRightClick(RightMouseClickedEvent& event) {
+	/* Clear mouse selected tile */
+	if (this->mouseSelectedTile != NULL) {
+		// Kill the entity
+		this->mouseSelectedTile.Kill();
+		this->mouseSelectedTile = NULL;
+
+	}
+}

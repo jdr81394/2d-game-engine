@@ -168,14 +168,12 @@ std::set<std::string> OrderedTilesDataStructure::GetAllUniqueAssetIds() {
 }
 
 
-void OrderedTilesDataStructure::AddTile(Entity e) {
-	const TransformComponent tC = e.GetComponent<TransformComponent>();
+void OrderedTilesDataStructure::AddTile(Entity e, Vec2 worldDisplacement) {
+	TransformComponent& tC = e.GetComponent<TransformComponent>();
 	const SpriteComponent sC = e.GetComponent<SpriteComponent>();
 
-	int eX = ceil(tC.position.x / sC.width);			// This will get the exact index
-	int eY = ceil(tC.position.y / sC.height);
-
-	Logger::Log("SPRITE COMPONENT HELD DOWN 1: " + sC.assetId);
+	int eX = ceil((tC.position.x - worldDisplacement.x) / sC.width);			// This will get the exact index
+	int eY = ceil((tC.position.y - worldDisplacement.y) / sC.height);
 
 	// JAKE - upon initialization I should initialize each key that the map should have. That out of range error should never occur.
 
@@ -234,6 +232,9 @@ void OrderedTilesDataStructure::AddTile(Entity e) {
 	}
 
 
+	// Readjust 
+	tC.position.x = eX * 32 + worldDisplacement.x;
+	tC.position.y = eY * 32 + worldDisplacement.y;
 
 	// Add the entity, go to the vector 
 	tilesOrderedByX[eX][eY] = e;
@@ -243,3 +244,51 @@ void OrderedTilesDataStructure::AddTile(Entity e) {
 
 }
 
+void OrderedTilesDataStructure::UpdateTilePositionsByOffset(Vec2 worldDisplacement) {
+	
+	
+
+	for (auto it = tilesOrderedByX.begin(); it != tilesOrderedByX.end(); ++it) {
+		std::map<int, Entity>& map2 = it->second;
+		for (auto it2 = map2.begin(); it2 != map2.end(); ++it2) {
+			Entity& e = it2->second;
+
+			if (e != NULL) {
+				if (e.HasComponent<TransformComponent>()) {
+
+					TransformComponent& tC = e.GetComponent<TransformComponent>();
+					int x = it->first;
+					int y = it2->first;
+					// 32 represents tile size
+					tC.position.x = (x * 32) + worldDisplacement.x;
+					tC.position.y = (y * 32) + worldDisplacement.y;
+					//tC.position.x += worldDisplacement.x;
+					//tC.position.y += worldDisplacement.y;
+				}
+			}
+
+		}
+	}
+
+	for (auto it = tilesOrderedByY.begin(); it != tilesOrderedByY.end(); ++it) {
+		std::map<int, Entity>& map2 = it->second;
+		for (auto it2 = map2.begin(); it2 != map2.end(); ++it2) {
+			Entity& e = it2->second;
+
+			if (e != NULL) {
+				if (e.HasComponent<TransformComponent>()) {
+					TransformComponent& tC = e.GetComponent<TransformComponent>();
+					int y = it->first;
+					int x = it2->first;
+					// 32 represents tile size
+					tC.position.x = (x * 32) + worldDisplacement.x;
+					tC.position.y = (y * 32) + worldDisplacement.y;
+					//tC.position.x += worldDisplacement.x;
+					//tC.position.y += worldDisplacement.y;
+				}
+			}
+
+		}
+	}
+
+}

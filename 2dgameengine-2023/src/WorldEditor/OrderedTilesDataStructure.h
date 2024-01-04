@@ -2,8 +2,8 @@
 #define ORDEREDTILESDATASTRUCTURE_H
 
 #include "./TileMap.h"
-
 #include "../ECS/ECS.h"
+#include "./Vec2.h";
 #include "../Components/SpriteComponent.h"
 #include "../Components/TransformComponent.h"
 
@@ -36,7 +36,9 @@ public:
 
 	std::set<std::string> GetAllUniqueAssetIds();
 
-	void AddTile(Entity e);
+	void AddTile(Entity e, Vec2 worldDisplacement);
+
+	void UpdateTilePositionsByOffset(Vec2 worldDisplacement);
 
 };
 

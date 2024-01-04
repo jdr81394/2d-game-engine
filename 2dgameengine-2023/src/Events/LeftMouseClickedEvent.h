@@ -11,6 +11,7 @@ class LeftMouseClickedEvent : public Event {
 private:
 	int x;
 	int y;
+
 public:
 	LeftMouseClickedEvent(int iX, int iY) : x(iX), y(iY) {}
 

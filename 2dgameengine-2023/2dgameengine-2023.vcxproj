@@ -432,6 +432,7 @@
     <ClInclude Include="src\Systems\RenderSystem.h" />
     <ClInclude Include="src\Systems\RenderTextSystem.h" />
     <ClInclude Include="src\Systems\ScriptSystem.h" />
+    <ClInclude Include="src\WorldEditor\Vec2.h" />
     <ClInclude Include="src\WorldEditor\OrderedTilesDataStructure.h" />
     <ClInclude Include="src\WorldEditor\TileMap.h" />
     <ClInclude Include="src\WorldEditor\WorldEditor.h" />
@@ -584,6 +585,7 @@
     <ClCompile Include="libs\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\AssetStore\AssetStore.cpp" />
     <ClCompile Include="src\ECS\ECS.cpp" />
+    <ClCompile Include="src\Events\OtherKeys.h" />
     <ClCompile Include="src\Game\Game.cpp" />
     <ClCompile Include="src\Game\LevelLoader.cpp" />
     <ClCompile Include="src\Logger\Logger.cpp" />
