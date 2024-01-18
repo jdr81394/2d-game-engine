@@ -81,11 +81,27 @@ void Registry::TagEntity(Entity entity, const std::string& tag) {
     tagPerEntity.emplace(entity.GetId(), tag);
 }
 
+/* 
+        std::unordered_map<std::string, Entity> entityPerTag;
+        std::unordered_map<int, std::string> tagPerEntity;
+
+*/
 bool Registry::EntityHasTag(Entity entity, const std::string& tag) const {
     if(tagPerEntity.find(entity.GetId()) == tagPerEntity.end() ) {
         return false;
     }
-    return entityPerTag.find(tag)->second == entity;
+    
+    auto it =  entityPerTag.find(tag);
+
+    if (it != entityPerTag.end()) {
+
+        return it->second == entity;
+    }
+    else {
+        return false;
+    }
+
+    
 }
 
 Entity Registry::GetEntityByTag(const std::string& tag) const {

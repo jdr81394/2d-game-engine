@@ -6,7 +6,7 @@
 #include "../Components/AnimationComponent.h"
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/KeyboardControlledComponent.h"
-#include "../Components/CameraFollowComponent.h"
+#include "../Components/PlayerControlledComponent.h"
 #include "../Components/ProjectileEmitterComponent.h"
 #include "../Components/HealthComponent.h"
 #include "../Components/TextLabelComponent.h"
@@ -36,7 +36,7 @@ void LevelLoader::LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& re
     }
 
     // Executes the script using the Sol state
-//    lua.script_file("./assets/scripts/Level" + std::to_string(levelNumber) + ".lua");
+    //lua.script_file("./assets/scripts/Level" + std::to_string(levelNumber) + ".lua");
     lua.script_file("./assets/scripts/test.lua");
 
     // Read the big table for the current level
@@ -240,9 +240,9 @@ void LevelLoader::LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& re
             }
 
             // CameraFollow
-            sol::optional<sol::table> cameraFollow = entity["components"]["camera_follow"];
+            sol::optional<sol::table> cameraFollow = entity["components"]["player_controlled"];
             if (cameraFollow != sol::nullopt) {
-                newEntity.AddComponent<CameraFollowComponent>();
+                newEntity.AddComponent<PlayerControlledComponent>();
             }
 
             // KeyboardControlled
@@ -359,7 +359,7 @@ void LevelLoader::LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& re
     // chopper.AddComponent<BoxColliderComponent>(32,32);
     // chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(500.0,500.0), 0, 10000, 20, true);
     // chopper.AddComponent<KeyboardControlledComponent>(glm::vec2(0, -200), glm::vec2(200, 0), glm::vec2(0, 200), glm::vec2(-200, 0));
-    // chopper.AddComponent<CameraFollowComponent>();
+    // chopper.AddComponent<PlayerControlledComponent>();
     // chopper.AddComponent<HealthComponent>(100);
     // chopper.AddComponent<TextLabelComponent>(glm::vec2(0), "","charriot-font", green, true);       // Health label, and color will be changed in renderHealthTextSystem
 

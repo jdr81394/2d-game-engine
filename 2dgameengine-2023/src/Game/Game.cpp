@@ -197,7 +197,7 @@ void Game::Setup() {
         // Do world editor stuff
         //registry->AddSystem<WorldEditorSystem>(registry.get()); // THIS GETS RAW POINTER, if the unique pointer is destroyed for whatever reason this will be dangling
         // Determine the tilemap first
-        worldEditor = new WorldEditor(registry);
+        worldEditor = new WorldEditor(registry, renderer, assetStore);
         PrepAssetStoreForWorldEditor();
    
 
@@ -219,10 +219,9 @@ void Game::PrepAssetStoreForWorldEditor() {
     for (const auto& entry : std::filesystem::directory_iterator(directoryPath)) {
         if (entry.path().extension() == ".png" || entry.path().extension() == ".jpg") {
             // Store the filename in a string variable
-            // JAKE TODO I MUST REFACTOR IN LUA ALL THE ONES THAT HAVE THE NUMBER NEXT TO THE NAME
             // EXAMPLE: "tree-1-texture",               file = "./assets/images/tree-1.png"
 
-            const std::string assetId = entry.path().stem().string() + "-texture";
+            std::string&&  assetId = entry.path().stem().string() + "-texture";
             // SDL_Surface* surface = SDL_CreateRGBSurface(0, 32, 32, 32, 0, 0, 0, 0);
             std::string filePath = entry.path().string();
 
@@ -246,6 +245,8 @@ void Game::PrepAssetStoreForWorldEditor() {
             Logger::Log("FILEPATH: " + filePath);
 
             worldEditor->setIdToFile(assetId, filePath);
+            worldEditor->AddToEntitiesSelection(std::move(assetId));
+
         }
     }
 
@@ -260,7 +261,7 @@ void Game::PrepAssetStoreForWorldEditor() {
         if (entry.path().extension() == ".png" || entry.path().extension() == ".jpg") {
             // Store the filename in a string variable
             mapFileNames.push_back(entry.path().generic_string());
-           
+
             //Logger::Log("File name generic string: " + entry.path().generic_string());
         }
     }
@@ -288,14 +289,14 @@ void Game::PrepAssetStoreForWorldEditor() {
                 // Create a texture from the portion surface
                 SDL_Texture* portionTexture = SDL_CreateTextureFromSurface(renderer, portionSurface);
 
-                const std::string assetId = mapFilePath + "-" + std::to_string(x) + "-" + std::to_string(y) + "-texture";
-
+                std::string&& assetId{ mapFilePath + "-" + std::to_string(x) + "-" + std::to_string(y) + "-texture" };
 
                 assetStore->AddTextureDirectly(assetId, portionTexture);
 
                 SDL_FreeSurface(portionSurface);
 
                 worldEditor->setIdToFile(assetId, mapFilePath);
+                worldEditor->AddToTilesSelection(std::move(assetId));
 
 
             }
@@ -350,7 +351,7 @@ void Game::Render() {
 
 
     if (isWorldEditor && worldEditor != nullptr) {
-       worldEditor->Update(renderer, assetStore, camera, window);
+       worldEditor->Render(renderer, camera, window);
     }
     // TODO: Render game objects...
     registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
@@ -363,6 +364,10 @@ void Game::Render() {
         if (isWorldEditor == false) {
             registry->GetSystem<RenderGUISystem>().Update(registry, camera);
         }
+    }
+
+    if (isWorldEditor && worldEditor != nullptr) {
+        worldEditor->RenderSelectedTileOutline();
     }
 
 

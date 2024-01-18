@@ -9,6 +9,7 @@ void WorldEditor::OnLeftMouseHeldDown(LeftMouseHeldDownEvent& event) {
 
 	/* This is for moving the whole map */
 	bool isShift = event.GetOtherKeys().isShift;
+
 	if (isShift == true) {
 
 		// Check difference in displacement
@@ -25,6 +26,20 @@ void WorldEditor::OnLeftMouseHeldDown(LeftMouseHeldDownEvent& event) {
 		worldDisplacement.x += xDiff;
 		worldDisplacement.y += yDiff;
 
+		// If there is a difference, then you update the entities
+		if (xDiff != 0 || yDiff != 0) {
+			for (auto it = orderedEntities.Begin(); it != orderedEntities.End(); ++it) {
+				Entity& e = *it;
+				if (e.HasComponent<TransformComponent>()) {
+					TransformComponent& tC = e.GetComponent<TransformComponent>();
+					tC.position.x += xDiff;
+					tC.position.y += yDiff;
+
+					Logger::Log("X: " + std::to_string(tC.position.x) + "  Y: " + std::to_string(tC.position.y));
+				}
+
+			}
+		}
 
 		// Change the values of the tiles in the worldMap
 		worldMap->UpdateTilePositionsByOffset(worldDisplacement);
@@ -34,188 +49,231 @@ void WorldEditor::OnLeftMouseHeldDown(LeftMouseHeldDownEvent& event) {
 		mouseGrabCoordinates.y = y;
 	}
 
+	// Let's make sure that it is in bounds of the map, if not then just return
+	if (x > (tileMap.numCols * tileMap.tileSize) + worldDisplacement.x || x <= 0 || x <= worldDisplacement.x) return;
+	if (y > (tileMap.numRows * tileMap.tileSize) + worldDisplacement.y || y <= 0 || y <= worldDisplacement.y) return;
+
 	/* This is for putting the tile down*/
-	if (mouseSelectedTile != NULL) {
+	if (mouseSelectedTile.entity != NULL) {
 
 		
-		if (x > (tileMap.numCols * tileMap.tileSize) + worldDisplacement.x || x <= 0 ||  x <= worldDisplacement.x) return;
-		if (y > (tileMap.numRows * tileMap.tileSize) + worldDisplacement.y || y <= 0 || y <= worldDisplacement.y ) return;
+		/*if (x > (tileMap.numCols * tileMap.tileSize) + worldDisplacement.x || x <= 0 || x <= worldDisplacement.x) return;
+		if (y > (tileMap.numRows * tileMap.tileSize) + worldDisplacement.y || y <= 0 || y <= worldDisplacement.y ) return;*/
 
 
 
 		Entity entity = registry->CreateEntity();
 
 		/* For position, let's make it snap into place */
-		const SpriteComponent sC = mouseSelectedTile.GetComponent<SpriteComponent>();
-		const TransformComponent tC = mouseSelectedTile.GetComponent<TransformComponent>();
+		const SpriteComponent sC = mouseSelectedTile.entity.GetComponent<SpriteComponent>();
+		const TransformComponent tC = mouseSelectedTile.entity.GetComponent<TransformComponent>();
 
 
 
 		/*
-			Lets imagine no displacement
+			Check for tag before snapping
 		*/
 
-		int snapX = (floor(x / sC.width) * sC.width);
-		int snapY = (floor(y / sC.height) * sC.height);
+		glm::vec2 position{};
 
-		/*
-			Now imagine displacement 
-			x, relative to the displacement
-			x = 400
-			dX = 300
-			
-			a = x - (x -dx)
+		if (mouseSelectedTile.tag == Tag::Tile) {
+			int snapX = (floor(x / sC.width) * sC.width);
+			int snapY = (floor(y / sC.height) * sC.height);
 
-		*/
+			if (snapX > tileMap.numCols * tileMap.tileSize - 32 + worldDisplacement.x) return;
+			if (snapY > tileMap.numRows * tileMap.tileSize - 32 + worldDisplacement.y) return;
+
+			position = glm::vec2(snapX, snapY);
+
+		}
+		else {
+			// if not a tile, no need to snap, lets put it right in the middle of the mouse though
+			position.x = x - (tileMap.tileSize / 2);
+			position.y = y - (tileMap.tileSize / 2);
+		}
 
 
 
-		if (snapX > tileMap.numCols * tileMap.tileSize - 32 + worldDisplacement.x) return;
-		if (snapY > tileMap.numRows * tileMap.tileSize - 32 + worldDisplacement.y ) return;
+		TagMap tagMap{};	// instatiate a tag map
+		GroupMap groupMap{};
 
-
-		glm::vec2 position = glm::vec2(snapX , snapY);
+		glm::vec2&& scale(glm::vec2(tileMap.scale, tileMap.scale));
 
 		entity.AddComponent<TransformComponent>(position);
-		entity.AddComponent<SpriteComponent>(sC.assetId, 32, 32, 1);
+		entity.AddComponent<SpriteComponent>(sC.assetId, 32, 32, 2);
+		try {
+			entity.Tag(tagMap.at(mouseSelectedTile.tag));
+		}
+		catch (std::out_of_range& e) {
+			Logger::Log("Error, tag is not found: " + std::to_string(mouseSelectedTile.tag));
+		}
+
+		try {
+			for (auto it = mouseSelectedTile.groups.begin(); it != mouseSelectedTile.groups.end(); it++) {
+				entity.Group(groupMap.at(*it));
+			}
+		}
+		catch (std::out_of_range& e) {
+			Logger::Log("Error, group is not found... ");
+		}
 
 
-
-		worldMap->AddTile(entity, worldDisplacement);
+		if (mouseSelectedTile.tag == Tag::Tile) {
+			worldMap->AddTile(entity, worldDisplacement);
+		}
+		else {
+			// TODO jake - handle differnet kinds of entities but for now just create entity
+			AddEntityToMap(entity);
+		}
 
 	}
 
 
 
-	/* Purpose: TODO Jake
-		1.This is for selecting a tile that is already laid down 
-	*/
-	
-	if (mouseSelectedTile == NULL) {
+	/* 
+		1.This is for selecting a tile that is already laid down OR ENTITY
+	*/	
+	if (generateWorld == true && mouseSelectedTile.entity == NULL && isShift == false &&(selectedTileWindowProperties.isSelected == false || selectedTileWindowProperties.isSelected == NULL)) {
+
+		// Let's run through the vector of entities and see if i can find it
+
+		for (auto it = orderedEntities.Begin(); it != orderedEntities.End(); ++it) {
+			/* lets see if its in hitbox using aabb */
+			const Entity& e = *it;
+
+			if (e.HasComponent<TransformComponent>()) {
+
+				const TransformComponent& tC = e.GetComponent<TransformComponent>();
+
+				const int tCX = tC.position.x;
+				const int tCY = tC.position.y;
+				const int tCW = 32;		// use 32 for rn
+				const int tCH = 32;
+
+				auto isPointInsideSquare = [](const int tCX, const int tCY, const int tCW, const int tCH, const int x, const int y) -> bool {
+					return (x >= tCX && x <= tCX + tCH &&
+						y >= tCY && y <= tCY + tCH);
+					};
+
+				// If the point is within the square, then assign the mouseSelectedTile to the entry
+				if (isPointInsideSquare(tCX, tCY, tCW, tCH, x, y)) {
+					selectedTileWindowProperties.entity = e;
+					selectedTileWindowProperties.isSelected = true;
+				}
+
+			}
+
+		}
+
+		// If it is still false, that means that it was not an entity that was found so we should look for a tile
+		if (selectedTileWindowProperties.isSelected == false) {
+
+			// I need to determine what tile I am clicking on by where the mouse is in relation to the x and y axis
+			const int eX(ceil((x - worldDisplacement.x) / tileMap.tileSize));
+			const int eY(ceil((y - worldDisplacement.y) / tileMap.tileSize));
+
+			/**
+			First thing to do: Highlight selected sprite
+			Idea 1:
+				Create a highlight sprite, create entity as highlight sprite then delete it when its appropriate
+
+			*/
 
 
+			/**
+				Second thing to do:
+				Create a sprite window that will hold this
+			*/
+
+			// Get entityId
+			// **** LATER *****
+			// TODO Check if im clicking on an entity on top of the tile first - this will be for obstacles and enemies
+			// Maybe create a map, like i did with X/yordered Tiles. Search the specific X value. If not there, search in a range of -16/+16
+			// 
+			// 
+			// Go through each range, and for object see if the click is within it's x,y,height,width boundaries
+
+			// Get entity out of the worldMap data structure first, then use it's id to get it out of the registry because we need to alter that, then we'll clean up the worldMap data structure later
+			const Entity entity = worldMap->GetTilesOrderedByX()[eX][eY];
+
+			if (entity != NULL) {
+				selectedTileWindowProperties.entity = entity;
+
+				selectedTileWindowProperties.isSelected = true;
+
+			}
+
+		}
+
+
+
+	}
+
+
+}
+
+// This adds the entity to the .lua file and pushes a refernce to the entity to be held by the world editor
+void WorldEditor::AddEntityToMap(Entity& entity) {
+
+	orderedEntities.Push(entity);
+}
+
+void WorldEditor::InitializeOrderedTilesDataStructure() {
+	if (worldMap == nullptr) {
+		worldMap = new OrderedTilesDataStructure(tileMap);
 	}
 }
 
-//void WorldEditor::OnLeftClick(LeftMouseClickedEvent& event) {
-//
-//	if (mouseSelectedTile != NULL) {
-//		int x = event.GetX();
-//		int y = event.GetY();
-//
-//
-//		if (x > tileMap.numCols * tileMap.tileSize || x <= 0) return;
-//		if (y > tileMap.numRows * tileMap.tileSize || y <= 0) return;
-//
-//
-//
-//		Entity entity = registry->CreateEntity();
-//
-//		/* For position, let's make it snap into place */
-//		const SpriteComponent sC = mouseSelectedTile.GetComponent<SpriteComponent>();
-//
-//
-//		Logger::Log("x: " + std::to_string(worldDisplacement.x) + "Y: " + std::to_string(worldDisplacement.y));
-//		int snapX = (ceil(x / sC.width) * sC.width) + worldDisplacement.x;
-//		int snapY = (ceil(y / sC.height) * sC.height) + worldDisplacement.y;
-//
-//		if (snapX > tileMap.numCols * tileMap.tileSize - 10) return;
-//		if (snapY > tileMap.numRows * tileMap.tileSize - 10) return;
-//
-//		glm::vec2 position = glm::vec2(snapX, snapY);
-//		entity.AddComponent<TransformComponent>(position);
-//
-//
-//		entity.AddComponent<SpriteComponent>(sC.assetId, 32, 32, 1);
-//		Logger::Log("SPRITE COMPONENT CLICK DOWN: " + sC.assetId);
-//
-//		Logger::Log("Entity from mouse click : " + std::to_string(entity.GetId()));
-//
-//		worldMap->AddTile(entity, worldDisplacement);
-//
-//	}
-//	
-//
-//}
-
-
-void WorldEditor::Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& assetStore, SDL_Rect& camera, SDL_Window* window) {
-	ImGui::NewFrame();
+void WorldEditor::RenderTileSelectionWindow(SDL_Window* window) {
 	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_AlwaysAutoResize;
 
+	ImGui::Begin("Tile Selection", NULL, windowFlags);
 
+	if (ImGui::Button("Log out World Map")) {
+		worldMap->LogTiles();
 
-	// Display a window for the tilemap:
-	if (generateWorld == false && ImGui::Begin("Tilemap Properties", NULL, windowFlags)) {
-
-		RenderSelectWorldDimensionsWindow(tileMap, generateWorld);
-
-
-		ImGui::End();
 	}
 
-	if (generateWorld) {
+	ImGui::NewLine(); // Put space between Button and the rest of the tiles
 
-		if (worldMap == nullptr) worldMap = new OrderedTilesDataStructure(tileMap);
+	if (ImGui::Button("Create Map")) {
+		GenerateFinalWorldMap(window);
+	}
 
-	
-		// Generate Grid for dropping tiles onto
-		GenerateGrid(renderer, tileMap, camera);
+	ImGui::NewLine();
 
-	
-		ImGui::Begin("Tile Selection", NULL, windowFlags);
-	
-
+	ImGuiTabBarFlags tabFlags = ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_FittingPolicyScroll;
+	ImGuiTabItemFlags itemTabFlags = ImGuiTabItemFlags_SetSelected;
+	/*	bool* open = new bool(true);
+		bool* closed = new bool(false);*/
 
 		// Load Textures into Selection Pane
-		auto allTextures = assetStore->GetAllTextures(); //  type std::map<std::string, SDL_Texture*>
-		const int numCols = 5;
-		int currentCount = 0;
-		const ImVec2 spacing(0.0f, 5.0f);
+	const std::map<std::string, SDL_Texture*>& allTextures = assetStore->GetAllTextures(); //  type std::map<std::string, SDL_Texture*>
 
-		if (ImGui::Button("Log out World Map")) {
-			worldMap->LogTiles();
+	// Shared variables
+	ImVec2 size = ImVec2(tileMap.tileSize, tileMap.tileSize); // ImVec2& - size - width and height
+	int currentCount{ 0 };
+	const ImVec2 spacing{ 0.0f, 5.0f };
 
-		}
-
-
-		ImGui::NewLine(); // Put space between Button and the rest of the tiles
-
-		if (ImGui::Button("Create Map")) {
-			GenerateFinalWorldMap(renderer, assetStore, window);
-		}
-
-		ImGui::NewLine(); 
-
-		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoNav | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_AlwaysVerticalScrollbar;
-		ImGuiTabBarFlags tabFlags = ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_FittingPolicyScroll;
-		ImGuiTabItemFlags itemTabFlags = ImGuiTabItemFlags_SetSelected;
-		bool* open = new bool(true);
-
-
-		ImGui::BeginTabBar("Tabs", tabFlags);
-		ImGui::BeginTabItem("Tiles", open, itemTabFlags);
-
+	ImGui::BeginTabBar("Tabs", tabFlags);
+	if (ImGui::BeginTabItem("Tiles")) {
 
 		ImGui::NewLine();
 
+		const std::vector<std::string>& allTiles = GetTilesSelection();
 
-		for (auto it = allTextures.begin(); it != allTextures.end(); ++it) {
-
-
-
-
-			ImTextureID textureId = it->second;
+		for (auto it = allTiles.begin(); it != allTiles.end(); ++it) {
 
 
-			ImVec2 size = ImVec2(tileMap.tileSize, tileMap.tileSize); // ImVec2& - size - width and height
-			ImVec2 uv0; // default ImVec2& - top left position - top left corner of the image 
-			ImVec2 uv1; // default ImVec2& -bottom right position - bottom right corner of the image
-			int framePadding = 0;	// idk what this does
-			//imVec4& - tint color rgba values
-			ImVec4 uv4Tint;
-			// ImVec4& - border color rgba values
-			ImVec4 uv4Border;
+			const std::string& tileAssetId = *it;
+
+			SDL_Texture* texture = allTextures.at(tileAssetId);
+
+			ImTextureID* textureId = reinterpret_cast<ImTextureID*>(texture);
+
+			/*ImTextureID textureId = it->second;*/
+
+
 			if (currentCount != 4) {
 				ImGui::SameLine(spacing.x, spacing.y);
 				currentCount++;
@@ -225,8 +283,6 @@ void WorldEditor::Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& as
 			}
 
 			// Get ready to move the tile 
-
-
 			ImGuiIO& io = ImGui::GetIO();
 
 			int mX, mY;
@@ -234,33 +290,37 @@ void WorldEditor::Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& as
 			// SDL function that gets the mouse state and puts it in these variables
 			SDL_GetMouseState(&mX, &mY);
 
-			if (ImGui::ImageButton(textureId, size)) {
-				if (mouseSelectedTile != NULL) {
-					registry->KillEntity(mouseSelectedTile);
-					mouseSelectedTile = NULL;
+			if (ImGui::ImageButton(texture, size)) {
+				if (mouseSelectedTile.entity != NULL) {
+					registry->KillEntity(mouseSelectedTile.entity);
+					mouseSelectedTile.entity = NULL;
 				}
-				mouseSelectedTile = registry->CreateEntity();
+				mouseSelectedTile.entity = registry->CreateEntity();
+				mouseSelectedTile.tag = Tag::Tile;
+				TagMap tm{};
+
+				mouseSelectedTile.entity.Tag(tm.at(mouseSelectedTile.tag));
 			}
 
-			if (mouseSelectedTile != NULL) {
+			if (mouseSelectedTile.entity != NULL) {
 
 				/* Putting this here kind of fixes the bug with the first click. Doesn't create anything but prevents it from showing up */
-				if (!mouseSelectedTile.HasComponent<TransformComponent>()) {
+				if (!mouseSelectedTile.entity.HasComponent<TransformComponent>()) {
 					glm::vec2 position = glm::vec2(mX, mY);
-					mouseSelectedTile.AddComponent<TransformComponent>(position);
+					mouseSelectedTile.entity.AddComponent<TransformComponent>(position);
 				}
 
-				if (!mouseSelectedTile.HasComponent<SpriteComponent>()) {
-					mouseSelectedTile.AddComponent<SpriteComponent>(it->first, 32, 32, 100);
-					Logger::Log("asset id: " + it->first);
+				if (!mouseSelectedTile.entity.HasComponent<SpriteComponent>()) {
+					mouseSelectedTile.entity.AddComponent<SpriteComponent>(tileAssetId, 32, 32, 100);
+					Logger::Log("asset id: " + tileAssetId);
 				}
 				/* ---------------------------------------------------------------------------------------------------  */
 
 
 				// Update it's position based on the users mouse
-				TransformComponent& tc = mouseSelectedTile.GetComponent<TransformComponent>();
-				tc.position.x = mX;
-				tc.position.y = mY;
+				TransformComponent& tc = mouseSelectedTile.entity.GetComponent<TransformComponent>();
+				tc.position.x = mX - (tileMap.tileSize / 2);	// tileMap.tileSize - 2 puts it right in the center of the users mouse
+				tc.position.y = mY - (tileMap.tileSize / 2); 
 
 			}
 
@@ -269,15 +329,324 @@ void WorldEditor::Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& as
 		}
 
 
+		ImGui::EndTabItem();
+	}
+	if (ImGui::BeginTabItem("Entities")) {
+		const std::vector<std::string>& allEntitesTiles = GetEntitiesSelection();
 
+		ImGui::NewLine();
+
+		for (auto it = allEntitesTiles.begin(); it != allEntitesTiles.end(); ++it) {
+			const std::string& tileAssetId = *it;
+
+			SDL_Texture* texture = allTextures.at(tileAssetId);
+
+			ImTextureID* textureId = reinterpret_cast<ImTextureID*>(texture);
+
+			if (currentCount != 4) {
+				ImGui::SameLine(spacing.x, spacing.y);
+				currentCount++;
+			}
+			else {
+				currentCount = 0;
+			}
+
+			// Get ready to move the tile 
+			ImGuiIO& io = ImGui::GetIO();
+
+			int mX, mY;
+			SDL_GetMouseState(&mX, &mY);
+
+			if (ImGui::ImageButton(texture, size)) {
+				if (mouseSelectedTile.entity != NULL) {
+					registry->KillEntity(mouseSelectedTile.entity);
+					mouseSelectedTile.entity = NULL;
+				}
+				mouseSelectedTile.entity = registry->CreateEntity();
+				mouseSelectedTile.tag = Tag::None;
+				TagMap tm{};
+
+				mouseSelectedTile.entity.Tag(tm.at(mouseSelectedTile.tag));
+
+			}
+			if (mouseSelectedTile.entity != NULL) {
+
+				/* Putting this here kind of fixes the bug with the first click. Doesn't create anything but prevents it from showing up */
+				if (!mouseSelectedTile.entity.HasComponent<TransformComponent>()) {
+					glm::vec2 position = glm::vec2(mX, mY);
+					mouseSelectedTile.entity.AddComponent<TransformComponent>(position);
+				}
+
+				if (!mouseSelectedTile.entity.HasComponent<SpriteComponent>()) {
+					mouseSelectedTile.entity.AddComponent<SpriteComponent>(tileAssetId, 32, 32, 100);
+					Logger::Log("asset id: " + tileAssetId);
+				}
+				/* ---------------------------------------------------------------------------------------------------  */
+
+
+				// Update it's position based on the users mouse
+				TransformComponent& tc = mouseSelectedTile.entity.GetComponent<TransformComponent>();
+				tc.position.x = mX - (tileMap.tileSize / 2);	// tileMap.tileSize - 2 puts it right in the center of the users mouse
+				tc.position.y = mY - (tileMap.tileSize / 2);
+
+			}
+
+
+
+
+
+		}
 
 		ImGui::EndTabItem();
-		ImGui::EndTabBar();
+
+	};
+	ImGui::EndTabBar();
 
 
-		// Generate the world 
-		ImGui::End();
+	// Generate the world 
+	ImGui::End();
+
+	//delete open;
+	//delete closed;
+
+}
+
+void WorldEditor::RenderSelectedTileWindow() {
+	/* Create a selected Tile window if needed */
+	if (selectedTileWindowProperties.isSelected == true) {
+		if (ImGui::Begin("Selected Tile", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::Text("Components");
+			ImGui::NewLine();
+
+			/* START OF SPRITE COMPONENTS */
+			Entity entity = selectedTileWindowProperties.entity;
+
+			if (entity.HasComponent<SpriteComponent>()) {
+
+				SpriteComponent& sC = entity.GetComponent<SpriteComponent>();
+
+				ImTextureID* t1 = reinterpret_cast<ImTextureID*>(assetStore->GetTexture(sC.assetId));
+				ImVec2 size = ImVec2(tileMap.tileSize, tileMap.tileSize); // ImVec2& - size - width and height
+
+				ImGui::SameLine(50, 0);
+
+				ImGui::Image(t1, size);
+
+				ImGui::Text("Sprite Component");
+
+				if (ImGui::Button("Show Tile Options", size)) {
+					selectedTileWindowProperties.showSpriteChoices = !selectedTileWindowProperties.showSpriteChoices;
+				}
+
+				if (selectedTileWindowProperties.showSpriteChoices) {
+					const ImVec2&& spacing{ 0.0f, 5.0f };
+
+
+					// tilesSelection
+					/* Now create all selectable tile styles  */
+					// if tileSelection is undefined
+					for (int i{ 0 }; i < tilesSelection.size(); i++) {
+
+						if (i % 8 != 0) {
+							ImGui::SameLine(spacing.x, spacing.y);
+						}
+
+						ImTextureID* t2 = reinterpret_cast<ImTextureID*>(assetStore->GetTexture(tilesSelection[i]));
+						ImVec2 size = ImVec2(tileMap.tileSize / 3, tileMap.tileSize / 3); // ImVec2& - size - width and height
+
+						// If selected then change the sprites 
+						if (ImGui::ImageButton(t2, size)) {
+							sC.assetId = tilesSelection[i];
+							Logger::Log("HERE!!!!");
+						}
+
+					}
+				}
+				ImGui::NewLine();
+			}
+
+
+
+			/* Start of Transform Component
+
+
+			if (tC != nullptr) {
+				ImGui::Text("Transform Component");
+				const ImVec2&& spacing{ 10.0f, 0.0f };
+
+				ImGui::SameLine(spacing.x, spacing.y);
+				float w = tileMap.numCols * tileMap.tileSize - 32;	// - 32 to get it onto the right spot?
+
+				if (ImGui::SliderFloat("X Position", &tC->position.x, 0, w)) {
+					tC->position.x = (floor(tC->position.x / tileMap.tileSize) * tileMap.tileSize); // snap X into grid
+
+					// TOOD: must adjust the x position in the registry component and the tilesOrderedByX/Y
+					const int eX(ceil((tC->position.x - worldDisplacement.x) / tileMap.tileSize));
+					const int eY(ceil((tC->position.y - worldDisplacement.y) / tileMap.tileSize));
+
+					worldMap->RemoveTile(Vec2(eX, eY));
+
+					Entity e = registry->Get							//problem, need entity because then ill have to recreate the tile every single time with each one of its components
+
+					worldMap->AddTile(e, worldDisplacement);
+				}
+			}
+			*/
+
+			/* RigidBody Component - not sure if working - MUST EDIT LUA SCRIPT TO MAKE THIS WORK */
+
+			ImGui::Text("Rigid Body");
+			ImGui::NewLine();
+			bool hasRigidBody = entity.HasComponent<RigidBodyComponent>();
+
+			if (hasRigidBody == true) {
+				RigidBodyComponent& rBC = entity.GetComponent<RigidBodyComponent>();
+
+				ImGui::InputFloat("X Velocity:", &rBC.velocity.x, 1, 100);
+				ImGui::InputFloat("Y Velocity:", &rBC.velocity.y, 1, 100);
+
+				const TransformComponent& tC = entity.GetComponent<TransformComponent>();
+
+				if (ImGui::Button("Remove RigidBody", ImVec2(100, 50))) {
+					registry->RemoveComponent<RigidBodyComponent>(entity);
+				};
+			}
+			else {
+				if (ImGui::Checkbox("Add a RigidBody", &hasRigidBody)) {
+					registry->AddComponent<RigidBodyComponent>(entity);
+				};
+			}
+
+
+			ImGui::Text("Box Collider");
+			ImGui::NewLine();
+			bool hasCollider = entity.HasComponent<BoxColliderComponent>();
+			// Check if it has collider
+			if (hasCollider == true) {
+				BoxColliderComponent& bC = entity.GetComponent<BoxColliderComponent>();
+
+				ImGui::InputInt("Width:", &bC.width, 1, 100);
+				ImGui::InputInt("Height:", &bC.height, 1, 100);
+
+				ImGui::InputFloat("x offset:", &bC.offset.x, 1, 100);
+				ImGui::InputFloat("y offset:", &bC.offset.y, 1, 100);
+
+			
+				if (ImGui::Button("Remove Collider", ImVec2(100, 50))) {
+					registry->RemoveComponent<BoxColliderComponent>(entity);
+				};
+			}
+			else {
+				if (ImGui::Checkbox("Add a Colliider", &hasCollider)) {
+					registry->AddComponent<BoxColliderComponent>(entity);
+				};
+
+			}
+
+			// Add a Player controlled componet
+			bool isPlayerControlled = entity.HasComponent<PlayerControlledComponent>();
+			ImGui::Text("Player Controlled Component");
+			ImGui::NewLine();
+			if (isPlayerControlled) {
+				if (ImGui::Checkbox("Remove Player Control", &isPlayerControlled)) {
+					registry->AddComponent<PlayerControlledComponent>(entity);
+				};
+				ImGui::Text("Choose your type of control:");
+				ImGui::NewLine();
+
+				/* Render Keyboard controller */
+				bool isKeyboardControlled = entity.HasComponent<KeyboardControlledComponent>();
+				if (isKeyboardControlled) {
+					KeyboardControlledComponent& kCC = entity.GetComponent<KeyboardControlledComponent>();
+
+					ImGui::Text("Set velocity from keys");
+					ImGui::NewLine();
+					ImGui::InputFloat("Up X Velocity:", &kCC.upVelocity.x, 1, 100);
+					ImGui::InputFloat("Up Y Velocity:", &kCC.upVelocity.y, 1, 100);
+					ImGui::NewLine();
+					ImGui::InputFloat("Down X Velocity:", &kCC.downVelocity.x, 1, 100);
+					ImGui::InputFloat("Down Y Velocity:", &kCC.downVelocity.y, 1, 100);
+					ImGui::NewLine();
+					ImGui::InputFloat("Left X Velocity:", &kCC.leftVelocity.x, 1, 100);
+					ImGui::InputFloat("Left Y Velocity:", &kCC.leftVelocity.y, 1, 100);
+					ImGui::NewLine();
+					ImGui::InputFloat("Right X Velocity:", &kCC.rightVelocity.x, 1, 100);
+					ImGui::InputFloat("Right Y Velocity:", &kCC.rightVelocity.y, 1, 100);
+
+					if (ImGui::Button("Remove Keyboard Control", ImVec2(100, 50))) {
+						registry->RemoveComponent<KeyboardControlledComponent>(entity);
+					};
+
+				}
+				else {
+					if (ImGui::Button("Make Keyboard Control", ImVec2(100, 50))) {
+						registry->AddComponent<KeyboardControlledComponent>(entity);
+					};
+				}
+
+
+	
+			}
+			else {
+				if (ImGui::Checkbox("Make it Player Controlled", &isPlayerControlled)) {
+					registry->AddComponent<PlayerControlledComponent>(entity);
+				};
+			}
+
+			ImGui::End();
+		}
+
+
 	}
+
+}
+
+
+void WorldEditor::RenderSelectedTileOutline() {
+	if(selectedTileWindowProperties.isSelected == true) {
+		/* Render the entity selected square, render its collision, if not then just where it is on the map */
+		bool hasTransform = selectedTileWindowProperties.entity.HasComponent<TransformComponent>();
+		bool hasBoxCollider = selectedTileWindowProperties.entity.HasComponent<BoxColliderComponent>();
+		if (hasBoxCollider) {
+			const TransformComponent& tC = selectedTileWindowProperties.entity.GetComponent<TransformComponent>();
+			const BoxColliderComponent& bCC = selectedTileWindowProperties.entity.GetComponent<BoxColliderComponent>();
+
+			SDL_Rect highlight = { tC.position.x + bCC.offset.x, tC.position.y + bCC.offset.y, bCC.width, bCC.height };
+
+			SDL_SetRenderDrawColor(renderer, 255,0, 0, 255);
+			SDL_RenderDrawRect(renderer, &highlight); // This function draws an unfilled rectangle
+
+
+		}
+		else if (hasTransform && hasBoxCollider) {
+			const TransformComponent& tC = selectedTileWindowProperties.entity.GetComponent<TransformComponent>();
+
+			SDL_Rect highlight = { tC.position.x, tC.position.y, 32, 32 };
+
+			SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+			SDL_RenderDrawRect(renderer, &highlight); // This function draws an unfilled rectangle
+		}
+	}
+
+
+}
+
+void WorldEditor::Render(SDL_Renderer* renderer, SDL_Rect& camera, SDL_Window* window) {
+	ImGui::NewFrame();
+
+
+	// Display a window for the tilemap:
+
+	RenderSelectWorldDimensionsWindow(tileMap, generateWorld);
+
+
+	if (generateWorld) {
+		InitializeOrderedTilesDataStructure();
+		GenerateGrid(tileMap, camera); // Generate Grid for dropping tiles onto
+		RenderTileSelectionWindow(window);
+	}
+
+	RenderSelectedTileWindow();
 
 
 
@@ -286,7 +655,7 @@ void WorldEditor::Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& as
 }
 
 
-void WorldEditor::GenerateFinalWorldMap(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& assetStore, SDL_Window* window) {
+void WorldEditor::GenerateFinalWorldMap(SDL_Window* window) {
 
 	// Keep track all the images that have been used
 	std::set<std::string> allAssetIds;
@@ -314,7 +683,6 @@ void WorldEditor::GenerateFinalWorldMap(SDL_Renderer* renderer, std::unique_ptr<
 
 	int widthOfSurface = numCols * 32;
 	int heightOfSurface = numRows * 32;
-
 
 	SDL_Surface* resultSurface = SDL_CreateRGBSurface(0, widthOfSurface, heightOfSurface, 32, 0, 0, 0, 0);
 
@@ -528,7 +896,7 @@ void WorldEditor::GenerateFinalWorldMap(SDL_Renderer* renderer, std::unique_ptr<
 
 	*/
 
-	delete pixels;
+	delete[] pixels;
 
 	for (const auto& texture : allTextures) {
 		SDL_DestroyTexture(texture);
@@ -552,29 +920,20 @@ void WorldEditor::GenerateFinalWorldMap(SDL_Renderer* renderer, std::unique_ptr<
 	final += "Level = {\n";	// open level bracket
 	final += "\tassets = {\n";// open asset
 	final += "\t\t[0] = \n";		// asset first index
-	final += "\t\t{ type = \"texture\" , id = \"./assets/tilemaps/test\",  file = \"./assets/tilemaps/test.png\" }\n";
-	// assets 
-	//for (auto it = allAssetIds.begin(); it != allAssetIds.end(); ++it) {
-	//	
-	//	std::string line = "\t\t{ type = \"texture\" , id = \"./assets/tilemaps/test\",";
-	//	/*std::string filePath = assetIdToFilePath[*it];*/
-	//	std::string filePath = "./assets/tilemaps/test";
-	//	if (filePath.empty()) {
-	//		continue;
-	//	}
+	final += "\t\t{ type = \"texture\" , id = \"./assets/tilemaps/test\",  file = \"./assets/tilemaps/test.png\" },\n";
+	
+	for (auto it = orderedEntities.Begin(); it != orderedEntities.End(); ++it) { // add all assets for units
+		const Entity& e = *it;
 
-	//	line += " file = \"./assets/tilemaps/test.png\" }";
+		if (e.HasComponent<SpriteComponent>()) {
+			const SpriteComponent& sC = e.GetComponent<SpriteComponent>();
+			const std::string&& path = std::move(assetIdToFilePath[sC.assetId]);
 
-	//	if (std::next(it) != allAssetIds.end()) {
-	//		line += ",";
-	//	}
+			final += "\t\t{ type = \"texture\", id=\"" + sC.assetId + "\",	file =\""+path+"\" },\n";
+		}
+	}
 
-	//	line += "\n";
-	//	final += line;
-
-	//	
-	//}
-
+	
 	final += "\t}\n,";	// close assets
 	final += "\ttilemap = {\n";	// open tile map
 	final += "\t\tmap_file=\"./assets/tilemaps/test.map\",\n";
@@ -586,7 +945,109 @@ void WorldEditor::GenerateFinalWorldMap(SDL_Renderer* renderer, std::unique_ptr<
 	final += "\t},\n"; // close tile map
 
 	final += "\tentities = {\n";	// open entities
-	final += "\t\t[0] = {}\n";	// JAKE - add entities in here later.
+	final += "\t\t[0] = {";
+
+	/* Handle all entities and their components*/
+
+	for (auto it = orderedEntities.Begin(); it != orderedEntities.End(); ++it) {
+		if(it != orderedEntities.Begin() ) final += "\t\t\t{\n";
+		// Get current entity
+		const Entity& e = *it;
+		
+		// Go through each possible tags and see if the entity has it 
+		TagMap tagMap{};	// create tagmap
+
+		// Jake
+		for (auto it2 = tagMap.Begin(); it2 != tagMap.End(); ++it2) {
+			if (e.HasTag(it2->second)) {
+				final += "\t\t\ttag=" + it2->second + "\n";
+			}
+		}
+
+		// Let's add the components
+		final += "\n\t\t\t\tcomponents = {\n";
+
+		// Let's go through each components
+		/* Transform Component check */
+		const float scale = 2; /* JAKE TODO SCALE IS HARDCODED TO 2.0. Must fix this when dealing with scale later*/
+
+		if (e.HasComponent<TransformComponent>()) {
+			const TransformComponent& tC = e.GetComponent<TransformComponent>();
+			final += "\t\t\t\t\ttransform = {\n";
+			final += "\t\t\t\t\t\tposition = { x = " + std::to_string((tC.position.x - worldDisplacement.x) * scale) + ", y= " + std::to_string((tC.position.y - worldDisplacement.y) * scale) + " },\n";
+			final += "\t\t\t\t\t\tscale = { x = " + std::to_string(scale) + ", y= " + std::to_string(scale) + " },\n";
+			final += "\t\t\t\t\t\trotation = "+std::to_string(tC.rotation) + "\n";
+			final += "\t\t\t\t\t},\n";
+			// If not final component, then add comma
+		}
+
+		/* Sprite Component */
+		if (e.HasComponent<SpriteComponent>()) {
+			const SpriteComponent& sC = e.GetComponent<SpriteComponent>();
+			final += "\t\t\t\t\tsprite = {\n";
+			final += "\t\t\t\t\t\ttexture_asset_id = \"" + sC.assetId+ "\"" + ",\n";
+			final += "\t\t\t\t\t\twidth = " + std::to_string(sC.width) + ",\n";
+			final += "\t\t\t\t\t\theight = " + std::to_string(sC.height) + ",\n";
+			final += "\t\t\t\t\t\tz_index = " + std::to_string(sC.zIndex) + "\n";
+			final += "\t\t\t\t\t},\n";
+		}
+
+		
+		/* Rigid body Component*/
+		if (e.HasComponent<RigidBodyComponent>()) {
+			const RigidBodyComponent& rBC = e.GetComponent<RigidBodyComponent>();
+			final += "\t\t\t\t\trigidbody = {\n";
+			final += "\t\t\t\t\t\tvelocity = { x = " + std::to_string(rBC.velocity.x) + ", y = " + std::to_string(rBC.velocity.y) + " }\n";
+			final += "\t\t\t\t\t},\n";
+		}
+
+		/* Box Collider Component */
+		if (e.HasComponent<BoxColliderComponent>()) {
+			const BoxColliderComponent& bCC = e.GetComponent<BoxColliderComponent>();
+
+			final += "\t\t\t\tboxcollider = {\n";
+			final += "\t\t\t\t\twidth = " + std::to_string(bCC.width) + ",\n";
+			final += "\t\t\t\t\theight = " + std::to_string(bCC.height) + ",\n";
+
+			final += "\t\t\t\t\toffset = { x = " + std::to_string(bCC.offset.x * scale) + 
+				", y = " + std::to_string(bCC.offset.y * scale) + " }\n";
+
+			final += "\t\t\t\t},\n";
+
+		}
+
+
+		/* Player Controlled Component i.e the CAMERA */
+		if (e.HasComponent<PlayerControlledComponent>()) {
+			const PlayerControlledComponent& pCC = e.GetComponent<PlayerControlledComponent>();
+			final += "\t\t\t\tplayer_controlled = {\n";
+			final += "\t\t\t\t},\n";
+		}
+
+
+		if (e.HasComponent<KeyboardControlledComponent>()) {
+			const KeyboardControlledComponent& kCC = e.GetComponent<KeyboardControlledComponent>();
+			const glm::vec2& upVelocity = kCC.upVelocity;
+			const glm::vec2& rightVelocity = kCC.rightVelocity;
+			const glm::vec2& downVelocity = kCC.downVelocity;
+			const glm::vec2& leftVelocity = kCC.leftVelocity;
+
+			final += "\t\t\t\tkeyboard_controller = {\n";
+			final += "\t\t\t\t\tup_velocity = { x = " + std::to_string(upVelocity.x) + ", y = " + std::to_string(upVelocity.y) + " },\n";
+			final += "\t\t\t\t\tright_velocity = { x = " + std::to_string(rightVelocity.x) + ", y = " + std::to_string(rightVelocity.y) + " },\n";
+			final += "\t\t\t\t\tleft_velocity = { x = " + std::to_string(leftVelocity.x) + ", y = " + std::to_string(leftVelocity.y) + " },\n";
+			final += "\t\t\t\t\tdown_velocity = { x = " + std::to_string(downVelocity.x) + ", y = " + std::to_string(downVelocity.y) + " }\n";
+			final += "\t\t\t\t},\n";	// end of player controlled
+		}
+
+		final += "\t\t\t\t}\n"; // end of components;
+
+
+		final += "\t\t\t},\n"; // end of entity with comma
+		
+	}
+	// do player 
+	//final += "\t\t},\n";	// JAKE - add entities in here later.
 	final += "\t}\n"; // close entities
 	final += "}"; // close level 
 
@@ -610,29 +1071,33 @@ void WorldEditor::GenerateFinalWorldMap(SDL_Renderer* renderer, std::unique_ptr<
 }
 
 void WorldEditor::RenderSelectWorldDimensionsWindow(TileMap& tileMap, bool& generateWorld) {
-	const char* fileNames[2] = { "jungle.png", "jungle-night.png" };
+	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_AlwaysAutoResize;
+	if (generateWorld == false && ImGui::Begin("Tilemap Properties", NULL, windowFlags)) {
+		const char* fileNames[2] = { "jungle.png", "jungle-night.png" };
 
-	static int selectedSpriteIndex = 0;
+		static int selectedSpriteIndex = 0;
 
-	// Create an instance of ImGuiFileDialog
-	//ImGui::Combo("texture id", &selectedSpriteIndex, fileNames, IM_ARRAYSIZE(fileNames));
+		// Create an instance of ImGuiFileDialog
+		//ImGui::Combo("texture id", &selectedSpriteIndex, fileNames, IM_ARRAYSIZE(fileNames));
 
-	// num rows
-	ImGui::InputInt("Number of Rows:", &tileMap.numRows);
-	// new cols
-	ImGui::InputInt("Number of Columns:", &tileMap.numCols);
-	// tile size 
-	ImGui::InputInt("Tile Size (default 32)", &tileMap.tileSize);
-	// scale 
-	ImGui::InputDouble("Scale (default 2.0)", &tileMap.scale);
+		// num rows
+		ImGui::InputInt("Number of Rows:", &tileMap.numRows);
+		// new cols
+		ImGui::InputInt("Number of Columns:", &tileMap.numCols);
+		// tile size 
+		ImGui::InputInt("Tile Size (default 32)", &tileMap.tileSize);
+		// scale 
+		ImGui::InputDouble("Scale (default 2.0)", &tileMap.scale);
 
-	if (ImGui::Button("Create World")) {
-		generateWorld = true;
+		if (ImGui::Button("Create World")) {
+			generateWorld = true;
 
+		}
+		ImGui::End();
 	}
 }
 
-void WorldEditor::GenerateGrid(SDL_Renderer* renderer, TileMap& tileMap, SDL_Rect& camera) {
+void WorldEditor::GenerateGrid(TileMap& tileMap, SDL_Rect& camera) {
 
 	// Render Each World Grid
 
@@ -658,10 +1123,15 @@ void WorldEditor::GenerateGrid(SDL_Renderer* renderer, TileMap& tileMap, SDL_Rec
 
 void WorldEditor::OnRightClick(RightMouseClickedEvent& event) {
 	/* Clear mouse selected tile */
-	if (this->mouseSelectedTile != NULL) {
+	if (mouseSelectedTile.entity != NULL) {
 		// Kill the entity
-		this->mouseSelectedTile.Kill();
-		this->mouseSelectedTile = NULL;
+		mouseSelectedTile.entity.Kill();
+		mouseSelectedTile.entity = NULL;
+		mouseSelectedTile.tag = Tag::None;
+		mouseSelectedTile.groups.clear();
+	}
 
+	if (selectedTileWindowProperties.isSelected == true) {
+		selectedTileWindowProperties.isSelected = false;
 	}
 }

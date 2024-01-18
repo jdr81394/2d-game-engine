@@ -396,7 +396,7 @@
     <ClInclude Include="src\AssetStore\AssetStore.h" />
     <ClInclude Include="src\Components\AnimationComponent.h" />
     <ClInclude Include="src\Components\BoxColliderComponent.h" />
-    <ClInclude Include="src\Components\CameraFollowComponent.h" />
+    <ClInclude Include="src\Components\PlayerControlledComponent.h" />
     <ClInclude Include="src\Components\HealthComponent.h" />
     <ClInclude Include="src\Components\KeyboardControlledComponent.h" />
     <ClInclude Include="src\Components\ProjectileComponent.h" />
@@ -432,6 +432,9 @@
     <ClInclude Include="src\Systems\RenderSystem.h" />
     <ClInclude Include="src\Systems\RenderTextSystem.h" />
     <ClInclude Include="src\Systems\ScriptSystem.h" />
+    <ClInclude Include="src\WorldEditor\MouseSelectedTile.h" />
+    <ClInclude Include="src\WorldEditor\OrderedEntities.h" />
+    <ClInclude Include="src\WorldEditor\SelectedTileWindowProperties.h" />
     <ClInclude Include="src\WorldEditor\Vec2.h" />
     <ClInclude Include="src\WorldEditor\OrderedTilesDataStructure.h" />
     <ClInclude Include="src\WorldEditor\TileMap.h" />
@@ -588,6 +591,7 @@
     <ClCompile Include="src\Events\OtherKeys.h" />
     <ClCompile Include="src\Game\Game.cpp" />
     <ClCompile Include="src\Game\LevelLoader.cpp" />
+    <ClCompile Include="src\Labels\Labels.h" />
     <ClCompile Include="src\Logger\Logger.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\WorldEditor\OrderedTilesDataStructure.cpp" />

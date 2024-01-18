@@ -101,7 +101,8 @@ class EventBus {
         /*
             Emit an event of type <T>
             In our implementation, as soon as something emits an event we go ahead and execute all those listener callbacks
-            Example: eventBus->EmitEvent<CollisionEvent>(player,enemy);
+            Example: eventBus->EmitEvent<CollisionEvent>(
+            ,enemy);
         */
         // Some implementations call this "dispatch Event"
         // TArgs means multiple arguments

@@ -16,7 +16,6 @@ class KeyboardControlSystem : public System {
     public:
         KeyboardControlSystem() {
             RequireComponent<SpriteComponent>();
-            RequireComponent<RigidBodyComponent>();
             RequireComponent<KeyboardControlledComponent>();
         };
 
@@ -28,29 +27,66 @@ class KeyboardControlSystem : public System {
             // std::string keyCode = std::to_string(event.symbol);
             // std::string keySymbol(1, event.symbol);
             // Logger::Log("Key pressed event emitted: [" + keyCode + "] " + keySymbol);
-            for (auto entity : GetSystemEntities()) {
-                const auto keyboardcontrol = entity.GetComponent<KeyboardControlledComponent>();
-                auto& rigidbody = entity.GetComponent<RigidBodyComponent>();
-                auto& sprite = entity.GetComponent<SpriteComponent>();
+            for (const Entity& entity : GetSystemEntities()) {
+                const KeyboardControlledComponent& keyboardcontrol = entity.GetComponent<KeyboardControlledComponent>();
+                SpriteComponent& sprite = entity.GetComponent<SpriteComponent>();
+
+                const bool b = entity.HasComponent<RigidBodyComponent>();
+                const bool doesAnimate = entity.HasComponent<AnimationComponent>();
+
+              
+
 
                 switch (event.symbol) {
                     case SDLK_UP:
                         /* */
-                        rigidbody.velocity = keyboardcontrol.upVelocity;
-                        sprite.srcRect.y = sprite.height * 0;       // Points to first row. This works because the sprite is already 32 pixels tall, so multiplying it by 0 gives the proper placement for where we want to be in the spritesheet
+                        if (b) {
+                            RigidBodyComponent& rigidbody = entity.GetComponent<RigidBodyComponent>();
+
+                            rigidbody.velocity = keyboardcontrol.upVelocity;
+                        }
+                        
+                        if (doesAnimate) {
+                            sprite.srcRect.y = sprite.height * 0;       // Points to first row. This works because the sprite is already 32 pixels tall, so multiplying it by 0 gives the proper placement for where we want to be in the spritesheet
+
+                        }
                         
                         break;
                     case SDLK_RIGHT:
-                        rigidbody.velocity = keyboardcontrol.rightVelocity;
-                        sprite.srcRect.y = sprite.height * 1;
+                        if (b) {
+                            RigidBodyComponent& rigidbody = entity.GetComponent<RigidBodyComponent>();
+
+                            rigidbody.velocity = keyboardcontrol.rightVelocity;
+                        }
+
+                        
+                        if (doesAnimate) {
+                            sprite.srcRect.y = sprite.height * 1;
+
+                        }
                         break;
                     case SDLK_DOWN:
-                        rigidbody.velocity = keyboardcontrol.downVelocity;
-                        sprite.srcRect.y = sprite.height * 2;
+                        if (b) {
+                        
+                            RigidBodyComponent& rigidbody = entity.GetComponent<RigidBodyComponent>();
+
+                            rigidbody.velocity = keyboardcontrol.downVelocity;
+
+                        }
+                        if (doesAnimate) {
+                            sprite.srcRect.y = sprite.height * 2;
+
+                        }
                         break;
                     case SDLK_LEFT:
-                        rigidbody.velocity = keyboardcontrol.leftVelocity;
-                        sprite.srcRect.y = sprite.height * 3;
+                        if (b) {
+                            RigidBodyComponent& rigidbody = entity.GetComponent<RigidBodyComponent>();
+                            rigidbody.velocity = keyboardcontrol.leftVelocity;
+
+                        }
+                        if (doesAnimate) {
+                            sprite.srcRect.y = sprite.height * 3;
+                        }
                         break;
                 }
             }

@@ -156,7 +156,7 @@ Level = {
                     down_velocity = { x = 0, y = 50 },
                     left_velocity = { x = -50, y = 0 }
                 },
-                camera_follow = {
+                player_controlled = {
                     follow = true
                 }
             }
@@ -2871,8 +2871,7 @@ Level = {
                     end
                 }
             }
-        }
-        
+        }   
     }
 }
 

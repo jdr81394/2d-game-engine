@@ -167,6 +167,36 @@ std::set<std::string> OrderedTilesDataStructure::GetAllUniqueAssetIds() {
 	return result;
 }
 
+void OrderedTilesDataStructure::RemoveTile(Vec2 coords) {
+
+	try {
+		std::map<int, Entity>& map1 = tilesOrderedByX.at(coords.x);
+		Entity&& e1 = std::move(map1.at(coords.y));
+
+		std::map<int, Entity>& map2 = tilesOrderedByY.at(coords.y);
+		Entity&& e2 = std::move(map2.at(coords.x));
+
+		if (e1 != NULL) {
+			map1.erase(coords.y);
+			e1.Kill();
+			Logger::Log("KILLED 1");
+		}
+
+		if (e2 != NULL) {
+			map2.erase(coords.x);
+			e2.Kill();
+			Logger::Log("KILLED 2");
+		}
+	}
+	catch (const std::out_of_range& e) {
+		Logger::Err("Key not found while removing tile: ");
+
+	}
+
+
+
+}
+
 
 void OrderedTilesDataStructure::AddTile(Entity e, Vec2 worldDisplacement) {
 	TransformComponent& tC = e.GetComponent<TransformComponent>();
@@ -186,30 +216,12 @@ void OrderedTilesDataStructure::AddTile(Entity e, Vec2 worldDisplacement) {
 	try {
 		std::map<int, Entity>& map2 = tilesOrderedByX.at(eX);
 
-		//for (auto it = map2.begin(); it != map2.end(); ++it) {
-		//	//std::cout << "Value at key " << it->first << ": " << it->second->GetId() << std::endl;
-		//}
-
 		Entity e2 = map2.at(eY);
-
-		if (e2 != NULL && e2.HasComponent<SpriteComponent>()) {
-			const SpriteComponent sC2 = e2.GetComponent<SpriteComponent>();
-
-
-
-			Logger::Log("SPRITE COMPONENT HELD DOWN 2: " + sC2.assetId);
-		}
-
-
-
-		if (e != NULL && e2 == NULL)
-			Logger::Log("ID1: " + std::to_string(e.GetId()) + "  ID2: " + std::to_string(e2.GetId()));
 
 		if (e2 != NULL) {
 
 			// Delete element
 			map2.erase(eY);
-			//Logger::Log("TILES ORDERED BY X: entity with this id was deleted: " + std::to_string( e2->GetId() ) + ", new entity: " + std::to_string(e->GetId()));
 			e2.Kill();
 		}
 	}
@@ -222,7 +234,6 @@ void OrderedTilesDataStructure::AddTile(Entity e, Vec2 worldDisplacement) {
 		Entity e2 = map2.at(eX);
 		if (e2 != NULL) {
 			map2.erase(eX);
-			//Logger::Log("TILES ORDERED BY Y: entity with this id was deleted: " + std::to_string(e2->GetId()) + ", new entity: " + std::to_string(e->GetId()));
 			e2.Kill();
 		}
 
@@ -246,6 +257,7 @@ void OrderedTilesDataStructure::AddTile(Entity e, Vec2 worldDisplacement) {
 
 void OrderedTilesDataStructure::UpdateTilePositionsByOffset(Vec2 worldDisplacement) {
 	
+
 	
 
 	for (auto it = tilesOrderedByX.begin(); it != tilesOrderedByX.end(); ++it) {
@@ -262,8 +274,6 @@ void OrderedTilesDataStructure::UpdateTilePositionsByOffset(Vec2 worldDisplaceme
 					// 32 represents tile size
 					tC.position.x = (x * 32) + worldDisplacement.x;
 					tC.position.y = (y * 32) + worldDisplacement.y;
-					//tC.position.x += worldDisplacement.x;
-					//tC.position.y += worldDisplacement.y;
 				}
 			}
 

@@ -10,7 +10,7 @@
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/ProjectileComponent.h"
 #include "../Components/ProjectileEmitterComponent.h"
-#include "../Components/CameraFollowComponent.h"
+#include "../Components/PlayerControlledComponent.h"
 #include <SDL.h>
 
 class ProjectileEmitSystem: public System {
@@ -27,8 +27,8 @@ class ProjectileEmitSystem: public System {
         void OnKeyPressed(KeyPressedEvent& event) {
             if (event.symbol == SDLK_SPACE) {
                 for (auto entity: GetSystemEntities()) {
-                    // Gustavo says using the CameraFollowComponent is a hacky way to do this. 
-                    if (entity.HasComponent<CameraFollowComponent>()) {
+                    // Gustavo says using the PlayerControlledComponent is a hacky way to do this. 
+                    if (entity.HasComponent<PlayerControlledComponent>()) {
                         const auto projectileEmitter = entity.GetComponent<ProjectileEmitterComponent>();
                         const auto transform = entity.GetComponent<TransformComponent>();
                         const auto rigidbody = entity.GetComponent<RigidBodyComponent>();

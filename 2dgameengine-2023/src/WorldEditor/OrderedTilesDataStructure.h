@@ -6,6 +6,7 @@
 #include "./Vec2.h";
 #include "../Components/SpriteComponent.h"
 #include "../Components/TransformComponent.h"
+#include "./OrderedEntities.h"
 
 #include <map>
 
@@ -15,10 +16,16 @@ class OrderedTilesDataStructure {
 
 private:
 	// Have both these data structures for potential needs in the future.
+	// JAKE - TODO - I NEED TO MAKE THESE TO BE & 
 	std::map<int, std::map<int, Entity>> tilesOrderedByX;
 	std::map<int, std::map<int, Entity>> tilesOrderedByY;
 
 public:
+
+	OrderedTilesDataStructure() = default;
+
+	OrderedTilesDataStructure(TileMap tileMap);
+
 
 	inline std::map<int, std::map<int, Entity>> GetTilesOrderedByX() {
 		return tilesOrderedByX;
@@ -30,9 +37,7 @@ public:
 
 	void LogTiles();
 
-	OrderedTilesDataStructure() = default;
-
-	OrderedTilesDataStructure(TileMap tileMap);
+	void RemoveTile(Vec2 coords);
 
 	std::set<std::string> GetAllUniqueAssetIds();
 
