@@ -561,18 +561,19 @@ void WorldEditor::RenderSelectedTileWindow() {
 
 					ImGui::Text("Set velocity from keys");
 					ImGui::NewLine();
-					ImGui::InputFloat("Up X Velocity:", &kCC.upVelocity.x, 1, 100);
-					ImGui::InputFloat("Up Y Velocity:", &kCC.upVelocity.y, 1, 100);
+					//ImGui::InputFloat("Up X Velocity:", &kCC.upVelocity.x, -1, 100);
+					ImGui::InputFloat("Up Y Velocity:", &kCC.upVelocity.y, -1, -100);
 					ImGui::NewLine();
-					ImGui::InputFloat("Down X Velocity:", &kCC.downVelocity.x, 1, 100);
+					//ImGui::InputFloat("Down X Velocity:", &kCC.downVelocity.x, 1, 100);
 					ImGui::InputFloat("Down Y Velocity:", &kCC.downVelocity.y, 1, 100);
 					ImGui::NewLine();
-					ImGui::InputFloat("Left X Velocity:", &kCC.leftVelocity.x, 1, 100);
-					ImGui::InputFloat("Left Y Velocity:", &kCC.leftVelocity.y, 1, 100);
+					ImGui::InputFloat("Left X Velocity:", &kCC.leftVelocity.x, -1, -100);
+					//ImGui::InputFloat("Left Y Velocity:", &kCC.leftVelocity.y, 1, 100);
 					ImGui::NewLine();
 					ImGui::InputFloat("Right X Velocity:", &kCC.rightVelocity.x, 1, 100);
-					ImGui::InputFloat("Right Y Velocity:", &kCC.rightVelocity.y, 1, 100);
+					//ImGui::InputFloat("Right Y Velocity:", &kCC.rightVelocity.y, 1, 100);
 
+					ImGui::NewLine();
 					if (ImGui::Button("Remove Keyboard Control", ImVec2(100, 50))) {
 						registry->RemoveComponent<KeyboardControlledComponent>(entity);
 					};
@@ -592,6 +593,36 @@ void WorldEditor::RenderSelectedTileWindow() {
 					registry->AddComponent<PlayerControlledComponent>(entity);
 				};
 			}
+
+			ImGui::NewLine();
+
+
+			ImGui::Text("Health Component");
+			ImGui::NewLine();
+			bool hasHealthComponent = entity.HasComponent<HealthComponent>();
+			if (hasHealthComponent) {
+				HealthComponent& hC = entity.GetComponent<HealthComponent>();
+				ImGui::InputInt("Total HP: ", &hC.healthPercentage);
+
+				if (ImGui::Button("Remove Health", ImVec2(100, 50))) {
+					registry->RemoveComponent<HealthComponent>(entity);
+				}
+			}
+			else {
+				if(ImGui::Checkbox("Add Health", &hasHealthComponent)) {
+					registry->AddComponent<HealthComponent>(entity);
+				}
+			}
+
+
+			/*
+			TODO:
+			1. Animation (Tricky)
+			2. Projectile
+			3. Projectile Emitter
+			4. Script
+			5. TextLabel
+			*/
 
 			ImGui::End();
 		}
@@ -957,7 +988,6 @@ void WorldEditor::GenerateFinalWorldMap(SDL_Window* window) {
 		// Go through each possible tags and see if the entity has it 
 		TagMap tagMap{};	// create tagmap
 
-		// Jake
 		for (auto it2 = tagMap.Begin(); it2 != tagMap.End(); ++it2) {
 			if (e.HasTag(it2->second)) {
 				final += "\t\t\ttag=" + it2->second + "\n";

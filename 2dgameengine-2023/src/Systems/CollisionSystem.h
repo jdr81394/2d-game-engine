@@ -15,9 +15,6 @@ class CollisionSystem : public System {
         }
 
     void Update(std::unique_ptr<EventBus>& eventBus) {
-        // TODO: Check all entities that have a box collider to see if they are colliding with each other.
-        // Tip: AABB collision check = Axis-Aligned Bounding Boxes
-
         auto entities = GetSystemEntities();
 
         for (auto i = entities.begin(); i != entities.end(); i++) {

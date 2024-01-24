@@ -353,7 +353,6 @@ void Game::Render() {
     if (isWorldEditor && worldEditor != nullptr) {
        worldEditor->Render(renderer, camera, window);
     }
-    // TODO: Render game objects...
     registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
     registry->GetSystem<RenderTextSystem>().Update(renderer, assetStore, camera);
     registry->GetSystem<RenderHealthSystem>().Update(renderer, camera);
