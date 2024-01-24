@@ -66,7 +66,7 @@ private:
 	void GenerateFinalWorldMap(SDL_Window* window);
 	void RenderSelectWorldDimensionsWindow(TileMap& tileMap, bool& generateWorld);
 	void GenerateGrid(TileMap& tileMap, SDL_Rect& camera);
-	void AddEntityToMap(Entity&entity);
+	void AddEntityToMap(int x, int y, Entity&entity);
 
 public:
 

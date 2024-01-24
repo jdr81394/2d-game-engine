@@ -29,14 +29,27 @@ void WorldEditor::OnLeftMouseHeldDown(LeftMouseHeldDownEvent& event) {
 		// If there is a difference, then you update the entities
 		if (xDiff != 0 || yDiff != 0) {
 			for (auto it = orderedEntities.Begin(); it != orderedEntities.End(); ++it) {
-				Entity& e = *it;
-				if (e.HasComponent<TransformComponent>()) {
-					TransformComponent& tC = e.GetComponent<TransformComponent>();
-					tC.position.x += xDiff;
-					tC.position.y += yDiff;
+				const std::map<int, std::vector<Entity>> & map = it->second;
 
-					Logger::Log("X: " + std::to_string(tC.position.x) + "  Y: " + std::to_string(tC.position.y));
+				for (auto jt = map.begin(); jt != map.end(); ++jt) {
+
+					const std::vector<Entity>& v = jt->second;
+
+					for (auto kt = v.begin(); kt != v.end(); ++kt) {
+						const Entity& e = *kt;
+
+						if (e.HasComponent<TransformComponent>()) {
+							TransformComponent& tC = e.GetComponent<TransformComponent>();
+							tC.position.x += xDiff;
+							tC.position.y += yDiff;
+
+							Logger::Log("X: " + std::to_string(tC.position.x) + "  Y: " + std::to_string(tC.position.y));
+						}
+					}
+
 				}
+
+
 
 			}
 		}
@@ -60,7 +73,17 @@ void WorldEditor::OnLeftMouseHeldDown(LeftMouseHeldDownEvent& event) {
 		/*if (x > (tileMap.numCols * tileMap.tileSize) + worldDisplacement.x || x <= 0 || x <= worldDisplacement.x) return;
 		if (y > (tileMap.numRows * tileMap.tileSize) + worldDisplacement.y || y <= 0 || y <= worldDisplacement.y ) return;*/
 
+		/* We need to check to make sure an entity doesn't already exist so we don't place it down twice */
 
+		//orderedEntities;
+
+
+		/*
+				auto isPointInsideSquare = [](const int tCX, const int tCY, const int tCW, const int tCH, const int x, const int y) -> bool {
+					return (x >= tCX && x <= tCX + tCH &&
+						y >= tCY && y <= tCY + tCH);
+					};
+		*/
 
 		Entity entity = registry->CreateEntity();
 
@@ -123,7 +146,7 @@ void WorldEditor::OnLeftMouseHeldDown(LeftMouseHeldDownEvent& event) {
 		}
 		else {
 			// TODO jake - handle differnet kinds of entities but for now just create entity
-			AddEntityToMap(entity);
+			AddEntityToMap(position.x, position.y, entity);
 		}
 
 	}
@@ -139,30 +162,48 @@ void WorldEditor::OnLeftMouseHeldDown(LeftMouseHeldDownEvent& event) {
 
 		for (auto it = orderedEntities.Begin(); it != orderedEntities.End(); ++it) {
 			/* lets see if its in hitbox using aabb */
-			const Entity& e = *it;
+			const std::map<int,std::vector<Entity>>& m = it->second;
+			
+			
+			for (auto jt = m.begin(); jt != m.end(); ++jt) {
 
-			if (e.HasComponent<TransformComponent>()) {
+				const std::vector<Entity>& v = jt->second;
 
-				const TransformComponent& tC = e.GetComponent<TransformComponent>();
+				for(auto kt = v.begin(); kt != v.end(); ++kt) {
 
-				const int tCX = tC.position.x;
-				const int tCY = tC.position.y;
-				const int tCW = 32;		// use 32 for rn
-				const int tCH = 32;
+					const Entity& e = *kt;
 
-				auto isPointInsideSquare = [](const int tCX, const int tCY, const int tCW, const int tCH, const int x, const int y) -> bool {
-					return (x >= tCX && x <= tCX + tCH &&
-						y >= tCY && y <= tCY + tCH);
-					};
+				
+					if (e.HasComponent<TransformComponent>()) {
 
-				// If the point is within the square, then assign the mouseSelectedTile to the entry
-				if (isPointInsideSquare(tCX, tCY, tCW, tCH, x, y)) {
-					selectedTileWindowProperties.entity = e;
-					selectedTileWindowProperties.isSelected = true;
+						const TransformComponent& tC = e.GetComponent<TransformComponent>();
+
+						const int tCX = tC.position.x;
+						const int tCY = tC.position.y;
+						const int tCW = 32;		// use 32 for rn
+						const int tCH = 32;
+
+						// Jake return
+						auto isPointInsideSquare = [](const int tCX, const int tCY, const int tCW, const int tCH, const int x, const int y) -> bool {
+							return (x >= tCX && x <= tCX + tCH &&
+								y >= tCY && y <= tCY + tCH);
+							};
+
+						// If the point is within the square, then assign the mouseSelectedTile to the entry
+						if (isPointInsideSquare(tCX, tCY, tCW, tCH, x, y)) {
+							selectedTileWindowProperties.entity = e;
+							selectedTileWindowProperties.isSelected = true;
+						}
+
+					}
+
 				}
 
-			}
+			
 
+			}
+			
+		
 		}
 
 		// If it is still false, that means that it was not an entity that was found so we should look for a tile
@@ -213,9 +254,9 @@ void WorldEditor::OnLeftMouseHeldDown(LeftMouseHeldDownEvent& event) {
 }
 
 // This adds the entity to the .lua file and pushes a refernce to the entity to be held by the world editor
-void WorldEditor::AddEntityToMap(Entity& entity) {
+void WorldEditor::AddEntityToMap(int x, int y, Entity& entity) {
 
-	orderedEntities.Push(entity);
+	orderedEntities.Add(x,y,entity);
 }
 
 void WorldEditor::InitializeOrderedTilesDataStructure() {
@@ -954,14 +995,29 @@ void WorldEditor::GenerateFinalWorldMap(SDL_Window* window) {
 	final += "\t\t{ type = \"texture\" , id = \"./assets/tilemaps/test\",  file = \"./assets/tilemaps/test.png\" },\n";
 	
 	for (auto it = orderedEntities.Begin(); it != orderedEntities.End(); ++it) { // add all assets for units
-		const Entity& e = *it;
+		
+		const std::map<int, std::vector<Entity>>&  map = it->second;
 
-		if (e.HasComponent<SpriteComponent>()) {
-			const SpriteComponent& sC = e.GetComponent<SpriteComponent>();
-			const std::string&& path = std::move(assetIdToFilePath[sC.assetId]);
+		for (auto jt = map.begin(); jt != map.end(); ++jt) {
+		
+			const std::vector<Entity>& v = jt->second;
 
-			final += "\t\t{ type = \"texture\", id=\"" + sC.assetId + "\",	file =\""+path+"\" },\n";
+			for (auto kt = v.begin(); kt != v.end(); ++kt) {
+				
+				const Entity& e = *kt;
+
+				if (e.HasComponent<SpriteComponent>()) {
+					const SpriteComponent& sC = e.GetComponent<SpriteComponent>();
+					const std::string&& path = std::move(assetIdToFilePath[sC.assetId]);
+
+					final += "\t\t{ type = \"texture\", id=\"" + sC.assetId + "\",	file =\"" + path + "\" },\n";
+				}
+			}
+
+
 		}
+		
+
 	}
 
 	
@@ -981,100 +1037,111 @@ void WorldEditor::GenerateFinalWorldMap(SDL_Window* window) {
 	/* Handle all entities and their components*/
 
 	for (auto it = orderedEntities.Begin(); it != orderedEntities.End(); ++it) {
-		if(it != orderedEntities.Begin() ) final += "\t\t\t{\n";
-		// Get current entity
-		const Entity& e = *it;
-		
-		// Go through each possible tags and see if the entity has it 
-		TagMap tagMap{};	// create tagmap
+		if (it != orderedEntities.Begin()) final += "\t\t\t{\n";
 
-		for (auto it2 = tagMap.Begin(); it2 != tagMap.End(); ++it2) {
-			if (e.HasTag(it2->second)) {
-				final += "\t\t\ttag=" + it2->second + "\n";
+		const std::map<int, std::vector<Entity>>& map = it->second;
+
+		for (auto jt = map.begin(); jt != map.end(); ++jt) {
+
+			const std::vector<Entity>& v = jt->second;
+
+			for (auto kt = v.begin(); kt != v.end(); ++kt) {
+
+				// Get current entity
+				const Entity& e = *kt;
+
+				// Go through each possible tags and see if the entity has it 
+				TagMap tagMap{};	// create tagmap
+
+				for (auto it2 = tagMap.Begin(); it2 != tagMap.End(); ++it2) {
+					if (e.HasTag(it2->second)) {
+						final += "\t\t\ttag=" + it2->second + "\n";
+					}
+				}
+
+				// Let's add the components
+				final += "\n\t\t\t\tcomponents = {\n";
+
+				// Let's go through each components
+				/* Transform Component check */
+				const float scale = 2; /* JAKE TODO SCALE IS HARDCODED TO 2.0. Must fix this when dealing with scale later*/
+
+				if (e.HasComponent<TransformComponent>()) {
+					const TransformComponent& tC = e.GetComponent<TransformComponent>();
+					final += "\t\t\t\t\ttransform = {\n";
+					final += "\t\t\t\t\t\tposition = { x = " + std::to_string((tC.position.x - worldDisplacement.x) * scale) + ", y= " + std::to_string((tC.position.y - worldDisplacement.y) * scale) + " },\n";
+					final += "\t\t\t\t\t\tscale = { x = " + std::to_string(scale) + ", y= " + std::to_string(scale) + " },\n";
+					final += "\t\t\t\t\t\trotation = " + std::to_string(tC.rotation) + "\n";
+					final += "\t\t\t\t\t},\n";
+					// If not final component, then add comma
+				}
+
+				/* Sprite Component */
+				if (e.HasComponent<SpriteComponent>()) {
+					const SpriteComponent& sC = e.GetComponent<SpriteComponent>();
+					final += "\t\t\t\t\tsprite = {\n";
+					final += "\t\t\t\t\t\ttexture_asset_id = \"" + sC.assetId + "\"" + ",\n";
+					final += "\t\t\t\t\t\twidth = " + std::to_string(sC.width) + ",\n";
+					final += "\t\t\t\t\t\theight = " + std::to_string(sC.height) + ",\n";
+					final += "\t\t\t\t\t\tz_index = " + std::to_string(sC.zIndex) + "\n";
+					final += "\t\t\t\t\t},\n";
+				}
+
+
+				/* Rigid body Component*/
+				if (e.HasComponent<RigidBodyComponent>()) {
+					const RigidBodyComponent& rBC = e.GetComponent<RigidBodyComponent>();
+					final += "\t\t\t\t\trigidbody = {\n";
+					final += "\t\t\t\t\t\tvelocity = { x = " + std::to_string(rBC.velocity.x) + ", y = " + std::to_string(rBC.velocity.y) + " }\n";
+					final += "\t\t\t\t\t},\n";
+				}
+
+				/* Box Collider Component */
+				if (e.HasComponent<BoxColliderComponent>()) {
+					const BoxColliderComponent& bCC = e.GetComponent<BoxColliderComponent>();
+
+					final += "\t\t\t\tboxcollider = {\n";
+					final += "\t\t\t\t\twidth = " + std::to_string(bCC.width) + ",\n";
+					final += "\t\t\t\t\theight = " + std::to_string(bCC.height) + ",\n";
+
+					final += "\t\t\t\t\toffset = { x = " + std::to_string(bCC.offset.x * scale) +
+						", y = " + std::to_string(bCC.offset.y * scale) + " }\n";
+
+					final += "\t\t\t\t},\n";
+
+				}
+
+
+				/* Player Controlled Component i.e the CAMERA */
+				if (e.HasComponent<PlayerControlledComponent>()) {
+					const PlayerControlledComponent& pCC = e.GetComponent<PlayerControlledComponent>();
+					final += "\t\t\t\tplayer_controlled = {\n";
+					final += "\t\t\t\t},\n";
+				}
+
+
+				if (e.HasComponent<KeyboardControlledComponent>()) {
+					const KeyboardControlledComponent& kCC = e.GetComponent<KeyboardControlledComponent>();
+					const glm::vec2& upVelocity = kCC.upVelocity;
+					const glm::vec2& rightVelocity = kCC.rightVelocity;
+					const glm::vec2& downVelocity = kCC.downVelocity;
+					const glm::vec2& leftVelocity = kCC.leftVelocity;
+
+					final += "\t\t\t\tkeyboard_controller = {\n";
+					final += "\t\t\t\t\tup_velocity = { x = " + std::to_string(upVelocity.x) + ", y = " + std::to_string(upVelocity.y) + " },\n";
+					final += "\t\t\t\t\tright_velocity = { x = " + std::to_string(rightVelocity.x) + ", y = " + std::to_string(rightVelocity.y) + " },\n";
+					final += "\t\t\t\t\tleft_velocity = { x = " + std::to_string(leftVelocity.x) + ", y = " + std::to_string(leftVelocity.y) + " },\n";
+					final += "\t\t\t\t\tdown_velocity = { x = " + std::to_string(downVelocity.x) + ", y = " + std::to_string(downVelocity.y) + " }\n";
+					final += "\t\t\t\t},\n";	// end of player controlled
+				}
+
+				final += "\t\t\t\t}\n"; // end of components;
+
+
+				final += "\t\t\t},\n"; // end of entity with comma
+
 			}
 		}
-
-		// Let's add the components
-		final += "\n\t\t\t\tcomponents = {\n";
-
-		// Let's go through each components
-		/* Transform Component check */
-		const float scale = 2; /* JAKE TODO SCALE IS HARDCODED TO 2.0. Must fix this when dealing with scale later*/
-
-		if (e.HasComponent<TransformComponent>()) {
-			const TransformComponent& tC = e.GetComponent<TransformComponent>();
-			final += "\t\t\t\t\ttransform = {\n";
-			final += "\t\t\t\t\t\tposition = { x = " + std::to_string((tC.position.x - worldDisplacement.x) * scale) + ", y= " + std::to_string((tC.position.y - worldDisplacement.y) * scale) + " },\n";
-			final += "\t\t\t\t\t\tscale = { x = " + std::to_string(scale) + ", y= " + std::to_string(scale) + " },\n";
-			final += "\t\t\t\t\t\trotation = "+std::to_string(tC.rotation) + "\n";
-			final += "\t\t\t\t\t},\n";
-			// If not final component, then add comma
-		}
-
-		/* Sprite Component */
-		if (e.HasComponent<SpriteComponent>()) {
-			const SpriteComponent& sC = e.GetComponent<SpriteComponent>();
-			final += "\t\t\t\t\tsprite = {\n";
-			final += "\t\t\t\t\t\ttexture_asset_id = \"" + sC.assetId+ "\"" + ",\n";
-			final += "\t\t\t\t\t\twidth = " + std::to_string(sC.width) + ",\n";
-			final += "\t\t\t\t\t\theight = " + std::to_string(sC.height) + ",\n";
-			final += "\t\t\t\t\t\tz_index = " + std::to_string(sC.zIndex) + "\n";
-			final += "\t\t\t\t\t},\n";
-		}
-
-		
-		/* Rigid body Component*/
-		if (e.HasComponent<RigidBodyComponent>()) {
-			const RigidBodyComponent& rBC = e.GetComponent<RigidBodyComponent>();
-			final += "\t\t\t\t\trigidbody = {\n";
-			final += "\t\t\t\t\t\tvelocity = { x = " + std::to_string(rBC.velocity.x) + ", y = " + std::to_string(rBC.velocity.y) + " }\n";
-			final += "\t\t\t\t\t},\n";
-		}
-
-		/* Box Collider Component */
-		if (e.HasComponent<BoxColliderComponent>()) {
-			const BoxColliderComponent& bCC = e.GetComponent<BoxColliderComponent>();
-
-			final += "\t\t\t\tboxcollider = {\n";
-			final += "\t\t\t\t\twidth = " + std::to_string(bCC.width) + ",\n";
-			final += "\t\t\t\t\theight = " + std::to_string(bCC.height) + ",\n";
-
-			final += "\t\t\t\t\toffset = { x = " + std::to_string(bCC.offset.x * scale) + 
-				", y = " + std::to_string(bCC.offset.y * scale) + " }\n";
-
-			final += "\t\t\t\t},\n";
-
-		}
-
-
-		/* Player Controlled Component i.e the CAMERA */
-		if (e.HasComponent<PlayerControlledComponent>()) {
-			const PlayerControlledComponent& pCC = e.GetComponent<PlayerControlledComponent>();
-			final += "\t\t\t\tplayer_controlled = {\n";
-			final += "\t\t\t\t},\n";
-		}
-
-
-		if (e.HasComponent<KeyboardControlledComponent>()) {
-			const KeyboardControlledComponent& kCC = e.GetComponent<KeyboardControlledComponent>();
-			const glm::vec2& upVelocity = kCC.upVelocity;
-			const glm::vec2& rightVelocity = kCC.rightVelocity;
-			const glm::vec2& downVelocity = kCC.downVelocity;
-			const glm::vec2& leftVelocity = kCC.leftVelocity;
-
-			final += "\t\t\t\tkeyboard_controller = {\n";
-			final += "\t\t\t\t\tup_velocity = { x = " + std::to_string(upVelocity.x) + ", y = " + std::to_string(upVelocity.y) + " },\n";
-			final += "\t\t\t\t\tright_velocity = { x = " + std::to_string(rightVelocity.x) + ", y = " + std::to_string(rightVelocity.y) + " },\n";
-			final += "\t\t\t\t\tleft_velocity = { x = " + std::to_string(leftVelocity.x) + ", y = " + std::to_string(leftVelocity.y) + " },\n";
-			final += "\t\t\t\t\tdown_velocity = { x = " + std::to_string(downVelocity.x) + ", y = " + std::to_string(downVelocity.y) + " }\n";
-			final += "\t\t\t\t},\n";	// end of player controlled
-		}
-
-		final += "\t\t\t\t}\n"; // end of components;
-
-
-		final += "\t\t\t},\n"; // end of entity with comma
-		
 	}
 	// do player 
 	//final += "\t\t},\n";	// JAKE - add entities in here later.
