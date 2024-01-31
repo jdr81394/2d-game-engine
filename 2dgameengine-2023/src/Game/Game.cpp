@@ -39,7 +39,7 @@ int Game::mapWidth;
 Game::Game() {
     isRunning = false;
     isDebug = false;
-    isWorldEditor = true;
+    isWorldEditor = false;
     registry = std::make_unique<Registry>();
     assetStore = std::make_unique<AssetStore>();
     eventBus = std::make_unique<EventBus>();

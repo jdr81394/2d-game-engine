@@ -2,46 +2,303 @@ Level = {
 	assets = {
 		[0] = 
 		{ type = "texture" , id = "./assets/tilemaps/test",  file = "./assets/tilemaps/test.png" },
-		{ type = "texture", id="tree-19-texture",	file ="./assets/images/tree-19.png" },
+		{ type = "texture", id="landing-base-texture",	file ="./assets/images/landing-base.png" },
+		{ type = "texture", id="landing-base-texture",	file ="./assets/images/landing-base.png" },
+		{ type = "texture", id="landing-base-texture",	file ="./assets/images/landing-base.png" },
+		{ type = "texture", id="landing-base-texture",	file ="./assets/images/landing-base.png" },
+		{ type = "texture", id="landing-base-texture",	file ="./assets/images/landing-base.png" },
+		{ type = "texture", id="landing-base-texture",	file ="./assets/images/landing-base.png" },
+		{ type = "texture", id="landing-base-texture",	file ="./assets/images/landing-base.png" },
+		{ type = "texture", id="landing-base-texture",	file ="./assets/images/landing-base.png" },
+		{ type = "texture", id="landing-base-texture",	file ="./assets/images/landing-base.png" },
+		{ type = "texture", id="landing-base-texture",	file ="./assets/images/landing-base.png" },
+		{ type = "texture", id="landing-base-texture",	file ="./assets/images/landing-base.png" },
+		{ type = "texture", id="landing-base-texture",	file ="./assets/images/landing-base.png" },
+		{ type = "texture", id="landing-base-texture",	file ="./assets/images/landing-base.png" },
+		{ type = "texture", id="landing-base-texture",	file ="./assets/images/landing-base.png" },
+		{ type = "texture", id="landing-base-texture",	file ="./assets/images/landing-base.png" },
+		{ type = "texture", id="landing-base-texture",	file ="./assets/images/landing-base.png" },
+		{ type = "texture", id="landing-base-texture",	file ="./assets/images/landing-base.png" },
 	}
 ,	tilemap = {
 		map_file="./assets/tilemaps/test.map",
 		texture_asset_id="./assets/tilemaps/test",
-		num_rows=20,
-		num_cols=20,
+		num_rows=10,
+		num_cols=10,
 		tile_size=32,
 		scale=2.0
 	},
 	entities = {
-		[0] = {
+		[0] = 	{
+
 				components = {
 					transform = {
-						position = { x = 706.000000, y= 532.000000 },
+						position = { x = 82.000000, y= 530.000000 },
 						scale = { x = 2.000000, y= 2.000000 },
 						rotation = 0.000000
 					},
 					sprite = {
-						texture_asset_id = "tree-19-texture",
+						texture_asset_id = "landing-base-texture",
 						width = 32,
 						height = 32,
 						z_index = 2
 					},
-					rigidbody = {
-						velocity = { x = 0.000000, y = 0.000000 }
+				}
+			},
+			{
+
+				components = {
+					transform = {
+						position = { x = 142.000000, y= 54.000000 },
+						scale = { x = 2.000000, y= 2.000000 },
+						rotation = 0.000000
 					},
-				boxcollider = {
-					width = 32,
-					height = 32,
-					offset = { x = 0.000000, y = 0.000000 }
-				},
-				player_controlled = {
-				},
-				keyboard_controller = {
-					up_velocity = { x = 0.000000, y = -50.000000 },
-					right_velocity = { x = 50.000000, y = 0.000000 },
-					left_velocity = { x = -50.000000, y = 0.000000 },
-					down_velocity = { x = 0.000000, y = 50.000000 }
-				},
+					sprite = {
+						texture_asset_id = "landing-base-texture",
+						width = 32,
+						height = 32,
+						z_index = 2
+					},
+				}
+			},
+			{
+
+				components = {
+					transform = {
+						position = { x = 142.000000, y= 58.000000 },
+						scale = { x = 2.000000, y= 2.000000 },
+						rotation = 0.000000
+					},
+					sprite = {
+						texture_asset_id = "landing-base-texture",
+						width = 32,
+						height = 32,
+						z_index = 2
+					},
+				}
+			},
+			{
+
+				components = {
+					transform = {
+						position = { x = 142.000000, y= 60.000000 },
+						scale = { x = 2.000000, y= 2.000000 },
+						rotation = 0.000000
+					},
+					sprite = {
+						texture_asset_id = "landing-base-texture",
+						width = 32,
+						height = 32,
+						z_index = 2
+					},
+				}
+			},
+			{
+
+				components = {
+					transform = {
+						position = { x = 142.000000, y= 60.000000 },
+						scale = { x = 2.000000, y= 2.000000 },
+						rotation = 0.000000
+					},
+					sprite = {
+						texture_asset_id = "landing-base-texture",
+						width = 32,
+						height = 32,
+						z_index = 2
+					},
+				}
+			},
+			{
+
+				components = {
+					transform = {
+						position = { x = 142.000000, y= 244.000000 },
+						scale = { x = 2.000000, y= 2.000000 },
+						rotation = 0.000000
+					},
+					sprite = {
+						texture_asset_id = "landing-base-texture",
+						width = 32,
+						height = 32,
+						z_index = 2
+					},
+				}
+			},
+			{
+
+				components = {
+					transform = {
+						position = { x = 142.000000, y= 244.000000 },
+						scale = { x = 2.000000, y= 2.000000 },
+						rotation = 0.000000
+					},
+					sprite = {
+						texture_asset_id = "landing-base-texture",
+						width = 32,
+						height = 32,
+						z_index = 2
+					},
+				}
+			},
+			{
+
+				components = {
+					transform = {
+						position = { x = 142.000000, y= 374.000000 },
+						scale = { x = 2.000000, y= 2.000000 },
+						rotation = 0.000000
+					},
+					sprite = {
+						texture_asset_id = "landing-base-texture",
+						width = 32,
+						height = 32,
+						z_index = 2
+					},
+				}
+			},
+			{
+
+				components = {
+					transform = {
+						position = { x = 142.000000, y= 374.000000 },
+						scale = { x = 2.000000, y= 2.000000 },
+						rotation = 0.000000
+					},
+					sprite = {
+						texture_asset_id = "landing-base-texture",
+						width = 32,
+						height = 32,
+						z_index = 2
+					},
+				}
+			},
+			{
+
+				components = {
+					transform = {
+						position = { x = 272.000000, y= 116.000000 },
+						scale = { x = 2.000000, y= 2.000000 },
+						rotation = 0.000000
+					},
+					sprite = {
+						texture_asset_id = "landing-base-texture",
+						width = 32,
+						height = 32,
+						z_index = 2
+					},
+				}
+			},
+			{
+
+				components = {
+					transform = {
+						position = { x = 276.000000, y= 124.000000 },
+						scale = { x = 2.000000, y= 2.000000 },
+						rotation = 0.000000
+					},
+					sprite = {
+						texture_asset_id = "landing-base-texture",
+						width = 32,
+						height = 32,
+						z_index = 2
+					},
+				}
+			},
+			{
+
+				components = {
+					transform = {
+						position = { x = 278.000000, y= 124.000000 },
+						scale = { x = 2.000000, y= 2.000000 },
+						rotation = 0.000000
+					},
+					sprite = {
+						texture_asset_id = "landing-base-texture",
+						width = 32,
+						height = 32,
+						z_index = 2
+					},
+				}
+			},
+			{
+
+				components = {
+					transform = {
+						position = { x = 280.000000, y= 126.000000 },
+						scale = { x = 2.000000, y= 2.000000 },
+						rotation = 0.000000
+					},
+					sprite = {
+						texture_asset_id = "landing-base-texture",
+						width = 32,
+						height = 32,
+						z_index = 2
+					},
+				}
+			},
+			{
+
+				components = {
+					transform = {
+						position = { x = 456.000000, y= 50.000000 },
+						scale = { x = 2.000000, y= 2.000000 },
+						rotation = 0.000000
+					},
+					sprite = {
+						texture_asset_id = "landing-base-texture",
+						width = 32,
+						height = 32,
+						z_index = 2
+					},
+				}
+			},
+			{
+
+				components = {
+					transform = {
+						position = { x = 524.000000, y= 278.000000 },
+						scale = { x = 2.000000, y= 2.000000 },
+						rotation = 0.000000
+					},
+					sprite = {
+						texture_asset_id = "landing-base-texture",
+						width = 32,
+						height = 32,
+						z_index = 2
+					},
+				}
+			},
+			{
+
+				components = {
+					transform = {
+						position = { x = 524.000000, y= 278.000000 },
+						scale = { x = 2.000000, y= 2.000000 },
+						rotation = 0.000000
+					},
+					sprite = {
+						texture_asset_id = "landing-base-texture",
+						width = 32,
+						height = 32,
+						z_index = 2
+					},
+				}
+			},
+			{
+
+				components = {
+					transform = {
+						position = { x = 524.000000, y= 280.000000 },
+						scale = { x = 2.000000, y= 2.000000 },
+						rotation = 0.000000
+					},
+					sprite = {
+						texture_asset_id = "landing-base-texture",
+						width = 32,
+						height = 32,
+						z_index = 2
+					},
 				}
 			},
 	}

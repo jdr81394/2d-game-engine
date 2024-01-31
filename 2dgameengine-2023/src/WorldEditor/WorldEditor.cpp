@@ -1033,12 +1033,11 @@ void WorldEditor::GenerateFinalWorldMap(SDL_Window* window) {
 	final += "\t},\n"; // close tile map
 
 	final += "\tentities = {\n";	// open entities
-	final += "\t\t[0] = {";
+	final += "\t\t[0] = ";
 
 	/* Handle all entities and their components*/
 
 	for (auto it = orderedEntities.Begin(); it != orderedEntities.End(); ++it) {
-		if (it != orderedEntities.Begin()) final += "\t\t\t{\n";
 
 		const std::map<int, std::vector<Entity>>& map = it->second;
 
@@ -1047,6 +1046,7 @@ void WorldEditor::GenerateFinalWorldMap(SDL_Window* window) {
 			const std::vector<Entity>& v = jt->second;
 
 			for (auto kt = v.begin(); kt != v.end(); ++kt) {
+				final += "\t\t\t{\n";
 
 				// Get current entity
 				const Entity& e = *kt;
