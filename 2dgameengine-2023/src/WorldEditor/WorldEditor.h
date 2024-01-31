@@ -30,6 +30,7 @@
 #include <iostream>
 #include <memory>
 #include <fstream>
+#include <limits>
 
 #include <SDL.h>
 #include <SDL_image.h>
@@ -67,6 +68,7 @@ private:
 	void RenderSelectWorldDimensionsWindow(TileMap& tileMap, bool& generateWorld);
 	void GenerateGrid(TileMap& tileMap, SDL_Rect& camera);
 	void AddEntityToMap(int x, int y, Entity&entity);
+	void DeleteOrderedEntity(int x, int y);
 
 public:
 

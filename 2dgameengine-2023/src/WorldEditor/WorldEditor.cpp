@@ -255,6 +255,7 @@ void WorldEditor::OnLeftMouseHeldDown(LeftMouseHeldDownEvent& event) {
 
 // This adds the entity to the .lua file and pushes a refernce to the entity to be held by the world editor
 void WorldEditor::AddEntityToMap(int x, int y, Entity& entity) {
+	Logger::Log("Size of vector before being added: " + std::to_string(orderedEntities[x][y].size()) + "\n");
 
 	orderedEntities.Add(x,y,entity);
 }
@@ -1219,6 +1220,11 @@ void WorldEditor::GenerateGrid(TileMap& tileMap, SDL_Rect& camera) {
 }
 
 void WorldEditor::OnRightClick(RightMouseClickedEvent& event) {
+
+	if (selectedTileWindowProperties.isSelected == true) {
+		selectedTileWindowProperties.isSelected = false;
+	}
+
 	/* Clear mouse selected tile */
 	if (mouseSelectedTile.entity != NULL) {
 		// Kill the entity
@@ -1227,8 +1233,121 @@ void WorldEditor::OnRightClick(RightMouseClickedEvent& event) {
 		mouseSelectedTile.tag = Tag::None;
 		mouseSelectedTile.groups.clear();
 	}
+	// Remove an entity from where it is placed on the map
+	else if (mouseSelectedTile.entity == NULL) {
 
-	if (selectedTileWindowProperties.isSelected == true) {
-		selectedTileWindowProperties.isSelected = false;
+		// Let's check for the ordered entities first before we try to remove a tile
+		// we must first get the x and y of the click
+		const int& x = event.GetX() - (tileMap.tileSize / 2);
+		const int& y = event.GetY() - (tileMap.tileSize / 2);
+		DeleteOrderedEntity(x, y);
+
+	
+		/* Lets go through tiles and find the one underneath that we want to get rid of */
+		// Gotta break it down into 
+		/* Transform x and y of mouse into x and y indices on map */
+		const int& a = ceil((x - worldDisplacement.x) / tileMap.tileSize);			// This will get the exact index
+		const int& b = ceil((y - worldDisplacement.y) / tileMap.tileSize);
+
+		if (worldMap->HasTile(a, b)) {
+			worldMap->RemoveTile(Vec2{a,b});
+		};
+
+
+	
+
+		
 	}
+
+	
+
+
+}
+
+void WorldEditor::DeleteOrderedEntity(int x, int y) {
+
+	/* Jake Could make logic branch to try to get pixel perfect click, but meh */
+
+	// this is the index
+	int closestValueX = std::numeric_limits<int>::max();	// fill up to max, not infinity because memory inefficient.. leaves open to edge case bugs though
+
+
+	for (auto it = orderedEntities.Begin(); it != orderedEntities.End(); ++it) {
+		// if not, then we need to see if it's the closest value
+		if (abs(it->first - x) <= abs(closestValueX - x)) {
+			closestValueX = it->first;
+		}
+	}
+
+	// Needs to be within 8 pixels of the center
+	if (abs(closestValueX - x) > 10) {
+		return;
+	}
+
+	int closestValueY = std::numeric_limits<int>::max();
+
+	try {
+		//  the next map for y, if its within a certain range, maybe 12 pixels
+		const std::map<int, std::vector<Entity>>& m = orderedEntities.At(closestValueX);
+
+		for (auto it = m.begin(); it != m.end(); ++it) {
+			if (abs(it->first - y) <= abs(closestValueY - y)) {
+				closestValueY = it->first;
+			}
+		}
+
+	}
+	catch (...) {
+		Logger::Err("I should write safe code.. so this block exists. lol. Maybe it'll actually be worth it? ");
+	}
+
+	// needs to be within 8 pixels of the center
+	if (abs(closestValueY - y) > 10) {
+		return;
+	}
+
+	// Private scope so I can reuse the interator it lol
+	{
+		/* Jake todo, we can sort by z index later, perhaps grab by Z */
+		auto it = orderedEntities.Find(closestValueX);
+
+		if (it != orderedEntities.End()) {
+			std::map<int, std::vector<Entity>>& m = it->second;
+
+			auto jt = m.find(closestValueY);
+
+			if (jt != m.end()) {
+				std::vector<Entity>& v = jt->second;
+
+				Logger::Log("Size of vector before: " + std::to_string(v.size()) + "\n");
+
+				if (v.size() > 0) {
+					Entity& e = v.back();
+					v.pop_back();
+					Logger::Log("Size of vector after: " + std::to_string(v.size()) + "\n");
+
+					e.Kill();
+
+					// Lets delete the vector entirely
+					if (v.size() == 0) {
+						m.erase(jt);	// deletes the key entirely from the y
+						if (it->second.size() == 0) {
+							orderedEntities.Erase(it); // deletes the key entirely from root map x
+						}
+					}
+					return;	// jump out of this because we deleted something
+
+				}
+				else {
+					Logger::Err(
+						"Somehow you managed to f this up -> " + std::to_string(v.size()) +
+						"the vector of entities had a size that was 0 or less.. "
+					);
+				}
+			}
+		}
+
+	}
+
+
 }

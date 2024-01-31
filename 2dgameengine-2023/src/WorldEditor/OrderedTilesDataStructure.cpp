@@ -6,7 +6,6 @@ OrderedTilesDataStructure::OrderedTilesDataStructure(TileMap tileMap) {
 		Logger::Log("numRows: " + std::to_string(tileMap.numRows));
 		Logger::Log("numCols: " + std::to_string(tileMap.numCols));*/
 
-	Logger::Log("IN WORLD MAP");
 	// initialize first map of the tilesOrderedByY
 	for (int i = 0; i < tileMap.numRows; i++) {
 		// Logger::Log("COUNTER: " + std::to_string(i));
@@ -167,29 +166,53 @@ std::set<std::string> OrderedTilesDataStructure::GetAllUniqueAssetIds() {
 	return result;
 }
 
+// Assuming tilesOrderedByX and Y are in coordination
+bool OrderedTilesDataStructure::HasTile(int x, int y) {
+	
+	try {
+		const std::map<int, std::map<int, Entity>>& m = GetTilesOrderedByX();
+
+		const std::map<int, Entity>& n = m.at(x);
+
+		const Entity& e = n.at(y);
+
+		if (e != NULL) {
+			return true;
+		}
+		else {
+			return false;
+		}
+
+	}
+	catch (...) {
+		Logger::Err("Tile does not exist at: " + std::to_string(x) + " " + std::to_string(y) + ". ");
+		return false;
+	}
+}
+
 void OrderedTilesDataStructure::RemoveTile(Vec2 coords) {
 
 	try {
 		std::map<int, Entity>& map1 = tilesOrderedByX.at(coords.x);
-		Entity&& e1 = std::move(map1.at(coords.y));
+		Entity& e1 = map1.at(coords.y);
 
 		std::map<int, Entity>& map2 = tilesOrderedByY.at(coords.y);
-		Entity&& e2 = std::move(map2.at(coords.x));
+		Entity& e2 = map2.at(coords.x);
 
 		if (e1 != NULL) {
-			map1.erase(coords.y);
 			e1.Kill();
+			map1.erase(coords.y);
 			Logger::Log("KILLED 1");
 		}
 
 		if (e2 != NULL) {
-			map2.erase(coords.x);
 			e2.Kill();
+			map2.erase(coords.x);
 			Logger::Log("KILLED 2");
 		}
 	}
 	catch (const std::out_of_range& e) {
-		Logger::Err("Key not found while removing tile: ");
+		Logger::Err("Key not found while removing tile, X:  " + std::to_string(coords.x) + " Y: " + std::to_string(coords.y));
 
 	}
 

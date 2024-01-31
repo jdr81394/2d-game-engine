@@ -9,6 +9,7 @@
 #include "./OrderedEntities.h"
 
 #include <map>
+#include <limits>
 
 
 
@@ -34,7 +35,10 @@ public:
 		return tilesOrderedByY;
 	};
 
+
 	void LogTiles();
+
+	bool HasTile(int x, int y);
 
 	void RemoveTile(Vec2 coords);
 
